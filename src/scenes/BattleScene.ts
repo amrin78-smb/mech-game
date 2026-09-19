@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 
+import { cannonArtFor } from '../AssetKeys';
 import { getLevelDef, getWeaponDef, levels, tuning, weapons } from '../data';
 import type { Boss } from '../entities/Boss';
 import type { Enemy } from '../entities/Enemy';
@@ -111,7 +112,13 @@ export class BattleScene extends Phaser.Scene {
 
     this.background = new ParallaxBackground(this, this.level.background, baseWidth, baseHeight);
     // Hull, loadout and mounts all come out of the save, so Hangar spending shows up here.
-    this.mecha = new Mecha(this, mechaX, groundY, this.saves.hullMax());
+    this.mecha = new Mecha(
+      this,
+      mechaX,
+      groundY,
+      this.saves.hullMax(),
+      cannonArtFor(this.mainWeaponId()),
+    );
 
     this.targeting = new TargetingSystem();
     this.damage = new DamageSystem();

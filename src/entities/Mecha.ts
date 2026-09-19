@@ -63,7 +63,13 @@ export class Mecha extends Phaser.GameObjects.Container {
   /** Fired on each footfall so the scene can kick dust and shake the camera. */
   onFootfall: ((x: number, y: number) => void) | undefined;
 
-  constructor(scene: Phaser.Scene, x: number, groundY: number, hullMax: number) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    groundY: number,
+    hullMax: number,
+    cannonArt: string = AssetKeys.MECHA_CANNON,
+  ) {
     super(scene, x, groundY);
 
     this.hullMax = hullMax;
@@ -89,9 +95,9 @@ export class Mecha extends Phaser.GameObjects.Container {
       scene.add.image(
         this.torso.displayWidth * CANNON_ANCHOR_X,
         this.torso.displayHeight * CANNON_ANCHOR_Y,
-        AssetKeys.MECHA_CANNON,
+        cannonArt,
       ),
-      AssetKeys.MECHA_CANNON,
+      cannonArt,
     ).setOrigin(CANNON_ORIGIN_X, CANNON_ORIGIN_Y);
     this.cannon = {
       image: cannonImage,

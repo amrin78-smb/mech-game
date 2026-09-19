@@ -93,6 +93,48 @@ const ASSETS: Asset[] = [
     prompt: "Wide silhouette layer of a RUINED FACTORY SKYLINE: broken smokestacks, collapsed gantries, dead cranes, all as dark desaturated brown-grey silhouettes with minimal internal detail, filling only the lower half. Nothing but the silhouettes." },
   { key: "bg_ground", size: "1536x1024", transparent: false,
     prompt: "Wide strip of cracked WASTELAND GROUND seen from the side: dry fissured earth, scattered scrap, oil stains, a worn vehicle track running horizontally. Slightly darker and more detailed than a sky layer." },
+
+  // Zone 2, The Ash Canyons
+  { key: "enemy_drone_swarm", size: "1024x1024", transparent: true,
+    prompt: "A small flying SCRAP DRONE enemy, facing LEFT. Compact quadrotor built from welded scrap, exposed spinning rotor blades on thin arms, one glowing red eye, small dangling grabber claw. Simple and readable at tiny size." },
+  { key: "enemy_shield_bearer", size: "1024x1024", transparent: true,
+    prompt: "A SHIELD BEARER robot enemy, facing LEFT. Squat heavy walker hunched behind an enormous riveted tower shield held on its LEFT side, glowing cyan energy running along the shield rim, thick braced legs. The shield dominates the silhouette." },
+  { key: "boss_iron_matriarch", size: "1024x1024", transparent: true,
+    prompt: "A BOSS: the IRON MATRIARCH, facing LEFT. Tall cathedral-like war machine on heavy treads, layered armor skirts, three glowing cyan shield emitter spires on top, rows of drone bay hatches along its flank, glowing vents. Twice as menacing and detailed as a normal enemy, same art style." },
+
+  // Zone 3, The Furnace
+  { key: "enemy_incinerator_tank", size: "1536x1024", transparent: true,
+    prompt: "An INCINERATOR TANK enemy, facing LEFT. Heavy tracked tank with a long flame projector nozzle jutting forward LEFT, a pilot flame glowing orange at its tip, fuel drums strapped on the back, scorched blackened armor plating." },
+  { key: "enemy_burrower", size: "1536x1024", transparent: true,
+    prompt: "A BURROWER machine enemy, facing LEFT. Segmented tunnelling robot with a huge conical spiral drill head at the front LEFT, ridged armored body segments behind it, caked in dirt and dust." },
+  { key: "enemy_elite_vanguard", size: "1024x1024", transparent: true,
+    prompt: "An ELITE VANGUARD robot enemy, facing LEFT. Heavily armored elite war machine, layered overlapping plating, broad shoulder pauldrons, ornate brass trim, a glowing cyan energy barrier projector mounted on its back. Conveys an expensive, high grade unit." },
+  { key: "boss_leviathan_engine", size: "1536x1024", transparent: true,
+    prompt: "A BOSS: THE LEVIATHAN ENGINE, facing LEFT. Colossal locomotive-like crawler fortress on many heavy treads, an armored ramming prow at the front, THREE huge glowing orange furnace ports spaced along its flank as weak points, tall smokestacks belching black smoke. Twice as menacing and detailed as a normal enemy, same art style." },
+
+  // Main cannon variants, face RIGHT, pivot at the LEFT end
+  { key: "weapon_acid_spitter", size: "1536x1024", transparent: true,
+    prompt: "A huge detached MECHA ARM CANNON, horizontal, nozzle pointing RIGHT. A corroded chemical sprayer: thick glass tanks of glowing sickly green acid strapped along it, brass valves and hoses, wide flared nozzle, green drip stains and corrosion. Drawn so the LEFT end is the pivot point where it mounts to a shoulder. No robot attached." },
+  { key: "weapon_railgun", size: "1536x1024", transparent: true,
+    prompt: "A huge detached MECHA RAILGUN, horizontal, barrel pointing RIGHT. Long slender twin rail accelerator with copper induction coils and crackling electric blue energy arcing between the rails, a heavy capacitor block and cooling fins at the LEFT pivot end. No robot attached." },
+  { key: "projectile_flak", size: "1024x1024", transparent: true,
+    prompt: "A single small FLAK SHELL, stubby fat body with small fins, pointing RIGHT, faint orange glow at the tail. Very simple, readable at tiny size." },
+
+  // Parallax layers, zone 2 The Ash Canyons
+  { key: "bg_ash_sky", size: "1536x1024", transparent: false,
+    prompt: "Wide SKY ONLY over cold badlands: pale blue-grey overcast, thin cold haze, faint pale sun, distant drifting ash clouds. No ground, no rocks in the lower third, muted so gameplay reads on top of it." },
+  { key: "bg_ash_ruins", size: "1536x1024", transparent: true,
+    prompt: "Wide silhouette layer of towering ASH CANYON walls and eroded rock spires, with a few rusted pipelines strung between them, all as dark desaturated blue-grey silhouettes with minimal internal detail, filling only the lower half. Nothing but the silhouettes." },
+  { key: "bg_ash_ground", size: "1536x1024", transparent: false,
+    prompt: "Wide strip of ASH COVERED CANYON FLOOR seen from the side: grey volcanic ash drifts, scattered pale boulders, a bone dry cracked riverbed, faint tracks. Slightly darker and more detailed than a sky layer." },
+
+  // Parallax layers, zone 3 The Furnace
+  { key: "bg_furnace_sky", size: "1536x1024", transparent: false,
+    prompt: "Wide SKY ONLY over an industrial hellscape: deep red and molten orange glowing sky, thick rolling black smoke, faint embers rising. No ground, no buildings in the lower third, muted so gameplay reads on top of it." },
+  { key: "bg_furnace_ruins", size: "1536x1024", transparent: true,
+    prompt: "Wide silhouette layer of a burning FOUNDRY complex: blast furnaces, tall chimneys, pipe gantries and cooling towers, as near black silhouettes with a faint orange rim light along their edges, filling only the lower half. Nothing but the silhouettes." },
+  { key: "bg_furnace_ground", size: "1536x1024", transparent: false,
+    prompt: "Wide strip of scorched FOUNDRY FLOOR seen from the side: blackened slag and clinker, glowing orange cracks of molten metal running through it, spilled metal ingots, soot. Slightly darker and more detailed than a sky layer." },
 ];
 
 type Provider = "gemini" | "openai";

@@ -13,6 +13,9 @@ export const AssetKeys = {
   MECHA_CANNON: 'mecha_cannon',
 
   MECHA_TURRET: 'mecha_turret',
+  /** Cannon art per main weapon; see cannonArtFor. */
+  WEAPON_ACID_SPITTER: 'weapon_acid_spitter',
+  WEAPON_RAILGUN: 'weapon_railgun',
 
   PROJECTILE_SHELL: 'projectile_shell',
   PROJECTILE_FLAK: 'projectile_flak',
@@ -38,6 +41,20 @@ export function bgRuinsKey(theme: string): string {
 
 export function bgGroundKey(theme: string): string {
   return `bg_${theme}_ground`;
+}
+
+/**
+ * The cannon sprite for an equipped main weapon. Buying the Railgun should look
+ * different, not just hit differently. Falls back to the autocannon barrel for
+ * any weapon without its own art.
+ */
+const CANNON_ART: Record<string, string> = {
+  acid_spitter: 'weapon_acid_spitter',
+  railgun: 'weapon_railgun',
+};
+
+export function cannonArtFor(weaponId: string): string {
+  return CANNON_ART[weaponId] ?? 'mecha_cannon';
 }
 
 /** Themes PreloadScene generates placeholder parallax strips for, one per zone. */

@@ -54,6 +54,8 @@ interface Job {
   /** Output name, which is also the AssetKeys frame name. */
   out: string;
   kind: 'sprite' | 'background';
+  /** Explicit size for outputs that have no atlas frame to match. */
+  target?: { w: number; h: number };
 }
 
 const JOBS: Job[] = [
@@ -69,6 +71,23 @@ const JOBS: Job[] = [
   { raw: 'projectile_shell', out: 'projectile_shell', kind: 'sprite' },
   // The generator calls it pickup_scrap; AssetKeys calls it scrap_pickup.
   { raw: 'pickup_scrap', out: 'scrap_pickup', kind: 'sprite' },
+  { raw: 'enemy_drone_swarm', out: 'enemy_drone_swarm', kind: 'sprite' },
+  { raw: 'enemy_shield_bearer', out: 'enemy_shield_bearer', kind: 'sprite' },
+  { raw: 'boss_iron_matriarch', out: 'boss_iron_matriarch', kind: 'sprite' },
+  { raw: 'enemy_incinerator_tank', out: 'enemy_incinerator_tank', kind: 'sprite' },
+  { raw: 'enemy_burrower', out: 'enemy_burrower', kind: 'sprite' },
+  { raw: 'enemy_elite_vanguard', out: 'enemy_elite_vanguard', kind: 'sprite' },
+  { raw: 'boss_leviathan_engine', out: 'boss_leviathan_engine', kind: 'sprite' },
+  { raw: 'projectile_flak', out: 'projectile_flak', kind: 'sprite' },
+  // Cannon variants share the main cannon's footprint.
+  { raw: 'weapon_acid_spitter', out: 'weapon_acid_spitter', kind: 'sprite', target: { w: 172, h: 30 } },
+  { raw: 'weapon_railgun', out: 'weapon_railgun', kind: 'sprite', target: { w: 172, h: 30 } },
+  { raw: 'bg_ash_sky', out: 'bg_ash_canyons_sky', kind: 'background' },
+  { raw: 'bg_ash_ruins', out: 'bg_ash_canyons_ruins', kind: 'background' },
+  { raw: 'bg_ash_ground', out: 'bg_ash_canyons_ground', kind: 'background' },
+  { raw: 'bg_furnace_sky', out: 'bg_furnace_sky', kind: 'background' },
+  { raw: 'bg_furnace_ruins', out: 'bg_furnace_ruins', kind: 'background' },
+  { raw: 'bg_furnace_ground', out: 'bg_furnace_ground', kind: 'background' },
   { raw: 'bg_sky', out: 'bg_rust_flats_sky', kind: 'background' },
   { raw: 'bg_ruins', out: 'bg_rust_flats_ruins', kind: 'background' },
   { raw: 'bg_ground', out: 'bg_rust_flats_ground', kind: 'background' },
@@ -170,9 +189,12 @@ async function processSprite(job: Job, target: { w: number; h: number }): Promis
   const tw = trimmed.width ?? 1;
   const th = trimmed.height ?? 1;
 
-  // Pin the placeholder's dominant side; the art keeps its own aspect.
-  const targetDominantIsWidth = target.w >= target.h;
-  const scale = targetDominantIsWidth ? target.w / tw : target.h / th;
+  // Pin the LARGER output side to the larger placeholder side. Collision radius
+  // is max(w, h) / 2, so this is what actually preserves every hitbox: matching
+  // the target's dominant axis is not enough when the art is taller than the
+  // placeholder was wide, which is how the shield bearer and elite vanguard
+  // quietly grew by 12 and 22 percent on the first pass.
+  const scale = Math.max(target.w, target.h) / Math.max(tw, th);
   const outW = Math.max(1, Math.round(tw * scale * SUPERSAMPLE));
   const outH = Math.max(1, Math.round(th * scale * SUPERSAMPLE));
 
@@ -209,21 +231,21 @@ async function processBackground(job: Job): Promise<string> {
 
   let keyed = false;
   let buffer = raw;
-  if (job.raw === 'bg_ruins' && !(await hasMeaningfulAlpha(buffer))) {
+  if (job.raw.endsWith('_ruins') && !(await hasMeaningfulAlpha(buffer))) {
     buffer = await chromaKeyGreen(buffer);
     keyed = true;
   }
 
   let note = '';
 
-  if (job.raw === 'bg_sky') {
+  if (job.raw.endsWith('_sky')) {
     // Backmost layer: fills the frame, stays opaque.
     buffer = await sharp(buffer)
       .resize(width, BG_HEIGHT, { fit: 'cover', kernel: 'lanczos3' })
       .png()
       .toBuffer();
     note = 'full frame';
-  } else if (job.raw === 'bg_ground') {
+  } else if (job.raw.endsWith('_ground')) {
     const bandHeight = BG_HEIGHT - horizon;
     const band = await sharp(buffer)
       .resize(width, bandHeight, { fit: 'cover', position: 'bottom', kernel: 'lanczos3' })
@@ -319,7 +341,7 @@ async function main(): Promise<void> {
       console.log(await processBackground(job));
       continue;
     }
-    const target = targets.get(job.out);
+    const target = job.target ?? targets.get(job.out);
     if (target === undefined) {
       console.error(`No placeholder size for "${job.out}" in the atlas; cannot match it.`);
       process.exit(1);

@@ -24,6 +24,22 @@ import gunnerWalkerUrl from '../../assets/sprites/enemy_gunner_walker.png';
 import bossCompactorUrl from '../../assets/sprites/boss_compactor.png';
 import projectileShellUrl from '../../assets/sprites/projectile_shell.png';
 import scrapPickupUrl from '../../assets/sprites/scrap_pickup.png';
+import droneSwarmUrl from '../../assets/sprites/enemy_drone_swarm.png';
+import shieldBearerUrl from '../../assets/sprites/enemy_shield_bearer.png';
+import ironMatriarchUrl from '../../assets/sprites/boss_iron_matriarch.png';
+import incineratorTankUrl from '../../assets/sprites/enemy_incinerator_tank.png';
+import burrowerUrl from '../../assets/sprites/enemy_burrower.png';
+import eliteVanguardUrl from '../../assets/sprites/enemy_elite_vanguard.png';
+import leviathanUrl from '../../assets/sprites/boss_leviathan_engine.png';
+import projectileFlakUrl from '../../assets/sprites/projectile_flak.png';
+import acidSpitterUrl from '../../assets/sprites/weapon_acid_spitter.png';
+import railgunUrl from '../../assets/sprites/weapon_railgun.png';
+import bgAshSkyUrl from '../../assets/sprites/bg_ash_canyons_sky.png';
+import bgAshRuinsUrl from '../../assets/sprites/bg_ash_canyons_ruins.png';
+import bgAshGroundUrl from '../../assets/sprites/bg_ash_canyons_ground.png';
+import bgFurnaceSkyUrl from '../../assets/sprites/bg_furnace_sky.png';
+import bgFurnaceRuinsUrl from '../../assets/sprites/bg_furnace_ruins.png';
+import bgFurnaceGroundUrl from '../../assets/sprites/bg_furnace_ground.png';
 import bgRustSkyUrl from '../../assets/sprites/bg_rust_flats_sky.png';
 import bgRustRuinsUrl from '../../assets/sprites/bg_rust_flats_ruins.png';
 import bgRustGroundUrl from '../../assets/sprites/bg_rust_flats_ground.png';
@@ -55,13 +71,29 @@ const ZONE_ONE_SPRITES: ReadonlyArray<readonly [string, string]> = [
   ['boss_compactor', bossCompactorUrl],
   ['projectile_shell', projectileShellUrl],
   ['scrap_pickup', scrapPickupUrl],
+  ['enemy_drone_swarm', droneSwarmUrl],
+  ['enemy_shield_bearer', shieldBearerUrl],
+  ['boss_iron_matriarch', ironMatriarchUrl],
+  ['enemy_incinerator_tank', incineratorTankUrl],
+  ['enemy_burrower', burrowerUrl],
+  ['enemy_elite_vanguard', eliteVanguardUrl],
+  ['boss_leviathan_engine', leviathanUrl],
+  ['projectile_flak', projectileFlakUrl],
+  ['weapon_acid_spitter', acidSpitterUrl],
+  ['weapon_railgun', railgunUrl],
 ];
 
-/** The rust flats parallax, which the AI set replaces wholesale. */
-const ZONE_ONE_BACKGROUNDS: ReadonlyArray<readonly [string, string]> = [
+/** All three zones' parallax now comes from the AI set. */
+const AI_BACKGROUNDS: ReadonlyArray<readonly [string, string]> = [
   [bgSkyKey('rust_flats'), bgRustSkyUrl],
   [bgRuinsKey('rust_flats'), bgRustRuinsUrl],
   [bgGroundKey('rust_flats'), bgRustGroundUrl],
+  [bgSkyKey('ash_canyons'), bgAshSkyUrl],
+  [bgRuinsKey('ash_canyons'), bgAshRuinsUrl],
+  [bgGroundKey('ash_canyons'), bgAshGroundUrl],
+  [bgSkyKey('furnace'), bgFurnaceSkyUrl],
+  [bgRuinsKey('furnace'), bgFurnaceRuinsUrl],
+  [bgGroundKey('furnace'), bgFurnaceGroundUrl],
 ];
 
 export class PreloadScene extends Phaser.Scene {
@@ -74,20 +106,20 @@ export class PreloadScene extends Phaser.Scene {
 
     this.load.atlas(ATLAS, 'art/sprites.png', 'art/sprites.json');
 
-    // Themes the AI set does not cover keep their generated strips.
-    for (const theme of BACKGROUND_THEMES) {
-      if (theme === 'rust_flats' && !USE_PLACEHOLDER_ART) continue;
-      this.load.image(bgSkyKey(theme), `art/bg_${theme}_sky.png`);
-      this.load.image(bgRuinsKey(theme), `art/bg_${theme}_ruins.png`);
-      this.load.image(bgGroundKey(theme), `art/bg_${theme}_ground.png`);
+    // The fallback path: generated strips for every theme, no AI art at all.
+    if (USE_PLACEHOLDER_ART) {
+      for (const theme of BACKGROUND_THEMES) {
+        this.load.image(bgSkyKey(theme), `art/bg_${theme}_sky.png`);
+        this.load.image(bgRuinsKey(theme), `art/bg_${theme}_ruins.png`);
+        this.load.image(bgGroundKey(theme), `art/bg_${theme}_ground.png`);
+      }
+      return;
     }
-
-    if (USE_PLACEHOLDER_ART) return;
 
     for (const [key, url] of ZONE_ONE_SPRITES) {
       this.load.image(key, url);
     }
-    for (const [key, url] of ZONE_ONE_BACKGROUNDS) {
+    for (const [key, url] of AI_BACKGROUNDS) {
       this.load.image(key, url);
     }
   }
