@@ -8,10 +8,11 @@ import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import enemySchema from './schemas/enemy.schema.json';
 import weaponSchema from './schemas/weapon.schema.json';
 import pilotSchema from './schemas/pilot.schema.json';
+import escortSchema from './schemas/escort.schema.json';
 import levelSchema from './schemas/level.schema.json';
 import tuningSchema from './schemas/tuning.schema.json';
 
-import { enemies, levels, pilots, tuning, weapons } from './index';
+import { enemies, escorts, levels, pilots, tuning, weapons } from './index';
 
 function formatErrors(errors: ErrorObject[] | null | undefined): string {
   if (!errors || errors.length === 0) return 'unknown validation error';
@@ -39,6 +40,7 @@ export function validateAllData(): void {
   const validateEnemy = ajv.compile(enemySchema);
   const validateWeapon = ajv.compile(weaponSchema);
   const validatePilot = ajv.compile(pilotSchema);
+  const validateEscort = ajv.compile(escortSchema);
   const validateLevel = ajv.compile(levelSchema);
   const validateTuning = ajv.compile(tuningSchema);
 
@@ -51,6 +53,16 @@ export function validateAllData(): void {
   }
   for (const weapon of weapons) {
     check(validateWeapon, weapon, `src/data/weapons.json entry "${weapon?.id ?? '?'}"`);
+  }
+  const weaponIds = new Set(weapons.map((weapon) => weapon.id));
+  for (const escort of escorts) {
+    check(validateEscort, escort, `src/data/escorts.json entry "${escort?.id ?? '?'}"`);
+    if (!weaponIds.has(escort.weaponId)) {
+      throw new Error(
+        `Escort "${escort.id}" mounts unknown weapon "${escort.weaponId}". ` +
+          `Add it to src/data/weapons.json.`,
+      );
+    }
   }
   for (const pilot of pilots) {
     check(validatePilot, pilot, `src/data/pilots.json entry "${pilot?.id ?? '?'}"`);

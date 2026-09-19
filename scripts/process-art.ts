@@ -88,6 +88,8 @@ const JOBS: Job[] = [
   { raw: 'bg_furnace_sky', out: 'bg_furnace_sky', kind: 'background' },
   { raw: 'bg_furnace_ruins', out: 'bg_furnace_ruins', kind: 'background' },
   { raw: 'bg_furnace_ground', out: 'bg_furnace_ground', kind: 'background' },
+  { raw: 'escort_scrap_hound', out: 'escort_scrap_hound', kind: 'sprite', target: { w: 62, h: 62 } },
+  { raw: 'escort_bulwark', out: 'escort_bulwark', kind: 'sprite', target: { w: 78, h: 78 } },
   { raw: 'bg_sky', out: 'bg_rust_flats_sky', kind: 'background' },
   { raw: 'bg_ruins', out: 'bg_rust_flats_ruins', kind: 'background' },
   { raw: 'bg_ground', out: 'bg_rust_flats_ground', kind: 'background' },

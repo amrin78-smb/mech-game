@@ -33,6 +33,8 @@ export interface WaveSpawnerOptions {
   readonly mechaX: number;
   readonly onEnemyAttack: (enemy: Enemy) => void;
   readonly onBossSpawned: (boss: Boss) => void;
+  /** Escort held lanes; enemies stop at the escort rather than the hull. */
+  readonly blockXFor: (lane: number) => number | null;
 }
 
 export class WaveSpawner {
@@ -55,7 +57,8 @@ export class WaveSpawner {
   private elapsed = 0;
 
   constructor(options: WaveSpawnerOptions) {
-    const { scene, level, laneY, spawnX, mechaX, onEnemyAttack, onBossSpawned } = options;
+    const { scene, level, laneY, spawnX, mechaX, onEnemyAttack, onBossSpawned, blockXFor } =
+      options;
 
     this.laneY = laneY;
     this.spawnX = spawnX;
@@ -88,6 +91,7 @@ export class WaveSpawner {
       meleeStandoff: tuning.world.meleeStandoff,
       onAttack: onEnemyAttack,
       onSpawnRequest: (parent, enemyId) => this.spawnFromParent(parent, enemyId),
+      blockXFor,
     };
   }
 

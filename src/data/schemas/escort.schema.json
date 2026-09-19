@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "escort.schema.json",
+  "title": "EscortDef",
+  "description": "An allied unit bought with scrap mid battle. It fights and it blocks: enemies in its lane stop at it instead of walking on to the hull.",
+  "type": "object",
+  "required": ["id", "name", "hp", "weaponId", "spriteKey", "standoffX", "cost", "costGrowth"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "name": { "type": "string" },
+    "hp": { "type": "number", "exclusiveMinimum": 0 },
+    "weaponId": { "type": "string", "description": "a weapon id from weapons.json; escorts reuse the same guns" },
+    "damageScale": { "type": "number", "exclusiveMinimum": 0, "default": 1, "description": "escorts hit softer than the mecha mounting the same gun" },
+    "spriteKey": { "type": "string" },
+    "standoffX": { "type": "number", "minimum": 0, "description": "px ahead of the mecha where it takes up position" },
+    "cost": { "type": "integer", "minimum": 0, "description": "scrap for the first one this run" },
+    "costGrowth": { "type": "number", "exclusiveMinimum": 0, "description": "cost multiplier per additional one bought this run" }
+  }
+}

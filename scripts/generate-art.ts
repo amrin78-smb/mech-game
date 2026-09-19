@@ -135,6 +135,12 @@ const ASSETS: Asset[] = [
     prompt: "Wide silhouette layer of a burning FOUNDRY complex: blast furnaces, tall chimneys, pipe gantries and cooling towers, as near black silhouettes with a faint orange rim light along their edges, filling only the lower half. Nothing but the silhouettes." },
   { key: "bg_furnace_ground", size: "1536x1024", transparent: false,
     prompt: "Wide strip of scorched FOUNDRY FLOOR seen from the side: blackened slag and clinker, glowing orange cracks of molten metal running through it, spilled metal ingots, soot. Slightly darker and more detailed than a sky layer." },
+
+  // Escort units, allied, face RIGHT like the mecha
+  { key: "escort_scrap_hound", size: "1024x1024", transparent: true,
+    prompt: "A small friendly ALLIED WALKER escort robot, facing RIGHT. Two legged scrappy light mech about knee height to a titan, welded plate armour, a short autocannon on its back, a bright cyan running light on its head. Clearly allied and scrappy rather than menacing." },
+  { key: "escort_bulwark", size: "1024x1024", transparent: true,
+    prompt: "A friendly ALLIED SHIELD VEHICLE escort, facing RIGHT. Squat heavy tracked vehicle with a large angled blast shield raised on its RIGHT front, thick riveted armour, a bright cyan running light. Clearly allied and defensive, built to absorb hits." },
 ];
 
 type Provider = "gemini" | "openai";

@@ -110,6 +110,22 @@ export interface LevelDef {
   };
 }
 
+/** escort.schema.json */
+export interface EscortDef {
+  id: string;
+  name: string;
+  hp: number;
+  /** A weapon id from weapons.json; escorts reuse the same guns. */
+  weaponId: string;
+  /** Escorts hit softer than the mecha mounting the same gun. */
+  damageScale?: number;
+  spriteKey: string;
+  /** px ahead of the mecha where it takes up position. */
+  standoffX: number;
+  cost: number;
+  costGrowth: number;
+}
+
 /** pilot.schema.json */
 export interface PilotDef {
   id: string;

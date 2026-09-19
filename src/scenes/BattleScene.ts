@@ -8,6 +8,7 @@ import { Mecha } from '../entities/Mecha';
 import { AudioManager } from '../systems/AudioManager';
 import { DamageSystem, type DamageResult } from '../systems/DamageSystem';
 import { EconomySystem } from '../systems/EconomySystem';
+import { EscortSystem } from '../systems/EscortSystem';
 import { ProjectileSystem } from '../systems/ProjectileSystem';
 import { TargetingSystem } from '../systems/TargetingSystem';
 import { TurretSystem } from '../systems/TurretSystem';
@@ -68,6 +69,7 @@ export class BattleScene extends Phaser.Scene {
   private audio!: AudioManager;
   private saves!: SaveManager;
   private pilotSystem!: PilotSystem;
+  private escorts!: EscortSystem;
 
   private hud!: Hud;
   private aimLine!: AimLine;
@@ -134,6 +136,23 @@ export class BattleScene extends Phaser.Scene {
       onImpact: (x, y, heavy, hitSomething) => this.onImpact(x, y, heavy, hitSomething),
     });
 
+    this.escorts = new EscortSystem({
+      scene: this,
+      targeting: this.targeting,
+      projectiles: this.projectiles,
+      mechaX,
+      laneY,
+      onShotFired: (x, y, rotation) => {
+        this.vfx.muzzleFlash(x, y, rotation, TURRET_FLASH_SCALE);
+        this.audio.play('turret', 0.35);
+      },
+      onDestroyed: (x, y) => {
+        this.vfx.explosion(x, y, 1.4);
+        this.audio.play('death_armored', 0.7);
+        this.vfx.shakeFromDamage(40);
+      },
+    });
+
     this.spawner = new WaveSpawner({
       scene: this,
       level: this.level,
@@ -142,6 +161,7 @@ export class BattleScene extends Phaser.Scene {
       mechaX,
       onEnemyAttack: (enemy) => this.onEnemyAttack(enemy),
       onBossSpawned: (boss) => this.onBossSpawned(boss),
+      blockXFor: (lane) => this.escorts.blockXFor(lane),
     });
 
     this.weapon = new WeaponSystem({
@@ -188,13 +208,19 @@ export class BattleScene extends Phaser.Scene {
     this.focusMarker = new FocusMarker(this);
     this.scrapDrops = new ScrapDrops(this);
     this.bossBar = new BossBar(this, baseWidth);
-    this.upgrades = new UpgradePanel(
-      this,
-      baseHeight,
-      this.economy,
-      (kind) => this.onUpgradePurchased(kind),
-      () => this.audio.play('ui_click', 0.4, -300),
-    );
+    this.upgrades = new UpgradePanel({
+      scene: this,
+      height: baseHeight,
+      economy: this.economy,
+      onPurchase: (kind) => this.onUpgradePurchased(kind),
+      onRejected: () => this.audio.play('ui_click', 0.4, -300),
+      escortCost: (id) => this.escorts.costOf(id),
+      onDeploy: (id) => {
+        const deployed = this.escorts.deploy(id);
+        if (deployed) this.audio.play('upgrade', 0.8, -150);
+        return deployed;
+      },
+    });
 
     this.abilityButton = new AbilityButton(this, baseWidth, baseHeight, this.pilotSystem, () =>
       this.activateAbility(),
@@ -270,6 +296,7 @@ export class BattleScene extends Phaser.Scene {
     const enemies = this.spawner.activeEnemies;
     this.weapon.update(deltaSeconds, enemies);
     this.turrets.update(deltaSeconds, enemies);
+    this.escorts.update(deltaSeconds, enemies);
     this.projectiles.update(deltaSeconds, enemies);
     this.economy.update(deltaSeconds);
     this.pilotSystem.update(deltaSeconds);
@@ -333,6 +360,15 @@ export class BattleScene extends Phaser.Scene {
 
   private onEnemyAttack(enemy: Enemy): void {
     if (this.battleOver) return;
+
+    // Whatever is holding this lane takes the hit instead of the hull.
+    const blocker = this.escorts.blockerFor(enemy.lane);
+    if (blocker !== null && enemy.x <= blocker.blockX + enemy.bodyWidth) {
+      this.escorts.damage(blocker, enemy.damagePerHit);
+      this.audio.play('impact', 0.5);
+      return;
+    }
+
     const dealt = this.damage.applyToMecha(this.mecha, enemy.damagePerHit);
 
     // A boss slam is its own event, not just a bigger bite.
@@ -440,6 +476,7 @@ export class BattleScene extends Phaser.Scene {
 
     this.weapon.reset();
     this.turrets.reset();
+    this.escorts.reset();
     this.projectiles.reset();
     this.spawner.despawnAll();
     this.aimLine.hide();

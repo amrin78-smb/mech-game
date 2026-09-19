@@ -6,21 +6,24 @@
  * import it under tsx and still use the real data and the real DamageSystem.
  * `./index.ts` adds the Vite level glob on top for the browser.
  */
-import type { EnemyDef, LevelDef, PilotDef, Tuning, WeaponDef } from '../types';
+import type { EnemyDef, EscortDef, LevelDef, PilotDef, Tuning, WeaponDef } from '../types';
 
 import enemiesJson from './enemies.json';
 import weaponsJson from './weapons.json';
 import pilotsJson from './pilots.json';
+import escortsJson from './escorts.json';
 import tuningJson from './tuning.json';
 
 export const enemies = enemiesJson as unknown as EnemyDef[];
 export const weapons = weaponsJson as unknown as WeaponDef[];
 export const pilots = pilotsJson as unknown as PilotDef[];
+export const escorts = escortsJson as unknown as EscortDef[];
 export const tuning = tuningJson as unknown as Tuning;
 
 const enemiesById = new Map<string, EnemyDef>(enemies.map((e) => [e.id, e]));
 const weaponsById = new Map<string, WeaponDef>(weapons.map((w) => [w.id, w]));
 const pilotsById = new Map<string, PilotDef>(pilots.map((p) => [p.id, p]));
+const escortsById = new Map<string, EscortDef>(escorts.map((e) => [e.id, e]));
 
 export function getEnemyDef(id: string): EnemyDef {
   const def = enemiesById.get(id);
@@ -31,6 +34,12 @@ export function getEnemyDef(id: string): EnemyDef {
 export function getWeaponDef(id: string): WeaponDef {
   const def = weaponsById.get(id);
   if (!def) throw new Error(`Unknown weapon id "${id}" (check src/data/weapons.json)`);
+  return def;
+}
+
+export function getEscortDef(id: string): EscortDef {
+  const def = escortsById.get(id);
+  if (!def) throw new Error(`Unknown escort id "${id}" (check src/data/escorts.json)`);
   return def;
 }
 

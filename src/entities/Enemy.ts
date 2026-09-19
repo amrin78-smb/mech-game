@@ -31,6 +31,11 @@ export interface EnemyUpdateContext {
   readonly onAttack: (enemy: Enemy) => void;
   /** Spawner behaviour asks the WaveSpawner for a unit; it owns the pool. */
   readonly onSpawnRequest: (parent: Enemy, enemyId: string) => void;
+  /**
+   * x at which an allied escort blocks this lane, or null when it is clear.
+   * Melee enemies stop here instead of walking on to the hull.
+   */
+  readonly blockXFor: (lane: number) => number | null;
 }
 
 export class Enemy extends Phaser.GameObjects.Container {
@@ -230,11 +235,21 @@ export class Enemy extends Phaser.GameObjects.Container {
     // Nothing by default.
   }
 
-  /** Ranged enemies halt at their own attack range, melee at contact standoff. */
+  /**
+   * Ranged enemies halt at their own attack range, melee at contact standoff,
+   * and either stops early at an escort holding the lane. The escort is only a
+   * wall while it is closer than where they were already heading.
+   */
   private stopDistanceX(def: EnemyDef, ctx: EnemyUpdateContext): number {
     const range = def.attackRange ?? 0;
-    if (range > 0) return ctx.mechaX + range;
-    return ctx.mechaX + ctx.meleeStandoff + this.sprite.displayWidth * 0.5;
+    const atMecha =
+      range > 0
+        ? ctx.mechaX + range
+        : ctx.mechaX + ctx.meleeStandoff + this.sprite.displayWidth * 0.5;
+
+    const block = ctx.blockXFor(this.lane);
+    if (block === null) return atMecha;
+    return Math.max(atMecha, block + this.sprite.displayWidth * 0.5);
   }
 
   get hasShield(): boolean {

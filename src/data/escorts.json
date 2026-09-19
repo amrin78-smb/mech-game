@@ -1,0 +1,24 @@
+[
+  {
+    "id": "scrap_hound",
+    "name": "Scrap Hound",
+    "hp": 240,
+    "weaponId": "autocannon",
+    "damageScale": 0.5,
+    "spriteKey": "escort_scrap_hound",
+    "standoffX": 150,
+    "cost": 90,
+    "costGrowth": 1.55
+  },
+  {
+    "id": "bulwark",
+    "name": "Bulwark",
+    "hp": 620,
+    "weaponId": "flak_turret",
+    "damageScale": 0.6,
+    "spriteKey": "escort_bulwark",
+    "standoffX": 215,
+    "cost": 150,
+    "costGrowth": 1.55
+  }
+]
