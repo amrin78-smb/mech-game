@@ -55,8 +55,14 @@ const ENEMY_BASE_SIZE: Record<ArmorClass, { width: number; height: number }> = {
 const MECHA_LEGS = { width: 124, height: 150 };
 const MECHA_TORSO = { width: 164, height: 132 };
 const MECHA_CANNON = { width: 172, height: 30 };
+const MECHA_TURRET = { width: 54, height: 20 };
 const SHELL = { width: 16, height: 6 };
+const FLAK_SHELL = { width: 12, height: 8 };
 const SCRAP = { width: 16, height: 16 };
+const MUZZLE_FLASH = { width: 56, height: 36 };
+const SPARK = { width: 6, height: 6 };
+const SMOKE_PUFF = 22;
+const DEBRIS = { width: 8, height: 5 };
 const FOCUS_MARKER_SIZE = 72;
 const FOCUS_MARKER_ARM = 18;
 const FOCUS_MARKER_THICKNESS = 4;
@@ -84,6 +90,7 @@ export class PreloadScene extends Phaser.Scene {
     this.generateUtilityTextures(graphics);
     this.generateMechaTextures(graphics);
     this.generateProjectileTextures(graphics);
+    this.generateVfxTextures(graphics);
 
     for (const theme of BACKGROUND_THEMES) {
       this.generateSky(graphics, theme, baseHeight);
@@ -188,6 +195,18 @@ export class PreloadScene extends Phaser.Scene {
     }
     g.fillStyle(Palette.brass, 1).fillRect(cannon.width - 18, barrelTop - 5, 18, barrelHeight + 10);
     this.bake(g, AssetKeys.MECHA_CANNON, cannon.width, cannon.height);
+
+    // Turret: a stubby flak gun for the shoulder mounts, same pivot convention.
+    const turret = MECHA_TURRET;
+    const housingWidth = Math.round(turret.width * 0.34);
+    const turretBarrelTop = Math.round(turret.height * 0.3);
+    const turretBarrelHeight = turret.height - turretBarrelTop * 2;
+    g.fillStyle(Palette.ironDark, 1).fillRect(0, 0, housingWidth, turret.height);
+    g.fillStyle(Palette.ironLight, 1).fillRect(2, 2, housingWidth - 4, turret.height - 4);
+    g.fillStyle(Palette.rustDark, 1);
+    g.fillRect(housingWidth, turretBarrelTop, turret.width - housingWidth, turretBarrelHeight);
+    g.fillStyle(Palette.brass, 1).fillRect(turret.width - 10, turretBarrelTop - 3, 10, turretBarrelHeight + 6);
+    this.bake(g, AssetKeys.MECHA_TURRET, turret.width, turret.height);
   }
 
   private generateProjectileTextures(g: Phaser.GameObjects.Graphics): void {
@@ -203,6 +222,44 @@ export class PreloadScene extends Phaser.Scene {
     g.fillStyle(Palette.brass, 1);
     g.fillTriangle(half, 3, SCRAP.width - 3, half, 3, half);
     this.bake(g, AssetKeys.SCRAP_PICKUP, SCRAP.width, SCRAP.height);
+
+    // Flak round: fatter and darker than a cannon shell so the two read apart.
+    g.fillStyle(Palette.ironDark, 1).fillRect(0, 0, FLAK_SHELL.width, FLAK_SHELL.height);
+    g.fillStyle(Palette.brassDark, 1).fillRect(1, 1, FLAK_SHELL.width - 2, FLAK_SHELL.height - 2);
+    g.fillStyle(Palette.rustLight, 1).fillRect(FLAK_SHELL.width - 3, 1, 2, FLAK_SHELL.height - 2);
+    this.bake(g, AssetKeys.PROJECTILE_FLAK, FLAK_SHELL.width, FLAK_SHELL.height);
+  }
+
+  /**
+   * VFX particles. Kept as plain shapes with soft edges faked by stacked
+   * alphas, since a real sprite sheet replaces them later anyway.
+   */
+  private generateVfxTextures(g: Phaser.GameObjects.Graphics): void {
+    // Muzzle flash: a bright wedge pointing along the barrel.
+    const flash = MUZZLE_FLASH;
+    const midY = flash.height * 0.5;
+    g.fillStyle(0xffe9a8, 0.55);
+    g.fillTriangle(0, 2, 0, flash.height - 2, flash.width, midY);
+    g.fillStyle(0xffd75e, 0.85);
+    g.fillTriangle(0, 8, 0, flash.height - 8, flash.width * 0.72, midY);
+    g.fillStyle(0xfffdf0, 1);
+    g.fillTriangle(0, 13, 0, flash.height - 13, flash.width * 0.4, midY);
+    this.bake(g, AssetKeys.MUZZLE_FLASH, flash.width, flash.height);
+
+    g.fillStyle(0xffd75e, 1).fillRect(0, 0, SPARK.width, SPARK.height);
+    g.fillStyle(0xfffdf0, 1).fillRect(1, 1, SPARK.width - 2, SPARK.height - 2);
+    this.bake(g, AssetKeys.SPARK, SPARK.width, SPARK.height);
+
+    // Smoke: concentric discs so it fades at the rim without a real gradient.
+    const r = SMOKE_PUFF * 0.5;
+    g.fillStyle(0x6f6a62, 0.3).fillCircle(r, r, r);
+    g.fillStyle(0x58534c, 0.45).fillCircle(r, r, r * 0.72);
+    g.fillStyle(0x45413b, 0.6).fillCircle(r, r, r * 0.44);
+    this.bake(g, AssetKeys.SMOKE_PUFF, SMOKE_PUFF, SMOKE_PUFF);
+
+    g.fillStyle(Palette.ironDark, 1).fillRect(0, 0, DEBRIS.width, DEBRIS.height);
+    g.fillStyle(Palette.rust, 1).fillRect(0, 0, DEBRIS.width - 2, DEBRIS.height - 2);
+    this.bake(g, AssetKeys.DEBRIS, DEBRIS.width, DEBRIS.height);
   }
 
   private generateSky(g: Phaser.GameObjects.Graphics, theme: string, height: number): void {

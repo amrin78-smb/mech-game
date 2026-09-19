@@ -11,7 +11,9 @@
     "inBattleUpgrades",
     "vfx",
     "pools",
-    "targeting"
+    "targeting",
+    "boss",
+    "audio"
   ],
   "additionalProperties": false,
   "definitions": {
@@ -143,6 +145,18 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "seconds per sway cycle"
+        },
+        "turretMountOffsets": {
+          "type": "array",
+          "description": "turret mount positions relative to the torso, [x, y] pairs; mount 0 is the Phase 2 mount",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          }
         }
       }
     },
@@ -282,6 +296,69 @@
         "scrapPickupLifetime": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "hitFlashDuration": {
+          "type": "number",
+          "minimum": 0,
+          "description": "seconds a damaged enemy stays tinted"
+        },
+        "hitFlashTint": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "tint colour applied on hit"
+        },
+        "damageNumberRise": {
+          "type": "number",
+          "minimum": 0,
+          "description": "px a damage number floats upward per second"
+        },
+        "damageNumberLifetime": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "muzzleFlashDuration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shakePerDamage": {
+          "type": "number",
+          "minimum": 0,
+          "description": "camera shake intensity per point of damage taken, clamped by shakeMaxIntensity"
+        },
+        "shakeDurationMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "impactParticleCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deathParticleCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "exhaustSmokeFrequency": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "ms between exhaust smoke puffs"
+        },
+        "cannonRecoilPixels": {
+          "type": "number",
+          "minimum": 0,
+          "description": "px the main cannon kicks back on firing"
+        },
+        "turretRecoilPixels": {
+          "type": "number",
+          "minimum": 0
+        },
+        "recoilRecovery": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "how fast recoil decays back to rest, per second"
+        },
+        "muzzleFlashPoolSize": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     },
@@ -352,6 +429,73 @@
           "type": "number",
           "minimum": 0,
           "description": "px the touch aim point sits above the finger so it never covers the target"
+        }
+      }
+    },
+    "boss": {
+      "type": "object",
+      "description": "shared boss phase behaviour; per boss stats stay in enemies.json",
+      "required": [
+        "phase2HpFraction",
+        "chargeSpeedMultiplier",
+        "chargeDuration",
+        "chargeCooldown"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "phase2HpFraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "hp fraction at which phase 2 begins"
+        },
+        "chargeSpeedMultiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "chargeDuration": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "seconds of a phase 2 charge burst"
+        },
+        "chargeCooldown": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "seconds between charge bursts"
+        },
+        "entranceShakeIntensity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "slamShakeIntensity": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "audio": {
+      "type": "object",
+      "required": [
+        "masterVolume",
+        "sfxVolume",
+        "musicVolume"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "masterVolume": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "sfxVolume": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "musicVolume": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     }

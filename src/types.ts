@@ -138,10 +138,21 @@ export interface Tuning {
     /** lane centres as a fraction of screen height */
     lanesY: number[];
     turretMountCount: number;
+    /** Turret positions relative to the torso; mount 0 is the Phase 2 mount. */
+    turretMountOffsets: Array<[number, number]>;
     bobAmplitude: number;
     bobPeriod: number;
     swayAmplitude: number;
     swayPeriod: number;
+  };
+  /** Shared boss phase behaviour; per boss stats stay in enemies.json. */
+  boss: {
+    phase2HpFraction: number;
+    chargeSpeedMultiplier: number;
+    chargeDuration: number;
+    chargeCooldown: number;
+    entranceShakeIntensity: number;
+    slamShakeIntensity: number;
   };
   world: {
     baseWidth: number;
@@ -169,6 +180,27 @@ export interface Tuning {
     damageNumberPoolSize: number;
     scrapPickupRiseSpeed: number;
     scrapPickupLifetime: number;
+    hitFlashDuration: number;
+    hitFlashTint: number;
+    damageNumberRise: number;
+    damageNumberLifetime: number;
+    muzzleFlashDuration: number;
+    muzzleFlashPoolSize: number;
+    /** Shake intensity per point of damage taken, clamped by shakeMaxIntensity. */
+    shakePerDamage: number;
+    shakeDurationMs: number;
+    impactParticleCount: number;
+    deathParticleCount: number;
+    exhaustSmokeFrequency: number;
+    cannonRecoilPixels: number;
+    turretRecoilPixels: number;
+    /** How fast recoil decays back to rest, per second. */
+    recoilRecovery: number;
+  };
+  audio: {
+    masterVolume: number;
+    sfxVolume: number;
+    musicVolume: number;
   };
   pools: {
     projectiles: number;
@@ -195,4 +227,6 @@ export interface BattleResult {
   hullRemaining: number;
   hullMax: number;
   durationSeconds: number;
+  /** In battle repairs bought. The 3 star criterion in Phase 3 reads this. */
+  repairsUsed: number;
 }

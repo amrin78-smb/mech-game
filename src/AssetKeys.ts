@@ -8,8 +8,16 @@ export const AssetKeys = {
   MECHA_TORSO: 'mecha_torso',
   MECHA_CANNON: 'mecha_cannon',
 
+  MECHA_TURRET: 'mecha_turret',
+
   PROJECTILE_SHELL: 'projectile_shell',
+  PROJECTILE_FLAK: 'projectile_flak',
   SCRAP_PICKUP: 'scrap_pickup',
+
+  MUZZLE_FLASH: 'muzzle_flash',
+  SPARK: 'spark',
+  SMOKE_PUFF: 'smoke_puff',
+  DEBRIS: 'debris',
 
   UI_PIXEL: 'ui_pixel',
   FOCUS_MARKER: 'focus_marker',

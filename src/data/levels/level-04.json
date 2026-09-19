@@ -1,0 +1,20 @@
+{
+  "id": "level-04",
+  "name": "Fast Company",
+  "zone": 1,
+  "background": "rust_flats",
+  "music": "bgm_zone1",
+  "scrollSpeed": 16,
+  "economy": { "startingScrap": 110, "trickle": 1.8 },
+  "waves": [
+    { "time": 3,  "enemyId": "scavenger_bike", "count": 3, "interval": 1.6, "lane": 1 },
+    { "time": 14, "enemyId": "rustcrawler",    "count": 5, "interval": 0.9 },
+    { "time": 26, "enemyId": "scavenger_bike", "count": 5, "interval": 0.8, "lane": 0 },
+    { "time": 34, "enemyId": "scavenger_bike", "count": 5, "interval": 0.8, "lane": 2 },
+    { "time": 46, "enemyId": "plated_hulk",    "count": 2, "interval": 5.0, "lane": 1 },
+    { "time": 50, "enemyId": "scavenger_bike", "count": 6, "interval": 0.6 },
+    { "time": 66, "enemyId": "scavenger_bike", "count": 8, "interval": 0.45, "hpMultiplier": 1.2 }
+  ],
+  "stars": { "hullThreshold": 0.6 },
+  "rewards": { "firstClearCores": 18, "coresPerStar": 4 }
+}

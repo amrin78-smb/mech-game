@@ -1,12 +1,11 @@
 import Phaser from 'phaser';
 
+import { AssetKeys } from '../AssetKeys';
 import { getWeaponDef, tuning } from '../data';
 import type { Enemy } from '../entities/Enemy';
 import type { Mecha } from '../entities/Mecha';
-import { Projectile } from '../entities/Projectile';
 import type { WeaponDef } from '../types';
-import type { DamageResult, DamageSystem } from './DamageSystem';
-import { Pool } from './Pool';
+import type { ProjectileSystem } from './ProjectileSystem';
 import type { TargetingSystem } from './TargetingSystem';
 
 /**
@@ -18,36 +17,31 @@ import type { TargetingSystem } from './TargetingSystem';
  * precision shot at tuning.targeting.manualShotDamageMultiplier and auto fire
  * resumes after autoFireResumeDelay.
  *
- * Owns the projectile pool and resolves impacts, since that is where shells die.
+ * Shells come from the shared ProjectileSystem, so turrets and cannon draw on
+ * one pool.
  */
-
 export interface WeaponSystemOptions {
-  readonly scene: Phaser.Scene;
   readonly mecha: Mecha;
   readonly targeting: TargetingSystem;
-  readonly damage: DamageSystem;
+  readonly projectiles: ProjectileSystem;
   /** Weapon id from src/data/weapons.json. */
   readonly weaponId: string;
-  readonly onEnemyKilled: (enemy: Enemy) => void;
-  readonly onEnemyHit?: (enemy: Enemy, result: DamageResult) => void;
-  readonly onShotFired?: (isManual: boolean) => void;
+  readonly onShotFired: (x: number, y: number, rotation: number, isManual: boolean) => void;
 }
 
 export class WeaponSystem {
   private readonly mecha: Mecha;
   private readonly targeting: TargetingSystem;
-  private readonly damage: DamageSystem;
+  private readonly projectiles: ProjectileSystem;
   private readonly weapon: WeaponDef;
-  private readonly projectiles: Pool<Projectile>;
-  private readonly onEnemyKilled: (enemy: Enemy) => void;
-  private readonly onEnemyHit: ((enemy: Enemy, result: DamageResult) => void) | undefined;
-  private readonly onShotFired: ((isManual: boolean) => void) | undefined;
+  private readonly onShotFired: (
+    x: number,
+    y: number,
+    rotation: number,
+    isManual: boolean,
+  ) => void;
 
-  private readonly minX: number;
-  private readonly maxX: number;
-  private readonly maxY: number;
-
-  /** Multipliers the Phase 2 upgrade panel will drive. */
+  /** Multipliers the in battle upgrade panel drives. */
   damageMultiplier = 1;
   fireRateMultiplier = 1;
 
@@ -60,25 +54,37 @@ export class WeaponSystem {
 
   /** Reused aim point so target leading never allocates in the update loop. */
   private readonly aimPoint = new Phaser.Math.Vector2();
+  /** Reused shot spec, same reason. */
+  private readonly spec: {
+    textureKey: string;
+    speed: number;
+    damage: number;
+    damageType: WeaponDef['damageType'];
+    lifetimeSeconds: number;
+    isManualShot: boolean;
+    aoeRadius: number;
+  };
 
   constructor(options: WeaponSystemOptions) {
     this.mecha = options.mecha;
     this.targeting = options.targeting;
-    this.damage = options.damage;
+    this.projectiles = options.projectiles;
     this.weapon = getWeaponDef(options.weaponId);
-    this.onEnemyKilled = options.onEnemyKilled;
-    this.onEnemyHit = options.onEnemyHit;
     this.onShotFired = options.onShotFired;
 
-    const { baseWidth, baseHeight, despawnXFraction, spawnXFraction } = tuning.world;
-    this.minX = baseWidth * despawnXFraction;
-    this.maxX = baseWidth * (spawnXFraction + 0.1);
-    this.maxY = baseHeight;
+    this.spec = {
+      textureKey: shellTextureFor(this.weapon),
+      speed: this.weapon.projectile.speed,
+      damage: 0,
+      damageType: this.weapon.damageType,
+      lifetimeSeconds: tuning.world.projectileLifetime,
+      isManualShot: false,
+      aoeRadius: this.weapon.projectile.aoeRadius ?? 0,
+    };
+  }
 
-    this.projectiles = new Pool<Projectile>(
-      tuning.pools.projectiles,
-      () => new Projectile(options.scene),
-    );
+  get weaponName(): string {
+    return this.weapon.name;
   }
 
   get isManualAiming(): boolean {
@@ -91,10 +97,6 @@ export class WeaponSystem {
 
   get manualAimPointY(): number {
     return this.manualAimY;
-  }
-
-  get activeProjectiles(): readonly Projectile[] {
-    return this.projectiles.active;
   }
 
   /** Shots per second after upgrades. */
@@ -141,11 +143,9 @@ export class WeaponSystem {
 
     if (this.manualAiming) {
       this.mecha.aimAt(this.manualAimX, this.manualAimY);
-    } else {
-      this.updateAutoFire(deltaSeconds, enemies);
+      return;
     }
-
-    this.updateProjectiles(deltaSeconds, enemies);
+    this.updateAutoFire(deltaSeconds, enemies);
   }
 
   private updateAutoFire(deltaSeconds: number, enemies: readonly Enemy[]): void {
@@ -161,7 +161,7 @@ export class WeaponSystem {
       return;
     }
 
-    this.aimAtLead(target, muzzle.x, muzzle.y);
+    leadTarget(this.aimPoint, target, muzzle.x, muzzle.y, this.weapon.projectile.speed);
     this.mecha.aimAt(this.aimPoint.x, this.aimPoint.y);
 
     if (this.autoPauseRemaining > 0) return;
@@ -172,106 +172,56 @@ export class WeaponSystem {
     }
   }
 
-  /**
-   * Shells have travel time, so auto fire leads the target. Enemies only move
-   * along x, and stop once they are in attack range, which makes the intercept a
-   * single refinement pass rather than a solver.
-   */
-  private aimAtLead(target: Enemy, fromX: number, fromY: number): void {
-    const def = target.definition;
-    const targetY = target.centerY;
-    const velocityX = def === null || target.isAttacking ? 0 : -def.speed;
-    const projectileSpeed = this.weapon.projectile.speed;
-
-    if (velocityX === 0 || projectileSpeed <= 0) {
-      this.aimPoint.set(target.x, targetY);
-      return;
-    }
-
-    const flightTime = Phaser.Math.Distance.Between(fromX, fromY, target.x, targetY) / projectileSpeed;
-    const predictedX = target.x + velocityX * flightTime;
-    const refinedTime = Phaser.Math.Distance.Between(fromX, fromY, predictedX, targetY) / projectileSpeed;
-    this.aimPoint.set(target.x + velocityX * refinedTime, targetY);
-  }
-
   private fireShot(damage: number, isManual: boolean): void {
-    const projectile = this.projectiles.obtain();
-    // Pool exhausted: drop the shot rather than allocate mid frame.
-    if (projectile === null) return;
-
     const muzzle = this.mecha.getMuzzle();
-    projectile.fire(
-      muzzle.x,
-      muzzle.y,
-      this.mecha.aimRotation,
-      this.weapon.projectile.speed,
-      damage,
-      this.weapon.damageType,
-      tuning.world.projectileLifetime,
-      isManual,
-    );
-    this.onShotFired?.(isManual);
-  }
+    const rotation = this.mecha.aimRotation;
 
-  private updateProjectiles(deltaSeconds: number, enemies: readonly Enemy[]): void {
-    const active = this.projectiles.active;
-    const shellRadius = tuning.world.projectileRadius;
+    this.spec.damage = damage;
+    this.spec.isManualShot = isManual;
 
-    for (let i = active.length - 1; i >= 0; i -= 1) {
-      const projectile = active[i];
-      const alive = projectile.advance(deltaSeconds);
+    if (!this.projectiles.fire(muzzle.x, muzzle.y, rotation, this.spec)) return;
 
-      if (
-        !alive ||
-        projectile.x < this.minX ||
-        projectile.x > this.maxX ||
-        projectile.y < 0 ||
-        projectile.y > this.maxY
-      ) {
-        this.recycle(projectile);
-        continue;
-      }
-
-      const hit = this.findHit(projectile, enemies, shellRadius);
-      if (hit === null) continue;
-
-      const result = this.damage.applyToEnemy(hit, projectile.damage, projectile.damageType);
-      this.onEnemyHit?.(hit, result);
-      if (result.killed) {
-        this.onEnemyKilled(hit);
-      }
-      this.recycle(projectile);
-    }
-  }
-
-  private findHit(
-    projectile: Projectile,
-    enemies: readonly Enemy[],
-    shellRadius: number,
-  ): Enemy | null {
-    for (const enemy of enemies) {
-      if (!enemy.isAlive) continue;
-      const dx = enemy.x - projectile.x;
-      const dy = enemy.centerY - projectile.y;
-      const reach = enemy.radius + shellRadius;
-      if (dx * dx + dy * dy <= reach * reach) return enemy;
-    }
-    return null;
-  }
-
-  private recycle(projectile: Projectile): void {
-    projectile.deactivate();
-    this.projectiles.release(projectile);
+    this.mecha.kickCannon();
+    this.onShotFired(muzzle.x, muzzle.y, rotation, isManual);
   }
 
   reset(): void {
-    const active = this.projectiles.active;
-    for (let i = active.length - 1; i >= 0; i -= 1) {
-      active[i].deactivate();
-    }
-    this.projectiles.releaseAll();
     this.cooldown = 0;
     this.autoPauseRemaining = 0;
     this.manualAiming = false;
   }
+}
+
+/** Flak style rounds get the fatter shell so the two read apart in flight. */
+export function shellTextureFor(weapon: WeaponDef): string {
+  return (weapon.projectile.aoeRadius ?? 0) > 0
+    ? AssetKeys.PROJECTILE_FLAK
+    : AssetKeys.PROJECTILE_SHELL;
+}
+
+/**
+ * Shells have travel time, so auto fire leads the target. Enemies only move
+ * along x and stop once in attack range, which makes the intercept a single
+ * refinement pass rather than a solver. Writes into `out` to avoid allocating.
+ */
+export function leadTarget(
+  out: Phaser.Math.Vector2,
+  target: Enemy,
+  fromX: number,
+  fromY: number,
+  projectileSpeed: number,
+): void {
+  const targetY = target.centerY;
+  const velocityX = -target.movementSpeed;
+
+  if (velocityX === 0 || projectileSpeed <= 0) {
+    out.set(target.x, targetY);
+    return;
+  }
+
+  const flightTime = Phaser.Math.Distance.Between(fromX, fromY, target.x, targetY) / projectileSpeed;
+  const predictedX = target.x + velocityX * flightTime;
+  const refinedTime =
+    Phaser.Math.Distance.Between(fromX, fromY, predictedX, targetY) / projectileSpeed;
+  out.set(target.x + velocityX * refinedTime, targetY);
 }

@@ -1,0 +1,20 @@
+{
+  "id": "level-03",
+  "name": "Iron Backs",
+  "zone": 1,
+  "background": "rust_flats",
+  "music": "bgm_zone1",
+  "scrollSpeed": 11,
+  "economy": { "startingScrap": 110, "trickle": 1.8 },
+  "waves": [
+    { "time": 3,  "enemyId": "rustcrawler", "count": 5, "interval": 1.0 },
+    { "time": 16, "enemyId": "plated_hulk", "count": 1, "interval": 1.0, "lane": 1 },
+    { "time": 24, "enemyId": "rustcrawler", "count": 6, "interval": 0.8 },
+    { "time": 38, "enemyId": "plated_hulk", "count": 2, "interval": 5.0, "lane": 0 },
+    { "time": 40, "enemyId": "rustcrawler", "count": 5, "interval": 0.9, "lane": 2 },
+    { "time": 58, "enemyId": "plated_hulk", "count": 3, "interval": 4.5 },
+    { "time": 62, "enemyId": "rustcrawler", "count": 8, "interval": 0.6 }
+  ],
+  "stars": { "hullThreshold": 0.6 },
+  "rewards": { "firstClearCores": 15, "coresPerStar": 4 }
+}

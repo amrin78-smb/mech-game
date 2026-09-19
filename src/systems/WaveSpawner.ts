@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import { getEnemyDef, tuning } from '../data';
+import { Boss } from '../entities/Boss';
 import { Enemy, type EnemyUpdateContext } from '../entities/Enemy';
 import type { LevelDef, WaveEntry } from '../types';
 import { Pool } from './Pool';
@@ -10,7 +11,9 @@ import { Pool } from './Pool';
  * live list, movement updates and recycling. Authoring a new level is a JSON
  * file and nothing else (hard rule 1).
  *
- * Boss blocks are read but not spawned yet: the Boss entity is Phase 2.
+ * The boss sits outside the pool (there is only ever one) but is kept in the
+ * same live list, so targeting, projectiles and the win check treat it like any
+ * other enemy without special cases.
  */
 
 /** One timeline entry's live state. Built once, never allocated during update. */
@@ -29,6 +32,7 @@ export interface WaveSpawnerOptions {
   readonly spawnX: number;
   readonly mechaX: number;
   readonly onEnemyAttack: (enemy: Enemy) => void;
+  readonly onBossSpawned: (boss: Boss) => void;
 }
 
 export class WaveSpawner {
@@ -39,15 +43,24 @@ export class WaveSpawner {
   private readonly levelHpMultiplier: number;
   private readonly updateContext: EnemyUpdateContext;
   private readonly lastSpawnTime: number;
+  private readonly onBossSpawned: (boss: Boss) => void;
+
+  /** Everything alive right now, pooled trash and the boss alike. */
+  private readonly live: Enemy[] = [];
+
+  private readonly bossEntry: LevelDef['boss'] | undefined;
+  private readonly boss: Boss | null;
+  private bossSpawned = false;
 
   private elapsed = 0;
 
   constructor(options: WaveSpawnerOptions) {
-    const { scene, level, laneY, spawnX, mechaX, onEnemyAttack } = options;
+    const { scene, level, laneY, spawnX, mechaX, onEnemyAttack, onBossSpawned } = options;
 
     this.laneY = laneY;
     this.spawnX = spawnX;
     this.levelHpMultiplier = level.hpMultiplier ?? 1;
+    this.onBossSpawned = onBossSpawned;
 
     this.pool = new Pool<Enemy>(tuning.pools.enemies, () => new Enemy(scene));
 
@@ -60,10 +73,15 @@ export class WaveSpawner {
       });
     }
 
-    this.lastSpawnTime = this.waves.reduce((latest, wave) => {
+    this.bossEntry = level.boss;
+    // Built up front, never during the fight.
+    this.boss = this.bossEntry ? new Boss(scene) : null;
+
+    const lastWave = this.waves.reduce((latest, wave) => {
       const finish = wave.entry.time + wave.entry.interval * Math.max(0, wave.entry.count - 1);
       return Math.max(latest, finish);
     }, 0);
+    this.lastSpawnTime = Math.max(lastWave, this.bossEntry?.time ?? 0);
 
     this.updateContext = {
       mechaX,
@@ -73,19 +91,27 @@ export class WaveSpawner {
   }
 
   get activeEnemies(): readonly Enemy[] {
-    return this.pool.active;
+    return this.live;
   }
 
   get aliveCount(): number {
-    return this.pool.activeCount;
+    return this.live.length;
   }
 
-  /** True once every timeline entry has spawned its full count. */
+  get activeBoss(): Boss | null {
+    return this.boss !== null && this.boss.isAlive ? this.boss : null;
+  }
+
+  get hasBoss(): boolean {
+    return this.bossEntry !== undefined;
+  }
+
+  /** True once every timeline entry, and the boss if there is one, has spawned. */
   get isTimelineComplete(): boolean {
     for (const wave of this.waves) {
       if (wave.spawned < wave.entry.count) return false;
     }
-    return true;
+    return this.bossEntry === undefined || this.bossSpawned;
   }
 
   /** Wave progress for the HUD bar, 0 to 1 across the spawn timeline. */
@@ -101,10 +127,10 @@ export class WaveSpawner {
   update(deltaSeconds: number): void {
     this.elapsed += deltaSeconds;
     this.spawnDueEnemies();
+    this.spawnBossIfDue();
 
-    const enemies = this.pool.active;
-    for (let i = enemies.length - 1; i >= 0; i -= 1) {
-      enemies[i].update(deltaSeconds, this.updateContext);
+    for (let i = this.live.length - 1; i >= 0; i -= 1) {
+      this.live[i].update(deltaSeconds, this.updateContext);
     }
   }
 
@@ -132,18 +158,52 @@ export class WaveSpawner {
         : Phaser.Math.RND.between(0, this.laneY.length - 1);
 
     enemy.spawn(def, this.spawnX, this.laneY[laneIndex], laneIndex, hpMultiplier);
+    this.live.push(enemy);
+  }
+
+  private spawnBossIfDue(): void {
+    const entry = this.bossEntry;
+    const boss = this.boss;
+    if (entry === undefined || boss === null || this.bossSpawned) return;
+    if (this.elapsed < entry.time) return;
+
+    const def = getEnemyDef(entry.enemyId);
+    // Bosses walk the middle lane so they read as the centre of the fight.
+    const laneIndex = Math.floor(this.laneY.length / 2);
+
+    boss.spawn(
+      def,
+      this.spawnX,
+      this.laneY[laneIndex],
+      laneIndex,
+      this.levelHpMultiplier * (entry.hpMultiplier ?? 1),
+    );
+    this.live.push(boss);
+    this.bossSpawned = true;
+    this.onBossSpawned(boss);
   }
 
   despawn(enemy: Enemy): void {
     enemy.deactivate();
-    this.pool.release(enemy);
+    this.removeFromLive(enemy);
+    // The boss is a singleton, not a pool member.
+    if (enemy !== this.boss) {
+      this.pool.release(enemy);
+    }
+  }
+
+  private removeFromLive(enemy: Enemy): void {
+    const index = this.live.indexOf(enemy);
+    if (index < 0) return;
+    this.live[index] = this.live[this.live.length - 1];
+    this.live.pop();
   }
 
   despawnAll(): void {
-    const enemies = this.pool.active;
-    for (let i = enemies.length - 1; i >= 0; i -= 1) {
-      enemies[i].deactivate();
+    for (let i = this.live.length - 1; i >= 0; i -= 1) {
+      this.live[i].deactivate();
     }
+    this.live.length = 0;
     this.pool.releaseAll();
   }
 }

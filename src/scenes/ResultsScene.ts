@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 
+import { levels } from '../data';
 import type { BattleResult } from '../types';
 import { createTextButton } from '../ui/TextButton';
 import { SceneKeys } from './SceneKeys';
@@ -46,6 +47,7 @@ export class ResultsScene extends Phaser.Scene {
       `Scrap earned      ${scrapEarned}`,
       `Enemies destroyed ${enemiesKilled}`,
       `Hull remaining    ${Math.ceil(hullRemaining)} / ${Math.ceil(hullMax)}  (${hullPercent}%)`,
+      `Repairs bought    ${this.result.repairsUsed}`,
       `Time              ${this.result.durationSeconds.toFixed(1)}s`,
     ];
 
@@ -59,12 +61,35 @@ export class ResultsScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    createTextButton(this, width * 0.38, height * 0.74, 'RETRY', () => {
+    const nextLevel = this.nextLevelId();
+    const showNext = won && nextLevel !== null;
+    const buttonY = height * 0.76;
+
+    if (showNext) {
+      createTextButton(this, width * 0.28, buttonY, 'RETRY', () => {
+        this.scene.start(SceneKeys.Battle, { levelId: this.result.levelId });
+      });
+      createTextButton(this, width * 0.5, buttonY, 'NEXT LEVEL', () => {
+        this.scene.start(SceneKeys.Battle, { levelId: nextLevel });
+      });
+      createTextButton(this, width * 0.72, buttonY, 'MENU', () => {
+        this.scene.start(SceneKeys.MainMenu);
+      });
+      return;
+    }
+
+    createTextButton(this, width * 0.38, buttonY, 'RETRY', () => {
       this.scene.start(SceneKeys.Battle, { levelId: this.result.levelId });
     });
-
-    createTextButton(this, width * 0.62, height * 0.74, 'MENU', () => {
+    createTextButton(this, width * 0.62, buttonY, 'MENU', () => {
       this.scene.start(SceneKeys.MainMenu);
     });
+  }
+
+  /** Levels are ordered by id, so the next one is simply the next entry. */
+  private nextLevelId(): string | null {
+    const index = levels.findIndex((level) => level.id === this.result.levelId);
+    if (index < 0 || index + 1 >= levels.length) return null;
+    return levels[index + 1].id;
   }
 }

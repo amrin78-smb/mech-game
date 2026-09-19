@@ -1,12 +1,15 @@
 import Phaser from 'phaser';
 
 import { AssetKeys } from '../AssetKeys';
+import { tuning } from '../data';
 import type { EnemyDef } from '../types';
 import { Depths } from '../ui/Depths';
 
 /**
  * Hard rule 3: there is exactly one Enemy class. Every difference between a
  * rustcrawler and a plated hulk comes out of its EnemyDef, never a subclass.
+ * Boss is the single sanctioned exception, and it customises behaviour through
+ * the protected hooks below rather than by rewriting update.
  *
  * Instances are pooled and reused, so the constructor builds the display objects
  * and `spawn` does nothing but reset state.
@@ -27,14 +30,16 @@ export interface EnemyUpdateContext {
 }
 
 export class Enemy extends Phaser.GameObjects.Container {
-  private def: EnemyDef | null = null;
-  private hp = 0;
-  private hpMax = 0;
-  private attackTimer = 0;
-  private laneIndex = 0;
-  private inRange = false;
+  protected def: EnemyDef | null = null;
+  protected hp = 0;
+  protected hpMax = 0;
+  protected attackTimer = 0;
+  protected inRange = false;
 
-  private readonly sprite: Phaser.GameObjects.Image;
+  private laneIndex = 0;
+  private flashRemaining = 0;
+
+  protected readonly sprite: Phaser.GameObjects.Image;
   private readonly hpBarBg: Phaser.GameObjects.Rectangle;
   private readonly hpBarFill: Phaser.GameObjects.Rectangle;
 
@@ -66,9 +71,22 @@ export class Enemy extends Phaser.GameObjects.Container {
     return this.laneIndex;
   }
 
+  /** Bosses get a screen wide bar and a stinger; ordinary enemies do not. */
+  get isBoss(): boolean {
+    return false;
+  }
+
   /** Collision radius used by projectile impact checks. */
   get radius(): number {
     return Math.max(this.sprite.width, this.sprite.height) * 0.5;
+  }
+
+  get bodyWidth(): number {
+    return this.sprite.width;
+  }
+
+  get bodyHeight(): number {
+    return this.sprite.height;
   }
 
   /** Centre of mass, what the cannon aims at rather than the feet. */
@@ -87,7 +105,9 @@ export class Enemy extends Phaser.GameObjects.Container {
   }
 
   get hasRangedAttack(): boolean {
-    return this.def !== null && this.def.behaviors.includes('ranged') && (this.def.attackRange ?? 0) > 0;
+    return (
+      this.def !== null && this.def.behaviors.includes('ranged') && (this.def.attackRange ?? 0) > 0
+    );
   }
 
   get damagePerHit(): number {
@@ -98,6 +118,15 @@ export class Enemy extends Phaser.GameObjects.Container {
     return this.def?.reward ?? 0;
   }
 
+  /**
+   * Current closing speed in px per second. Auto fire reads this to lead its
+   * shots, so a charging boss is led correctly rather than by its base speed.
+   */
+  get movementSpeed(): number {
+    if (this.inRange || this.def === null) return 0;
+    return this.def.speed;
+  }
+
   spawn(def: EnemyDef, x: number, y: number, laneIndex: number, hpMultiplier: number): void {
     this.def = def;
     this.laneIndex = laneIndex;
@@ -105,10 +134,12 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.hp = this.hpMax;
     this.attackTimer = 0;
     this.inRange = false;
+    this.flashRemaining = 0;
 
     // Textures are baked at the def's scale, so the sprite is never scaled here.
     this.sprite.setTexture(def.spriteKey);
     this.sprite.setPosition(0, 0);
+    this.sprite.clearTint();
 
     this.hpBarBg.setSize(this.sprite.width, HP_BAR_HEIGHT);
     this.hpBarBg.setPosition(0, -this.sprite.height - HP_BAR_GAP);
@@ -120,16 +151,20 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.setDepth(Depths.ENEMIES + laneIndex);
     this.setActive(true);
     this.setVisible(true);
+    this.onSpawned();
   }
 
   override update(deltaSeconds: number, ctx: EnemyUpdateContext): void {
     const def = this.def;
     if (!this.active || def === null) return;
 
+    this.updateFlash(deltaSeconds);
+    this.updateBehavior(deltaSeconds, ctx);
+
     const stopX = this.stopDistanceX(def, ctx);
     if (this.x > stopX) {
       this.inRange = false;
-      this.x = Math.max(stopX, this.x - def.speed * deltaSeconds);
+      this.x = Math.max(stopX, this.x - this.travelSpeed(def) * deltaSeconds);
       return;
     }
 
@@ -139,6 +174,21 @@ export class Enemy extends Phaser.GameObjects.Container {
       this.attackTimer -= def.attackInterval;
       ctx.onAttack(this);
     }
+  }
+
+  /** Hook for Boss phase logic. Runs before movement each frame. */
+  protected updateBehavior(_deltaSeconds: number, _ctx: EnemyUpdateContext): void {
+    // Ordinary enemies have no state beyond advance and attack.
+  }
+
+  /** Hook so a charging boss can move faster than its EnemyDef speed. */
+  protected travelSpeed(def: EnemyDef): number {
+    return def.speed;
+  }
+
+  /** Hook for one time setup after a spawn, e.g. a boss entrance. */
+  protected onSpawned(): void {
+    // Nothing by default.
   }
 
   /** Ranged enemies halt at their own attack range, melee at contact standoff. */
@@ -152,6 +202,8 @@ export class Enemy extends Phaser.GameObjects.Container {
   applyDamage(amount: number): boolean {
     if (!this.isAlive) return false;
     this.hp -= amount;
+    this.flash();
+
     if (this.hp <= 0) {
       this.hp = 0;
       return true;
@@ -162,11 +214,27 @@ export class Enemy extends Phaser.GameObjects.Container {
     return false;
   }
 
+  /** White hot tint on hit, cleared by the timer in update. */
+  flash(): void {
+    this.flashRemaining = tuning.vfx.hitFlashDuration;
+    this.sprite.setTintFill(tuning.vfx.hitFlashTint);
+  }
+
+  private updateFlash(deltaSeconds: number): void {
+    if (this.flashRemaining <= 0) return;
+    this.flashRemaining -= deltaSeconds;
+    if (this.flashRemaining <= 0) {
+      this.sprite.clearTint();
+    }
+  }
+
   deactivate(): void {
     this.def = null;
     this.hp = 0;
     this.hpMax = 0;
     this.inRange = false;
+    this.flashRemaining = 0;
+    this.sprite.clearTint();
     this.setActive(false);
     this.setVisible(false);
     this.setPosition(-1000, -1000);

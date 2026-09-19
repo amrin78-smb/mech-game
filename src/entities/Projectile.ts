@@ -6,9 +6,20 @@ import { Depths } from '../ui/Depths';
 
 /**
  * A shell in flight. Pooled, so the constructor runs once per pool slot and
- * `fire` only resets state. Travel time is real: the cannon leads nothing, a
- * shell can miss a fast target, which is the point of the manual precision shot.
+ * `fire` only resets state. Travel time is real: a shell can miss a fast target,
+ * which is the point of the manual precision shot.
  */
+export interface ProjectileSpec {
+  readonly textureKey: string;
+  readonly speed: number;
+  readonly damage: number;
+  readonly damageType: DamageType;
+  readonly lifetimeSeconds: number;
+  readonly isManualShot: boolean;
+  /** Above 0 turns the impact into a blast that also hits nearby enemies. */
+  readonly aoeRadius: number;
+}
+
 export class Projectile extends Phaser.GameObjects.Image {
   private velocityX = 0;
   private velocityY = 0;
@@ -16,7 +27,8 @@ export class Projectile extends Phaser.GameObjects.Image {
 
   damage = 0;
   damageType: DamageType = 'kinetic';
-  /** True for a released manual drag shot, kept for Phase 2 impact flavour. */
+  aoeRadius = 0;
+  /** True for a released manual drag shot; drives the heavier impact VFX. */
   isManualShot = false;
 
   constructor(scene: Phaser.Scene) {
@@ -26,24 +38,17 @@ export class Projectile extends Phaser.GameObjects.Image {
     this.deactivate();
   }
 
-  fire(
-    x: number,
-    y: number,
-    rotation: number,
-    speed: number,
-    damage: number,
-    damageType: DamageType,
-    lifetimeSeconds: number,
-    isManualShot: boolean,
-  ): void {
+  fire(x: number, y: number, rotation: number, spec: ProjectileSpec): void {
+    this.setTexture(spec.textureKey);
     this.setPosition(x, y);
     this.setRotation(rotation);
-    this.velocityX = Math.cos(rotation) * speed;
-    this.velocityY = Math.sin(rotation) * speed;
-    this.damage = damage;
-    this.damageType = damageType;
-    this.isManualShot = isManualShot;
-    this.lifeRemaining = lifetimeSeconds;
+    this.velocityX = Math.cos(rotation) * spec.speed;
+    this.velocityY = Math.sin(rotation) * spec.speed;
+    this.damage = spec.damage;
+    this.damageType = spec.damageType;
+    this.aoeRadius = spec.aoeRadius;
+    this.isManualShot = spec.isManualShot;
+    this.lifeRemaining = spec.lifetimeSeconds;
     this.setActive(true);
     this.setVisible(true);
   }
@@ -63,5 +68,6 @@ export class Projectile extends Phaser.GameObjects.Image {
     this.velocityX = 0;
     this.velocityY = 0;
     this.lifeRemaining = 0;
+    this.aoeRadius = 0;
   }
 }
