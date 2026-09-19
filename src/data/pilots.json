@@ -1,0 +1,16 @@
+[
+  {
+    "id": "vex",
+    "name": "Vex",
+    "ability": { "name": "Overdrive", "kind": "fire_rate_boost", "cooldown": 45, "duration": 8, "magnitude": 0.75 },
+    "passive": { "kind": "cannon_damage", "perLevel": 0.05 },
+    "levelCosts": [15, 30, 50, 80]
+  },
+  {
+    "id": "mara",
+    "name": "Mara",
+    "ability": { "name": "Aegis Field", "kind": "shield", "cooldown": 60, "duration": 5, "magnitude": 400 },
+    "passive": { "kind": "hull_bonus", "perLevel": 0.04 },
+    "levelCosts": [15, 30, 50, 80]
+  }
+]

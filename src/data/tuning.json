@@ -1,0 +1,73 @@
+{
+  "damageMatrix": {
+    "kinetic": {
+      "light": 1.5,
+      "armored": 0.5,
+      "shielded": 1.0,
+      "swarm": 1.0
+    },
+    "chemical": {
+      "light": 1.0,
+      "armored": 1.75,
+      "shielded": 0.5,
+      "swarm": 0.75
+    },
+    "piercing": {
+      "light": 0.75,
+      "armored": 1.0,
+      "shielded": 2.0,
+      "swarm": 0.5
+    },
+    "explosive": {
+      "light": 1.0,
+      "armored": 0.5,
+      "shielded": 0.75,
+      "swarm": 2.0
+    }
+  },
+  "mecha": {
+    "baseHullHp": 1000,
+    "lanesY": [
+      0.55,
+      0.68,
+      0.82
+    ],
+    "turretMountCount": 3
+  },
+  "inBattleUpgrades": {
+    "damage": {
+      "baseCost": 40,
+      "costGrowth": 1.35,
+      "bonusPerLevel": 0.12
+    },
+    "fireRate": {
+      "baseCost": 40,
+      "costGrowth": 1.35,
+      "bonusPerLevel": 0.1
+    },
+    "repair": {
+      "baseCost": 60,
+      "costGrowth": 1.5,
+      "healFraction": 0.25
+    }
+  },
+  "vfx": {
+    "maxParticlesDesktop": 600,
+    "maxParticlesMobile": 250,
+    "shakeMaxIntensity": 0.012,
+    "damageNumberPoolSize": 60
+  },
+  "pools": {
+    "projectiles": 128,
+    "enemies": 96
+  },
+  "targeting": {
+    "priorityOrder": [
+      "focus",
+      "ranged_in_range",
+      "closest"
+    ],
+    "manualShotDamageMultiplier": 1.5,
+    "autoFireResumeDelay": 0.8
+  }
+}

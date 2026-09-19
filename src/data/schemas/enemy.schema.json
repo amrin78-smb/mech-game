@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "enemy.schema.json",
+  "title": "EnemyDef",
+  "type": "object",
+  "required": ["id", "name", "armorClass", "hp", "speed", "damage", "attackInterval", "reward", "spriteKey", "scale", "behaviors"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "name": { "type": "string" },
+    "armorClass": { "enum": ["light", "armored", "shielded", "swarm"] },
+    "hp": { "type": "number", "exclusiveMinimum": 0 },
+    "shieldHp": { "type": "number", "minimum": 0, "description": "Separate pool, only meaningful with the shielded behavior" },
+    "speed": { "type": "number", "exclusiveMinimum": 0, "description": "px per second at 1x world scale" },
+    "damage": { "type": "number", "minimum": 0 },
+    "attackRange": { "type": "number", "minimum": 0, "description": "0 or absent means melee contact range" },
+    "attackInterval": { "type": "number", "exclusiveMinimum": 0, "description": "seconds between attacks" },
+    "reward": { "type": "integer", "minimum": 0, "description": "scrap dropped on death" },
+    "spriteKey": { "type": "string" },
+    "scale": { "type": "number", "exclusiveMinimum": 0 },
+    "flying": { "type": "boolean", "default": false },
+    "behaviors": {
+      "type": "array",
+      "items": { "enum": ["melee", "ranged", "burrow", "spawner", "shielded"] },
+      "uniqueItems": true
+    },
+    "spawns": {
+      "type": "object",
+      "description": "Only for the spawner behavior",
+      "required": ["enemyId", "count", "interval"],
+      "additionalProperties": false,
+      "properties": {
+        "enemyId": { "type": "string" },
+        "count": { "type": "integer", "minimum": 1 },
+        "interval": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}

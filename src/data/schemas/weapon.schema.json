@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "weapon.schema.json",
+  "title": "WeaponDef",
+  "type": "object",
+  "required": ["id", "name", "slot", "damageType", "baseDamage", "fireRate", "projectile", "upgradeTrack"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "name": { "type": "string" },
+    "slot": { "enum": ["main", "turret"] },
+    "damageType": { "enum": ["kinetic", "chemical", "piercing", "explosive"] },
+    "baseDamage": { "type": "number", "exclusiveMinimum": 0 },
+    "fireRate": { "type": "number", "exclusiveMinimum": 0, "description": "shots per second" },
+    "projectile": {
+      "type": "object",
+      "required": ["kind", "speed"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["ballistic", "lobbed", "hitscan"] },
+        "speed": { "type": "number", "minimum": 0, "description": "px per second, ignored for hitscan" },
+        "aoeRadius": { "type": "number", "minimum": 0 },
+        "pierce": { "type": "boolean", "default": false },
+        "dot": {
+          "type": "object",
+          "description": "Damage over time pool left on impact",
+          "required": ["dps", "duration"],
+          "additionalProperties": false,
+          "properties": {
+            "dps": { "type": "number", "exclusiveMinimum": 0 },
+            "duration": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      }
+    },
+    "upgradeTrack": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Hangar card levels. Level 0 is the base weapon; entry N is the cost and bonuses to reach level N+1.",
+      "items": {
+        "type": "object",
+        "required": ["costCores"],
+        "additionalProperties": false,
+        "properties": {
+          "costCores": { "type": "integer", "minimum": 0 },
+          "damageBonus": { "type": "number", "minimum": 0, "description": "additive multiplier, 0.15 means +15%" },
+          "fireRateBonus": { "type": "number", "minimum": 0 },
+          "specialBonus": { "type": "number", "minimum": 0, "description": "weapon specific: aoeRadius, dot dps, pierce count" }
+        }
+      }
+    }
+  }
+}

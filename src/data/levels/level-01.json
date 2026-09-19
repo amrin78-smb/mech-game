@@ -1,0 +1,19 @@
+{
+  "id": "level-01",
+  "name": "First Contact",
+  "zone": 1,
+  "background": "rust_flats",
+  "music": "bgm_zone1",
+  "scrollSpeed": 12,
+  "economy": { "startingScrap": 80, "trickle": 1.5 },
+  "waves": [
+    { "time": 3,  "enemyId": "rustcrawler", "count": 3,  "interval": 1.5, "lane": 1 },
+    { "time": 14, "enemyId": "rustcrawler", "count": 4,  "interval": 1.2 },
+    { "time": 28, "enemyId": "rustcrawler", "count": 6,  "interval": 1.0 },
+    { "time": 45, "enemyId": "rustcrawler", "count": 5,  "interval": 0.8, "lane": 0 },
+    { "time": 46, "enemyId": "rustcrawler", "count": 5,  "interval": 0.8, "lane": 2 },
+    { "time": 65, "enemyId": "rustcrawler", "count": 10, "interval": 0.6, "hpMultiplier": 1.2 }
+  ],
+  "stars": { "hullThreshold": 0.7 },
+  "rewards": { "firstClearCores": 10, "coresPerStar": 3 }
+}

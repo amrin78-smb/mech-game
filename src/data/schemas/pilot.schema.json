@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pilot.schema.json",
+  "title": "PilotDef",
+  "type": "object",
+  "required": ["id", "name", "ability", "passive", "levelCosts"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "name": { "type": "string" },
+    "ability": {
+      "type": "object",
+      "required": ["name", "kind", "cooldown", "duration", "magnitude"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "kind": { "enum": ["fire_rate_boost", "damage_boost", "shield", "repair_burst", "slow_field"] },
+        "cooldown": { "type": "number", "exclusiveMinimum": 0 },
+        "duration": { "type": "number", "minimum": 0 },
+        "magnitude": { "type": "number", "description": "meaning depends on kind: 0.75 fire rate boost, absorb amount for shield, etc." }
+      }
+    },
+    "passive": {
+      "type": "object",
+      "required": ["kind", "perLevel"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["cannon_damage", "hull_bonus", "scrap_bonus", "turret_damage"] },
+        "perLevel": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "levelCosts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "integer", "minimum": 0 }
+    }
+  }
+}

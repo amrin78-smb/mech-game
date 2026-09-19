@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "level.schema.json",
+  "title": "LevelDef",
+  "type": "object",
+  "required": ["id", "name", "zone", "background", "scrollSpeed", "economy", "waves", "stars", "rewards"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^level-[0-9]{2}$" },
+    "name": { "type": "string" },
+    "zone": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "background": { "type": "string", "description": "parallax theme key, e.g. rust_flats" },
+    "music": { "type": "string" },
+    "scrollSpeed": { "type": "number", "minimum": 0, "description": "world scroll px per second" },
+    "hpMultiplier": { "type": "number", "exclusiveMinimum": 0, "default": 1, "description": "global enemy HP scale for this level" },
+    "economy": {
+      "type": "object",
+      "required": ["startingScrap", "trickle"],
+      "additionalProperties": false,
+      "properties": {
+        "startingScrap": { "type": "integer", "minimum": 0 },
+        "trickle": { "type": "number", "minimum": 0, "description": "scrap per second" },
+        "rewardMultiplier": { "type": "number", "exclusiveMinimum": 0, "default": 1 }
+      }
+    },
+    "waves": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["time", "enemyId", "count", "interval"],
+        "additionalProperties": false,
+        "properties": {
+          "time": { "type": "number", "minimum": 0, "description": "seconds from battle start" },
+          "enemyId": { "type": "string" },
+          "count": { "type": "integer", "minimum": 1 },
+          "interval": { "type": "number", "minimum": 0, "description": "seconds between spawns in this entry" },
+          "lane": { "type": "integer", "minimum": 0, "maximum": 2, "description": "omit for random lane" },
+          "hpMultiplier": { "type": "number", "exclusiveMinimum": 0, "default": 1 }
+        }
+      }
+    },
+    "boss": {
+      "type": "object",
+      "required": ["enemyId", "time"],
+      "additionalProperties": false,
+      "properties": {
+        "enemyId": { "type": "string" },
+        "time": { "type": "number", "minimum": 0 },
+        "hpMultiplier": { "type": "number", "exclusiveMinimum": 0, "default": 1 }
+      }
+    },
+    "stars": {
+      "type": "object",
+      "required": ["hullThreshold"],
+      "additionalProperties": false,
+      "properties": {
+        "hullThreshold": { "type": "number", "minimum": 0, "maximum": 1, "description": "2 star criterion: finish with hull fraction above this. 1 star is winning, 3 stars is winning with no repairs." }
+      }
+    },
+    "rewards": {
+      "type": "object",
+      "required": ["firstClearCores", "coresPerStar"],
+      "additionalProperties": false,
+      "properties": {
+        "firstClearCores": { "type": "integer", "minimum": 0 },
+        "coresPerStar": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
