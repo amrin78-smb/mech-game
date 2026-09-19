@@ -154,6 +154,12 @@ export interface Tuning {
     turretMountCount: number;
     /** Turret positions relative to the torso; mount 0 is the Phase 2 mount. */
     turretMountOffsets: Array<[number, number]>;
+    /** Seconds for a full two step stride. */
+    walkPeriod: number;
+    walkBob: number;
+    walkPitch: number;
+    /** The generated legs art faces left, so it is flipped to match the torso. */
+    legsFaceLeft: boolean;
     bobAmplitude: number;
     bobPeriod: number;
     swayAmplitude: number;

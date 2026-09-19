@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
-import { ATLAS, AssetKeys } from '../AssetKeys';
+import { AssetKeys } from '../AssetKeys';
+import { bindArt } from '../ArtBinding';
 import { tuning } from '../data';
 import { Pool } from '../systems/Pool';
 import { Depths } from './Depths';
@@ -28,9 +29,10 @@ export class ScrapDrops {
   constructor(scene: Phaser.Scene) {
     this.pool = new Pool<Drop>(tuning.pools.scrapPickups, () => {
       const image = scene.add
-        .image(0, 0, ATLAS, AssetKeys.SCRAP_PICKUP)
+        .image(0, 0, AssetKeys.SCRAP_PICKUP)
         .setDepth(Depths.PICKUPS)
         .setVisible(false);
+      bindArt(scene, image, AssetKeys.SCRAP_PICKUP);
       const label = scene.add
         .text(0, 0, '', { fontFamily: 'monospace', fontSize: '14px', color: LABEL_COLOR })
         .setOrigin(0, 0.5)

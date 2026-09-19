@@ -50,7 +50,11 @@
         0,
         -134
       ]
-    ]
+    ],
+    "walkPeriod": 1.6,
+    "walkBob": 4,
+    "walkPitch": 1.1,
+    "legsFaceLeft": true
   },
   "world": {
     "baseWidth": 1280,

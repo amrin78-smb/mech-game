@@ -186,6 +186,16 @@ export class VfxManager {
     this.smoke.emitParticleAt(x, y, heavy ? 3 : 1);
   }
 
+  /**
+   * Dust kicked out sideways as a foot lands. Low and wide rather than puffy,
+   * so it reads as weight hitting dirt instead of an explosion.
+   */
+  footfall(x: number, y: number): void {
+    this.smoke.emitParticleAt(x - 26, y - 4, 2);
+    this.smoke.emitParticleAt(x + 26, y - 4, 2);
+    this.debris.emitParticleAt(x, y - 2, 2);
+  }
+
   /** Something died: a full burst of sparks, debris and smoke. */
   explosion(x: number, y: number, scale: number): void {
     const count = Math.round(tuning.vfx.deathParticleCount * scale);

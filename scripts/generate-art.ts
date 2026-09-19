@@ -87,11 +87,11 @@ const ASSETS: Asset[] = [
     prompt: "A small pile of glowing SALVAGE SCRAP: gears, a brass cog, twisted metal, faint warm glow. Reads as a collectible currency drop at tiny size." },
 
   // Parallax layers, zone 1 Rust Flats, wide strips
-  { key: "bg_sky", size: "2048x1024", transparent: false,
+  { key: "bg_sky", size: "1536x1024", transparent: false,
     prompt: "Wide dieselpunk wasteland SKY ONLY: dirty ochre and ash-grey overcast sky, faint sun disc behind haze, distant smoke columns. No ground, no buildings in the lower third, muted so gameplay reads on top of it." },
-  { key: "bg_ruins", size: "2048x1024", transparent: true,
+  { key: "bg_ruins", size: "1536x1024", transparent: true,
     prompt: "Wide silhouette layer of a RUINED FACTORY SKYLINE: broken smokestacks, collapsed gantries, dead cranes, all as dark desaturated brown-grey silhouettes with minimal internal detail, filling only the lower half. Nothing but the silhouettes." },
-  { key: "bg_ground", size: "2048x1024", transparent: false,
+  { key: "bg_ground", size: "1536x1024", transparent: false,
     prompt: "Wide strip of cracked WASTELAND GROUND seen from the side: dry fissured earth, scattered scrap, oil stains, a worn vehicle track running horizontally. Slightly darker and more detailed than a sky layer." },
 ];
 

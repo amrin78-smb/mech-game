@@ -160,6 +160,25 @@
               "type": "number"
             }
           }
+        },
+        "walkPeriod": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "seconds for a full two step stride"
+        },
+        "walkBob": {
+          "type": "number",
+          "minimum": 0,
+          "description": "px the hull rises and falls per step"
+        },
+        "walkPitch": {
+          "type": "number",
+          "minimum": 0,
+          "description": "degrees the hull rocks fore and aft while walking"
+        },
+        "legsFaceLeft": {
+          "type": "boolean",
+          "description": "the generated legs art faces left, so it is flipped to match the torso"
         }
       }
     },

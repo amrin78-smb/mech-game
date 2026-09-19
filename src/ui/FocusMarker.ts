@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
-import { ATLAS, AssetKeys } from '../AssetKeys';
+import { AssetKeys } from '../AssetKeys';
+import { bindArt } from '../ArtBinding';
 import type { Enemy } from '../entities/Enemy';
 import { Depths } from './Depths';
 
@@ -14,13 +15,17 @@ const PULSE_SPEED = 4;
 
 export class FocusMarker {
   private readonly image: Phaser.GameObjects.Image;
+  /** Captured before any scaling, so the fit maths cannot feed back on itself. */
+  private readonly baseWidth: number;
   private elapsed = 0;
 
   constructor(scene: Phaser.Scene) {
     this.image = scene.add
-      .image(0, 0, ATLAS, AssetKeys.FOCUS_MARKER)
+      .image(0, 0, AssetKeys.FOCUS_MARKER)
       .setDepth(Depths.AIM_LINE)
       .setVisible(false);
+    bindArt(scene, this.image, AssetKeys.FOCUS_MARKER);
+    this.baseWidth = this.image.displayWidth;
   }
 
   /** Call once per frame with the current focus target, or null when there is none. */
@@ -31,7 +36,7 @@ export class FocusMarker {
     }
 
     this.elapsed += deltaSeconds;
-    const fit = (Math.max(target.radius, 1) * 2.4) / this.image.width;
+    const fit = (Math.max(target.radius, 1) * 2.4) / this.baseWidth;
     this.image.setVisible(true);
     this.image.setPosition(target.x, target.centerY);
     this.image.setScale(fit * (1 + Math.sin(this.elapsed * PULSE_SPEED) * PULSE_SCALE));

@@ -9,3 +9,6 @@ dist/
 
 # art proofing output
 tools/art/preview.png
+
+# raw AI art is large and regenerable; processed sprites are committed
+assets/raw/

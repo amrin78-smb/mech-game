@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
-import { ATLAS, AssetKeys } from '../AssetKeys';
+import { AssetKeys } from '../AssetKeys';
+import { bindArt } from '../ArtBinding';
 import { tuning } from '../data';
 import type { EnemyDef } from '../types';
 import { Depths } from '../ui/Depths';
@@ -54,7 +55,7 @@ export class Enemy extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
 
-    this.sprite = scene.add.image(0, 0, ATLAS, AssetKeys.UI_PIXEL).setOrigin(0.5, 1);
+    this.sprite = bindArt(scene, scene.add.image(0, 0, AssetKeys.UI_PIXEL), AssetKeys.UI_PIXEL).setOrigin(0.5, 1);
     this.hpBarBg = scene.add.rectangle(0, 0, 1, HP_BAR_HEIGHT, HP_BAR_BG).setOrigin(0.5, 1);
     this.hpBarFill = scene.add.rectangle(0, 0, 1, HP_BAR_HEIGHT - 2, HP_BAR_FILL).setOrigin(0, 1);
     this.shieldBarFill = scene.add
@@ -89,20 +90,20 @@ export class Enemy extends Phaser.GameObjects.Container {
 
   /** Collision radius used by projectile impact checks. */
   get radius(): number {
-    return Math.max(this.sprite.width, this.sprite.height) * 0.5;
+    return Math.max(this.sprite.displayWidth, this.sprite.displayHeight) * 0.5;
   }
 
   get bodyWidth(): number {
-    return this.sprite.width;
+    return this.sprite.displayWidth;
   }
 
   get bodyHeight(): number {
-    return this.sprite.height;
+    return this.sprite.displayHeight;
   }
 
   /** Centre of mass, what the cannon aims at rather than the feet. */
   get centerY(): number {
-    return this.y - this.sprite.height * 0.5;
+    return this.y - this.sprite.displayHeight * 0.5;
   }
 
   /** True once this enemy has stopped and is chewing on the hull. */
@@ -151,19 +152,20 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.spawnsRemaining = def.spawns?.count ?? 0;
     this.spawnTimer = def.spawns?.interval ?? 0;
 
-    // Textures are baked at the def's scale, so the sprite is never scaled here.
-    this.sprite.setTexture(ATLAS, def.spriteKey);
+    // Textures are authored at the def's scale; bindArt only pays back the
+    // supersample factor, so the on screen size is the same either way.
+    bindArt(this.scene, this.sprite, def.spriteKey);
     this.sprite.setPosition(0, 0);
     this.sprite.clearTint();
 
-    this.hpBarBg.setSize(this.sprite.width, HP_BAR_HEIGHT);
-    this.hpBarBg.setPosition(0, -this.sprite.height - HP_BAR_GAP);
-    this.hpBarFill.setSize(this.sprite.width - 2, HP_BAR_HEIGHT - 2);
-    this.hpBarFill.setPosition(-this.sprite.width * 0.5 + 1, -this.sprite.height - HP_BAR_GAP - 1);
-    this.shieldBarFill.setSize(this.sprite.width - 2, HP_BAR_HEIGHT - 2);
+    this.hpBarBg.setSize(this.sprite.displayWidth, HP_BAR_HEIGHT);
+    this.hpBarBg.setPosition(0, -this.sprite.displayHeight - HP_BAR_GAP);
+    this.hpBarFill.setSize(this.sprite.displayWidth - 2, HP_BAR_HEIGHT - 2);
+    this.hpBarFill.setPosition(-this.sprite.displayWidth * 0.5 + 1, -this.sprite.displayHeight - HP_BAR_GAP - 1);
+    this.shieldBarFill.setSize(this.sprite.displayWidth - 2, HP_BAR_HEIGHT - 2);
     this.shieldBarFill.setPosition(
-      -this.sprite.width * 0.5 + 1,
-      -this.sprite.height - HP_BAR_GAP - 1,
+      -this.sprite.displayWidth * 0.5 + 1,
+      -this.sprite.displayHeight - HP_BAR_GAP - 1,
     );
     this.setHpBarVisible(false);
 
@@ -232,7 +234,7 @@ export class Enemy extends Phaser.GameObjects.Container {
   private stopDistanceX(def: EnemyDef, ctx: EnemyUpdateContext): number {
     const range = def.attackRange ?? 0;
     if (range > 0) return ctx.mechaX + range;
-    return ctx.mechaX + ctx.meleeStandoff + this.sprite.width * 0.5;
+    return ctx.mechaX + ctx.meleeStandoff + this.sprite.displayWidth * 0.5;
   }
 
   get hasShield(): boolean {
@@ -286,7 +288,7 @@ export class Enemy extends Phaser.GameObjects.Container {
   /** The bars only appear once an enemy has actually been hurt. */
   private refreshBars(): void {
     this.setHpBarVisible(true);
-    const inner = this.sprite.width - 2;
+    const inner = this.sprite.displayWidth - 2;
     this.hpBarFill.width = Math.max(0, inner * this.healthFraction);
     this.shieldBarFill.width = Math.max(0, inner * this.shieldFraction);
     this.shieldBarFill.setVisible(this.shield > 0);

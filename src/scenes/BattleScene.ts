@@ -195,6 +195,11 @@ export class BattleScene extends Phaser.Scene {
     this.hints = new TutorialHints(this, this.level.id, baseWidth, baseHeight);
     this.perf = new PerfOverlay(this);
 
+    this.mecha.onFootfall = (x, y) => {
+      this.vfx.footfall(x, y);
+      this.vfx.shake(tuning.vfx.shakeMaxIntensity * 0.12);
+    };
+
     this.registerInput();
     this.cameras.main.setBackgroundColor(0x1a1512);
     this.audio.startDrone();
