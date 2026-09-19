@@ -44,6 +44,50 @@ const Palette = {
   enemySwarm: 0x6a5a3a,
 } as const;
 
+/**
+ * Per zone background palettes. GAME_DESIGN section 11 asks for three layer
+ * parallax per zone: rust and ash, then pale canyon walls, then a furnace glow.
+ */
+interface ThemePalette {
+  skyTop: number;
+  skyBottom: number;
+  ruins: number;
+  ruinsFar: number;
+  ground: number;
+  groundDark: number;
+  groundCrack: number;
+}
+
+const THEME_PALETTES: Record<string, ThemePalette> = {
+  rust_flats: {
+    skyTop: 0x2f2b27,
+    skyBottom: 0x9a8468,
+    ruins: 0x322b25,
+    ruinsFar: 0x3e362e,
+    ground: 0x4a3d30,
+    groundDark: 0x33291f,
+    groundCrack: 0x241c15,
+  },
+  ash_canyons: {
+    skyTop: 0x2b3038,
+    skyBottom: 0x8d94a0,
+    ruins: 0x2d333c,
+    ruinsFar: 0x3a414b,
+    ground: 0x454b54,
+    groundDark: 0x2e333a,
+    groundCrack: 0x20242a,
+  },
+  furnace: {
+    skyTop: 0x2a1410,
+    skyBottom: 0xb4552a,
+    ruins: 0x241310,
+    ruinsFar: 0x35201a,
+    ground: 0x3d2219,
+    groundDark: 0x2a1610,
+    groundCrack: 0xa8371a,
+  },
+};
+
 /** Placeholder body size per armor class, before the def's scale is applied. */
 const ENEMY_BASE_SIZE: Record<ArmorClass, { width: number; height: number }> = {
   light: { width: 48, height: 32 },
@@ -93,9 +137,10 @@ export class PreloadScene extends Phaser.Scene {
     this.generateVfxTextures(graphics);
 
     for (const theme of BACKGROUND_THEMES) {
-      this.generateSky(graphics, theme, baseHeight);
-      this.generateRuins(graphics, theme, baseHeight);
-      this.generateGround(graphics, theme, baseHeight);
+      const palette = THEME_PALETTES[theme];
+      this.generateSky(graphics, theme, baseHeight, palette);
+      this.generateRuins(graphics, theme, baseHeight, palette);
+      this.generateGround(graphics, theme, baseHeight, palette);
     }
 
     for (const def of enemies) {
@@ -262,9 +307,14 @@ export class PreloadScene extends Phaser.Scene {
     this.bake(g, AssetKeys.DEBRIS, DEBRIS.width, DEBRIS.height);
   }
 
-  private generateSky(g: Phaser.GameObjects.Graphics, theme: string, height: number): void {
-    const top = Phaser.Display.Color.ValueToColor(Palette.skyTop);
-    const bottom = Phaser.Display.Color.ValueToColor(Palette.skyBottom);
+  private generateSky(
+    g: Phaser.GameObjects.Graphics,
+    theme: string,
+    height: number,
+    palette: ThemePalette,
+  ): void {
+    const top = Phaser.Display.Color.ValueToColor(palette.skyTop);
+    const bottom = Phaser.Display.Color.ValueToColor(palette.skyBottom);
     const bandHeight = Math.ceil(height / SKY_BAND_COUNT);
     for (let i = 0; i < SKY_BAND_COUNT; i += 1) {
       const blend = Phaser.Display.Color.Interpolate.ColorWithColor(top, bottom, SKY_BAND_COUNT, i);
@@ -274,7 +324,12 @@ export class PreloadScene extends Phaser.Scene {
     this.bake(g, bgSkyKey(theme), SKY_STRIP_WIDTH, height);
   }
 
-  private generateRuins(g: Phaser.GameObjects.Graphics, theme: string, height: number): void {
+  private generateRuins(
+    g: Phaser.GameObjects.Graphics,
+    theme: string,
+    height: number,
+    palette: ThemePalette,
+  ): void {
     const groundY = Math.round(height * GROUND_TOP_FRACTION);
     // Deterministic silhouette, kept clear of the strip edges so tiling seams hide.
     const far: Array<[number, number, number]> = [
@@ -285,7 +340,7 @@ export class PreloadScene extends Phaser.Scene {
       [372, 80, 132],
       [452, 48, 76],
     ];
-    g.fillStyle(Palette.ruinsFar, 1);
+    g.fillStyle(palette.ruinsFar, 1);
     for (const far_ of far) {
       g.fillRect(far_[0], groundY - far_[2], far_[1], far_[2]);
     }
@@ -298,25 +353,30 @@ export class PreloadScene extends Phaser.Scene {
     ];
     for (const block of near) {
       const [x, w, h] = block;
-      g.fillStyle(Palette.ruins, 1);
+      g.fillStyle(palette.ruins, 1);
       g.fillRect(x, groundY - h, w, h);
       g.fillStyle(Palette.ironDark, 1);
       for (let wy = groundY - h + 14; wy < groundY - 20; wy += 26) {
         g.fillRect(x + 8, wy, w - 16, 8);
       }
     }
-    g.fillStyle(Palette.ruins, 1);
+    g.fillStyle(palette.ruins, 1);
     g.fillRect(212, groundY - 250, 18, 250);
     g.fillRect(398, groundY - 232, 14, 232);
     this.bake(g, bgRuinsKey(theme), RUINS_STRIP_WIDTH, height);
   }
 
-  private generateGround(g: Phaser.GameObjects.Graphics, theme: string, height: number): void {
+  private generateGround(
+    g: Phaser.GameObjects.Graphics,
+    theme: string,
+    height: number,
+    palette: ThemePalette,
+  ): void {
     const groundY = Math.round(height * GROUND_TOP_FRACTION);
     const groundHeight = height - groundY;
-    g.fillStyle(Palette.groundDark, 1).fillRect(0, groundY, GROUND_STRIP_WIDTH, groundHeight);
-    g.fillStyle(Palette.ground, 1).fillRect(0, groundY + 10, GROUND_STRIP_WIDTH, groundHeight - 10);
-    g.fillStyle(Palette.groundCrack, 1);
+    g.fillStyle(palette.groundDark, 1).fillRect(0, groundY, GROUND_STRIP_WIDTH, groundHeight);
+    g.fillStyle(palette.ground, 1).fillRect(0, groundY + 10, GROUND_STRIP_WIDTH, groundHeight - 10);
+    g.fillStyle(palette.groundCrack, 1);
     const cracks: Array<[number, number, number, number]> = [
       [30, 40, 120, 3],
       [200, 96, 160, 4],
@@ -372,6 +432,13 @@ export class PreloadScene extends Phaser.Scene {
     if (def.behaviors.includes('shielded')) {
       g.fillStyle(Palette.enemyShielded, 0.9);
       g.fillRect(0, 0, Math.max(3, Math.round(width * 0.09)), bodyHeight);
+    }
+    if (def.flying) {
+      // A rotor bar instead of treads, so the silhouette reads as airborne.
+      g.fillStyle(Palette.ironDark, 1).fillRect(0, bodyHeight, width, trackHeight);
+      g.fillStyle(this.enemyBodyColor(def.armorClass), 1).fillRect(0, bodyHeight, width, trackHeight);
+      g.fillStyle(Palette.ironLight, 1);
+      g.fillRect(Math.round(width * 0.1), 0, Math.round(width * 0.8), Math.max(2, Math.round(height * 0.08)));
     }
 
     this.bake(g, def.spriteKey, width, height);

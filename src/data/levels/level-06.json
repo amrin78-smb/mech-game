@@ -1,13 +1,14 @@
 {
-  "id": "level-03",
-  "name": "Iron Backs",
-  "zone": 1,
-  "background": "rust_flats",
-  "music": "bgm_zone1",
-  "scrollSpeed": 11,
+  "id": "level-06",
+  "name": "Watchers on the Rim",
+  "zone": 2,
+  "background": "ash_canyons",
+  "music": "bgm_zone2",
+  "scrollSpeed": 13,
+  "hpMultiplier": 1.45,
   "economy": {
-    "startingScrap": 110,
-    "trickle": 1.8
+    "startingScrap": 120,
+    "trickle": 2
   },
   "waves": [
     {
@@ -17,8 +18,8 @@
       "interval": 1
     },
     {
-      "time": 16,
-      "enemyId": "plated_hulk",
+      "time": 14,
+      "enemyId": "gunner_walker",
       "count": 1,
       "interval": 1,
       "lane": 1
@@ -30,27 +31,27 @@
       "interval": 0.8
     },
     {
-      "time": 38,
-      "enemyId": "plated_hulk",
+      "time": 34,
+      "enemyId": "gunner_walker",
       "count": 2,
-      "interval": 5,
+      "interval": 6,
       "lane": 0
     },
     {
-      "time": 40,
-      "enemyId": "rustcrawler",
+      "time": 46,
+      "enemyId": "scavenger_bike",
       "count": 5,
-      "interval": 0.9,
+      "interval": 0.7,
       "lane": 2
     },
     {
       "time": 58,
-      "enemyId": "plated_hulk",
+      "enemyId": "gunner_walker",
       "count": 3,
-      "interval": 4.5
+      "interval": 5
     },
     {
-      "time": 62,
+      "time": 64,
       "enemyId": "rustcrawler",
       "count": 8,
       "interval": 0.6
@@ -60,8 +61,7 @@
     "hullThreshold": 0.6
   },
   "rewards": {
-    "firstClearCores": 15,
-    "coresPerStar": 4
-  },
-  "hpMultiplier": 1.2
+    "firstClearCores": 20,
+    "coresPerStar": 5
+  }
 }

@@ -66,22 +66,24 @@
       "ruins": 0.42,
       "ground": 1
     },
-    "maxFrameSeconds": 0.05
+    "maxFrameSeconds": 0.05,
+    "burrowSpawnXFraction": 0.62,
+    "flyingYOffset": 104
   },
   "inBattleUpgrades": {
     "damage": {
-      "baseCost": 40,
-      "costGrowth": 1.35,
-      "bonusPerLevel": 0.12
+      "baseCost": 55,
+      "costGrowth": 1.6,
+      "bonusPerLevel": 0.09
     },
     "fireRate": {
-      "baseCost": 40,
-      "costGrowth": 1.35,
-      "bonusPerLevel": 0.1
+      "baseCost": 55,
+      "costGrowth": 1.6,
+      "bonusPerLevel": 0.07
     },
     "repair": {
-      "baseCost": 60,
-      "costGrowth": 1.5,
+      "baseCost": 90,
+      "costGrowth": 1.7,
       "healFraction": 0.25
     }
   },
@@ -125,16 +127,64 @@
     "touchAimOffsetY": 90
   },
   "boss": {
-    "phase2HpFraction": 0.5,
-    "chargeSpeedMultiplier": 3.2,
-    "chargeDuration": 1.1,
-    "chargeCooldown": 3.2,
-    "entranceShakeIntensity": 0.009,
-    "slamShakeIntensity": 0.007
+    "default": {
+      "phase2HpFraction": 0.5,
+      "chargeSpeedMultiplier": 3.2,
+      "chargeDuration": 1.1,
+      "chargeCooldown": 3.2,
+      "entranceShakeIntensity": 0.009,
+      "slamShakeIntensity": 0.007
+    },
+    "byId": {
+      "boss_compactor": {
+        "kind": "charger"
+      },
+      "boss_iron_matriarch": {
+        "kind": "shield_cycler",
+        "shieldUpDuration": 9,
+        "ventDuration": 6
+      },
+      "boss_leviathan_engine": {
+        "kind": "enrager",
+        "enrageThresholds": [
+          0.66,
+          0.33
+        ],
+        "enrageSpeedBonus": 0.4,
+        "enrageDamageBonus": 0.25
+      }
+    }
   },
   "audio": {
     "masterVolume": 0.75,
     "sfxVolume": 0.7,
     "musicVolume": 0.3
+  },
+  "combat": {
+    "shieldNonPiercingFactor": 0.5
+  },
+  "meta": {
+    "startingWeapons": [
+      "autocannon",
+      "flak_turret"
+    ],
+    "weaponUnlockCosts": {
+      "acid_spitter": 45,
+      "railgun": 80
+    },
+    "turretMountCosts": [
+      35,
+      90
+    ],
+    "hullUpgrade": {
+      "costs": [
+        20,
+        40,
+        70,
+        110,
+        160
+      ],
+      "bonusPerLevel": 0.12
+    }
   }
 }

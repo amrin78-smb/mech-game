@@ -9,8 +9,10 @@
     "attackInterval": 1.2,
     "reward": 10,
     "spriteKey": "enemy_rustcrawler",
-    "scale": 1.0,
-    "behaviors": ["melee"]
+    "scale": 1,
+    "behaviors": [
+      "melee"
+    ]
   },
   {
     "id": "scavenger_bike",
@@ -23,7 +25,9 @@
     "reward": 12,
     "spriteKey": "enemy_scavenger_bike",
     "scale": 0.9,
-    "behaviors": ["melee"]
+    "behaviors": [
+      "melee"
+    ]
   },
   {
     "id": "plated_hulk",
@@ -32,11 +36,13 @@
     "hp": 260,
     "speed": 30,
     "damage": 30,
-    "attackInterval": 2.0,
+    "attackInterval": 2,
     "reward": 30,
     "spriteKey": "enemy_plated_hulk",
     "scale": 1.4,
-    "behaviors": ["melee"]
+    "behaviors": [
+      "melee"
+    ]
   },
   {
     "id": "gunner_walker",
@@ -50,7 +56,9 @@
     "reward": 28,
     "spriteKey": "enemy_gunner_walker",
     "scale": 1.2,
-    "behaviors": ["ranged"]
+    "behaviors": [
+      "ranged"
+    ]
   },
   {
     "id": "boss_compactor",
@@ -59,10 +67,138 @@
     "hp": 2400,
     "speed": 18,
     "damage": 80,
-    "attackInterval": 3.0,
+    "attackInterval": 3,
     "reward": 300,
     "spriteKey": "boss_compactor",
     "scale": 2.6,
-    "behaviors": ["melee"]
+    "behaviors": [
+      "melee"
+    ]
+  },
+  {
+    "id": "drone_swarm",
+    "name": "Drone Swarm",
+    "armorClass": "swarm",
+    "hp": 18,
+    "speed": 175,
+    "damage": 5,
+    "attackInterval": 0.8,
+    "reward": 6,
+    "spriteKey": "enemy_drone_swarm",
+    "scale": 0.8,
+    "flying": true,
+    "behaviors": [
+      "melee"
+    ]
+  },
+  {
+    "id": "shield_bearer",
+    "name": "Shield Bearer",
+    "armorClass": "shielded",
+    "hp": 120,
+    "shieldHp": 220,
+    "speed": 34,
+    "damage": 18,
+    "attackInterval": 2,
+    "reward": 34,
+    "spriteKey": "enemy_shield_bearer",
+    "scale": 1.3,
+    "behaviors": [
+      "melee",
+      "shielded"
+    ]
+  },
+  {
+    "id": "boss_iron_matriarch",
+    "name": "Iron Matriarch",
+    "armorClass": "shielded",
+    "hp": 3000,
+    "shieldHp": 1100,
+    "speed": 16,
+    "damage": 90,
+    "attackInterval": 3,
+    "reward": 450,
+    "spriteKey": "boss_iron_matriarch",
+    "scale": 2.8,
+    "behaviors": [
+      "melee",
+      "shielded",
+      "spawner"
+    ],
+    "spawns": {
+      "enemyId": "drone_swarm",
+      "count": 4,
+      "interval": 7
+    }
+  },
+  {
+    "id": "incinerator_tank",
+    "name": "Incinerator Tank",
+    "armorClass": "armored",
+    "hp": 320,
+    "speed": 28,
+    "damage": 22,
+    "attackRange": 380,
+    "attackInterval": 2.2,
+    "reward": 40,
+    "spriteKey": "enemy_incinerator_tank",
+    "scale": 1.5,
+    "behaviors": [
+      "ranged"
+    ]
+  },
+  {
+    "id": "burrower",
+    "name": "Burrower",
+    "armorClass": "light",
+    "hp": 90,
+    "speed": 95,
+    "damage": 20,
+    "attackInterval": 1.4,
+    "reward": 18,
+    "spriteKey": "enemy_burrower",
+    "scale": 1,
+    "behaviors": [
+      "melee",
+      "burrow"
+    ]
+  },
+  {
+    "id": "elite_vanguard",
+    "name": "Elite Vanguard",
+    "armorClass": "shielded",
+    "hp": 360,
+    "shieldHp": 220,
+    "speed": 26,
+    "damage": 45,
+    "attackInterval": 2.2,
+    "reward": 60,
+    "spriteKey": "enemy_elite_vanguard",
+    "scale": 1.6,
+    "behaviors": [
+      "melee",
+      "shielded"
+    ]
+  },
+  {
+    "id": "boss_leviathan_engine",
+    "name": "The Leviathan Engine",
+    "armorClass": "armored",
+    "hp": 4000,
+    "speed": 14,
+    "damage": 120,
+    "attackInterval": 3.2,
+    "reward": 800,
+    "spriteKey": "boss_leviathan_engine",
+    "scale": 3.2,
+    "behaviors": [
+      "melee",
+      "spawner"
+    ],
+    "spawns": {
+      "enemyId": "burrower",
+      "count": 2,
+      "interval": 9
+    }
   }
 ]

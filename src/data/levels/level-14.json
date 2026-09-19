@@ -1,0 +1,78 @@
+{
+  "id": "level-14",
+  "name": "The Gauntlet",
+  "zone": 3,
+  "background": "furnace",
+  "music": "bgm_zone3",
+  "scrollSpeed": 15,
+  "hpMultiplier": 2.6,
+  "economy": {
+    "startingScrap": 220,
+    "trickle": 3
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "scavenger_bike",
+      "count": 8,
+      "interval": 0.5
+    },
+    {
+      "time": 14,
+      "enemyId": "drone_swarm",
+      "count": 10,
+      "interval": 0.32
+    },
+    {
+      "time": 26,
+      "enemyId": "plated_hulk",
+      "count": 3,
+      "interval": 3.5
+    },
+    {
+      "time": 38,
+      "enemyId": "burrower",
+      "count": 5,
+      "interval": 1.1
+    },
+    {
+      "time": 50,
+      "enemyId": "shield_bearer",
+      "count": 3,
+      "interval": 4.5
+    },
+    {
+      "time": 62,
+      "enemyId": "incinerator_tank",
+      "count": 2,
+      "interval": 5
+    },
+    {
+      "time": 74,
+      "enemyId": "elite_vanguard",
+      "count": 2,
+      "interval": 6
+    },
+    {
+      "time": 86,
+      "enemyId": "drone_swarm",
+      "count": 12,
+      "interval": 0.3,
+      "hpMultiplier": 1.1
+    },
+    {
+      "time": 96,
+      "enemyId": "scavenger_bike",
+      "count": 8,
+      "interval": 0.5,
+      "hpMultiplier": 1.1
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.45
+  },
+  "rewards": {
+    "firstClearCores": 40,
+    "coresPerStar": 8
+  }
+}

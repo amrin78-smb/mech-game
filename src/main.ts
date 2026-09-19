@@ -3,6 +3,8 @@ import Phaser from 'phaser';
 import { tuning } from './data';
 import { BattleScene } from './scenes/BattleScene';
 import { BootScene } from './scenes/BootScene';
+import { HangarScene } from './scenes/HangarScene';
+import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { ResultsScene } from './scenes/ResultsScene';
@@ -10,8 +12,8 @@ import { ResultsScene } from './scenes/ResultsScene';
 /**
  * Game config and scene registration, nothing else.
  *
- * LevelSelectScene and HangarScene are Phase 3 and are not registered yet: the
- * Phase 1 flow is Boot -> Preload -> MainMenu -> Battle -> Results.
+ * Flow: Boot -> Preload -> MainMenu -> LevelSelect -> Battle -> Results,
+ * with Hangar reachable from LevelSelect.
  */
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -37,7 +39,15 @@ const config: Phaser.Types.Core.GameConfig = {
   input: {
     activePointers: 2,
   },
-  scene: [BootScene, PreloadScene, MainMenuScene, BattleScene, ResultsScene],
+  scene: [
+    BootScene,
+    PreloadScene,
+    MainMenuScene,
+    LevelSelectScene,
+    HangarScene,
+    BattleScene,
+    ResultsScene,
+  ],
 };
 
 export default new Phaser.Game(config);

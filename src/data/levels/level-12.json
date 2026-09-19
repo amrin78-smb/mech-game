@@ -1,0 +1,67 @@
+{
+  "id": "level-12",
+  "name": "Ash and Ember",
+  "zone": 3,
+  "background": "furnace",
+  "music": "bgm_zone3",
+  "scrollSpeed": 13,
+  "hpMultiplier": 2.25,
+  "economy": {
+    "startingScrap": 180,
+    "trickle": 2.6
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "plated_hulk",
+      "count": 3,
+      "interval": 3.5
+    },
+    {
+      "time": 14,
+      "enemyId": "burrower",
+      "count": 4,
+      "interval": 1.2,
+      "lane": 0
+    },
+    {
+      "time": 26,
+      "enemyId": "incinerator_tank",
+      "count": 2,
+      "interval": 5,
+      "lane": 2
+    },
+    {
+      "time": 38,
+      "enemyId": "drone_swarm",
+      "count": 10,
+      "interval": 0.3
+    },
+    {
+      "time": 48,
+      "enemyId": "burrower",
+      "count": 6,
+      "interval": 1
+    },
+    {
+      "time": 60,
+      "enemyId": "incinerator_tank",
+      "count": 3,
+      "interval": 4.5
+    },
+    {
+      "time": 72,
+      "enemyId": "scavenger_bike",
+      "count": 10,
+      "interval": 0.4,
+      "hpMultiplier": 1.15
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.5
+  },
+  "rewards": {
+    "firstClearCores": 32,
+    "coresPerStar": 7
+  }
+}

@@ -36,5 +36,7 @@ export function bgGroundKey(theme: string): string {
   return `bg_${theme}_ground`;
 }
 
-/** Themes PreloadScene generates placeholder parallax strips for. */
-export const BACKGROUND_THEMES = ['rust_flats'] as const;
+/** Themes PreloadScene generates placeholder parallax strips for, one per zone. */
+export const BACKGROUND_THEMES = ['rust_flats', 'ash_canyons', 'furnace'] as const;
+
+export type BackgroundTheme = (typeof BACKGROUND_THEMES)[number];

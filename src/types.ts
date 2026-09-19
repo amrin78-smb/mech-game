@@ -131,6 +131,20 @@ export interface PilotDef {
 /** tuning.schema.json */
 export type ArmorMultipliers = Record<ArmorClass, number>;
 
+/** How a given boss behaves across its phases. */
+export type BossKind = 'charger' | 'shield_cycler' | 'enrager';
+
+export interface BossPhaseConfig {
+  kind: BossKind;
+  /** shield_cycler: seconds with the shield up, then seconds venting. */
+  shieldUpDuration?: number;
+  ventDuration?: number;
+  /** enrager: hp fractions at which it steps up, high to low. */
+  enrageThresholds?: number[];
+  enrageSpeedBonus?: number;
+  enrageDamageBonus?: number;
+}
+
 export interface Tuning {
   damageMatrix: Record<DamageType, ArmorMultipliers>;
   mecha: {
@@ -147,12 +161,16 @@ export interface Tuning {
   };
   /** Shared boss phase behaviour; per boss stats stay in enemies.json. */
   boss: {
-    phase2HpFraction: number;
-    chargeSpeedMultiplier: number;
-    chargeDuration: number;
-    chargeCooldown: number;
-    entranceShakeIntensity: number;
-    slamShakeIntensity: number;
+    default: {
+      phase2HpFraction: number;
+      chargeSpeedMultiplier: number;
+      chargeDuration: number;
+      chargeCooldown: number;
+      entranceShakeIntensity: number;
+      slamShakeIntensity: number;
+    };
+    /** Keyed by the boss enemy id in enemies.json. */
+    byId: Record<string, BossPhaseConfig>;
   };
   world: {
     baseWidth: number;
@@ -166,7 +184,28 @@ export interface Tuning {
     projectileLifetime: number;
     /** largest delta a single frame may apply */
     maxFrameSeconds: number;
+    /** Where burrow behaviour enemies erupt, as a fraction of width. */
+    burrowSpawnXFraction: number;
+    /** px a flying enemy sits above its lane. */
+    flyingYOffset: number;
     parallax: { sky: number; ruins: number; ground: number };
+  };
+  combat: {
+    /** GAME_DESIGN section 6: only piercing damages a shield pool at full value. */
+    shieldNonPiercingFactor: number;
+  };
+  /** Hangar economy. Weapon and pilot stat tracks stay in their own files. */
+  meta: {
+    startingWeapons: string[];
+    /** Cores to unlock, keyed by weapon id. */
+    weaponUnlockCosts: Record<string, number>;
+    /** Cores for mounts 2 and 3; mount 1 is free. */
+    turretMountCosts: number[];
+    hullUpgrade: {
+      costs: number[];
+      /** Additive hull fraction per level. */
+      bonusPerLevel: number;
+    };
   };
   inBattleUpgrades: {
     damage: { baseCost: number; costGrowth: number; bonusPerLevel: number };
@@ -227,6 +266,9 @@ export interface BattleResult {
   hullRemaining: number;
   hullMax: number;
   durationSeconds: number;
-  /** In battle repairs bought. The 3 star criterion in Phase 3 reads this. */
+  /** In battle repairs bought; the 3 star criterion reads this. */
   repairsUsed: number;
+  stars: number;
+  /** Cores paid out for this run, after the save recorded it. */
+  coresAwarded: number;
 }

@@ -1,0 +1,66 @@
+{
+  "id": "level-08",
+  "name": "Wall of Iron",
+  "zone": 2,
+  "background": "ash_canyons",
+  "music": "bgm_zone2",
+  "scrollSpeed": 11,
+  "hpMultiplier": 1.65,
+  "economy": {
+    "startingScrap": 140,
+    "trickle": 2.2
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "rustcrawler",
+      "count": 5,
+      "interval": 1
+    },
+    {
+      "time": 14,
+      "enemyId": "shield_bearer",
+      "count": 1,
+      "interval": 1,
+      "lane": 1
+    },
+    {
+      "time": 26,
+      "enemyId": "shield_bearer",
+      "count": 2,
+      "interval": 5
+    },
+    {
+      "time": 30,
+      "enemyId": "rustcrawler",
+      "count": 6,
+      "interval": 0.8
+    },
+    {
+      "time": 46,
+      "enemyId": "shield_bearer",
+      "count": 3,
+      "interval": 4.5
+    },
+    {
+      "time": 52,
+      "enemyId": "drone_swarm",
+      "count": 8,
+      "interval": 0.35
+    },
+    {
+      "time": 68,
+      "enemyId": "shield_bearer",
+      "count": 3,
+      "interval": 4,
+      "hpMultiplier": 1.1
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.55
+  },
+  "rewards": {
+    "firstClearCores": 25,
+    "coresPerStar": 6
+  }
+}

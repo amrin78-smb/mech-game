@@ -5,16 +5,54 @@
   "background": "rust_flats",
   "music": "bgm_boss",
   "scrollSpeed": 8,
-  "hpMultiplier": 1.15,
-  "economy": { "startingScrap": 120, "trickle": 2.0 },
+  "hpMultiplier": 1.3,
+  "economy": {
+    "startingScrap": 120,
+    "trickle": 2
+  },
   "waves": [
-    { "time": 3,  "enemyId": "rustcrawler",    "count": 5, "interval": 1.0 },
-    { "time": 15, "enemyId": "scavenger_bike", "count": 4, "interval": 0.7 },
-    { "time": 28, "enemyId": "plated_hulk",    "count": 2, "interval": 4.0, "lane": 1 },
-    { "time": 40, "enemyId": "scavenger_bike", "count": 6, "interval": 0.5 },
-    { "time": 55, "enemyId": "rustcrawler",    "count": 8, "interval": 0.7 }
+    {
+      "time": 3,
+      "enemyId": "rustcrawler",
+      "count": 5,
+      "interval": 1
+    },
+    {
+      "time": 15,
+      "enemyId": "scavenger_bike",
+      "count": 4,
+      "interval": 0.7
+    },
+    {
+      "time": 28,
+      "enemyId": "plated_hulk",
+      "count": 2,
+      "interval": 4,
+      "lane": 1
+    },
+    {
+      "time": 40,
+      "enemyId": "scavenger_bike",
+      "count": 6,
+      "interval": 0.5
+    },
+    {
+      "time": 55,
+      "enemyId": "rustcrawler",
+      "count": 8,
+      "interval": 0.7
+    }
   ],
-  "boss": { "enemyId": "boss_compactor", "time": 70 },
-  "stars": { "hullThreshold": 0.6 },
-  "rewards": { "firstClearCores": 25, "coresPerStar": 5 }
+  "boss": {
+    "enemyId": "boss_compactor",
+    "time": 70,
+    "hpMultiplier": 1
+  },
+  "stars": {
+    "hullThreshold": 0.6
+  },
+  "rewards": {
+    "firstClearCores": 25,
+    "coresPerStar": 5
+  }
 }

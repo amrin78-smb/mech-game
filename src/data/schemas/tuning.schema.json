@@ -13,7 +13,9 @@
     "pools",
     "targeting",
     "boss",
-    "audio"
+    "audio",
+    "combat",
+    "meta"
   ],
   "additionalProperties": false,
   "definitions": {
@@ -172,7 +174,9 @@
         "projectileRadius",
         "projectileLifetime",
         "parallax",
-        "maxFrameSeconds"
+        "maxFrameSeconds",
+        "burrowSpawnXFraction",
+        "flyingYOffset"
       ],
       "additionalProperties": false,
       "properties": {
@@ -240,6 +244,17 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "largest delta a single frame may apply, so a backgrounded tab does not teleport the wave"
+        },
+        "burrowSpawnXFraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "where burrow behaviour enemies erupt, as a fraction of width"
+        },
+        "flyingYOffset": {
+          "type": "number",
+          "minimum": 0,
+          "description": "px a flying enemy sits above its lane"
         }
       }
     },
@@ -436,40 +451,91 @@
       "type": "object",
       "description": "shared boss phase behaviour; per boss stats stay in enemies.json",
       "required": [
-        "phase2HpFraction",
-        "chargeSpeedMultiplier",
-        "chargeDuration",
-        "chargeCooldown"
+        "default",
+        "byId"
       ],
       "additionalProperties": false,
       "properties": {
-        "phase2HpFraction": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1,
-          "description": "hp fraction at which phase 2 begins"
+        "default": {
+          "type": "object",
+          "required": [
+            "phase2HpFraction",
+            "chargeSpeedMultiplier",
+            "chargeDuration",
+            "chargeCooldown"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "phase2HpFraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "chargeSpeedMultiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "chargeDuration": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "chargeCooldown": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "entranceShakeIntensity": {
+              "type": "number",
+              "minimum": 0
+            },
+            "slamShakeIntensity": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
         },
-        "chargeSpeedMultiplier": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "chargeDuration": {
-          "type": "number",
-          "exclusiveMinimum": 0,
-          "description": "seconds of a phase 2 charge burst"
-        },
-        "chargeCooldown": {
-          "type": "number",
-          "exclusiveMinimum": 0,
-          "description": "seconds between charge bursts"
-        },
-        "entranceShakeIntensity": {
-          "type": "number",
-          "minimum": 0
-        },
-        "slamShakeIntensity": {
-          "type": "number",
-          "minimum": 0
+        "byId": {
+          "type": "object",
+          "description": "keyed by the boss enemy id in enemies.json",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": [
+                  "charger",
+                  "shield_cycler",
+                  "enrager"
+                ]
+              },
+              "shieldUpDuration": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "ventDuration": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "enrageThresholds": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "enrageSpeedBonus": {
+                "type": "number",
+                "minimum": 0
+              },
+              "enrageDamageBonus": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
         }
       }
     },
@@ -496,6 +562,79 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        }
+      }
+    },
+    "combat": {
+      "type": "object",
+      "required": [
+        "shieldNonPiercingFactor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "shieldNonPiercingFactor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "GAME_DESIGN section 6: only piercing damages a shield pool at full value"
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "description": "Hangar economy. Weapon and pilot stat tracks stay in weapons.json and pilots.json.",
+      "required": [
+        "startingWeapons",
+        "weaponUnlockCosts",
+        "turretMountCosts",
+        "hullUpgrade"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "startingWeapons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "owned on a fresh save"
+        },
+        "weaponUnlockCosts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "description": "cores to unlock, keyed by weapon id"
+        },
+        "turretMountCosts": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "description": "cores for mounts 2 and 3; mount 1 is free"
+        },
+        "hullUpgrade": {
+          "type": "object",
+          "required": [
+            "costs",
+            "bonusPerLevel"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "costs": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "bonusPerLevel": {
+              "type": "number",
+              "minimum": 0,
+              "description": "additive hull fraction per level"
+            }
+          }
         }
       }
     }

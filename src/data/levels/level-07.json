@@ -1,0 +1,68 @@
+{
+  "id": "level-07",
+  "name": "Locust Sky",
+  "zone": 2,
+  "background": "ash_canyons",
+  "music": "bgm_zone2",
+  "scrollSpeed": 15,
+  "hpMultiplier": 1.55,
+  "economy": {
+    "startingScrap": 130,
+    "trickle": 2.1
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "drone_swarm",
+      "count": 6,
+      "interval": 0.4,
+      "lane": 0
+    },
+    {
+      "time": 12,
+      "enemyId": "drone_swarm",
+      "count": 8,
+      "interval": 0.35,
+      "lane": 1
+    },
+    {
+      "time": 22,
+      "enemyId": "rustcrawler",
+      "count": 6,
+      "interval": 0.8
+    },
+    {
+      "time": 32,
+      "enemyId": "drone_swarm",
+      "count": 10,
+      "interval": 0.3
+    },
+    {
+      "time": 46,
+      "enemyId": "gunner_walker",
+      "count": 2,
+      "interval": 5,
+      "lane": 2
+    },
+    {
+      "time": 52,
+      "enemyId": "drone_swarm",
+      "count": 12,
+      "interval": 0.28
+    },
+    {
+      "time": 68,
+      "enemyId": "drone_swarm",
+      "count": 14,
+      "interval": 0.25,
+      "hpMultiplier": 1.15
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.6
+  },
+  "rewards": {
+    "firstClearCores": 22,
+    "coresPerStar": 5
+  }
+}

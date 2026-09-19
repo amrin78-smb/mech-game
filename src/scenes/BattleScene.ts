@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { getLevelDef, levels, tuning, weapons } from '../data';
+import { getLevelDef, getWeaponDef, levels, tuning, weapons } from '../data';
 import type { Boss } from '../entities/Boss';
 import type { Enemy } from '../entities/Enemy';
 import { Mecha } from '../entities/Mecha';
@@ -11,10 +11,14 @@ import { EconomySystem } from '../systems/EconomySystem';
 import { ProjectileSystem } from '../systems/ProjectileSystem';
 import { TargetingSystem } from '../systems/TargetingSystem';
 import { TurretSystem } from '../systems/TurretSystem';
+import { PilotSystem } from '../systems/PilotSystem';
+import { SaveManager } from '../systems/SaveManager';
+import { evaluateStars } from '../systems/StarRating';
 import { VfxManager } from '../systems/VfxManager';
 import { WaveSpawner } from '../systems/WaveSpawner';
 import { WeaponSystem } from '../systems/WeaponSystem';
 import type { BattleResult, LevelDef } from '../types';
+import { AbilityButton } from '../ui/AbilityButton';
 import { AimLine } from '../ui/AimLine';
 import { BossBar } from '../ui/BossBar';
 import { FocusMarker } from '../ui/FocusMarker';
@@ -60,6 +64,8 @@ export class BattleScene extends Phaser.Scene {
   private turrets!: TurretSystem;
   private vfx!: VfxManager;
   private audio!: AudioManager;
+  private saves!: SaveManager;
+  private pilotSystem!: PilotSystem;
 
   private hud!: Hud;
   private aimLine!: AimLine;
@@ -67,6 +73,7 @@ export class BattleScene extends Phaser.Scene {
   private scrapDrops!: ScrapDrops;
   private upgrades!: UpgradePanel;
   private bossBar!: BossBar;
+  private abilityButton!: AbilityButton;
 
   private enemiesKilled = 0;
   private repairsUsed = 0;
@@ -84,6 +91,7 @@ export class BattleScene extends Phaser.Scene {
 
   init(data: BattleSceneData): void {
     this.level = getLevelDef(data?.levelId ?? levels[0].id);
+    this.saves = new SaveManager();
     this.enemiesKilled = 0;
     this.repairsUsed = 0;
     this.elapsedSeconds = 0;
@@ -99,7 +107,8 @@ export class BattleScene extends Phaser.Scene {
     const groundY = laneY[laneY.length - 1];
 
     this.background = new ParallaxBackground(this, this.level.background, baseWidth, baseHeight);
-    this.mecha = new Mecha(this, mechaX, groundY, tuning.mecha.baseHullHp);
+    // Hull, loadout and mounts all come out of the save, so Hangar spending shows up here.
+    this.mecha = new Mecha(this, mechaX, groundY, this.saves.hullMax());
 
     this.targeting = new TargetingSystem();
     this.damage = new DamageSystem();
@@ -146,8 +155,22 @@ export class BattleScene extends Phaser.Scene {
         this.audio.play('turret', 0.5);
       },
     });
-    // Phase 2 fits a single mount; the Hangar sells mounts 2 and 3 in Phase 3.
-    this.turrets.addMount(this, 0);
+    const mounts = Math.min(this.saves.turretMounts, tuning.mecha.turretMountOffsets.length);
+    for (let index = 0; index < mounts; index += 1) {
+      this.turrets.addMount(this, index);
+    }
+
+    // Hangar weapon cards and the pilot's passive are baked in before the fight.
+    this.weapon.damageMultiplier = this.weaponDamageMultiplier();
+    this.weapon.fireRateMultiplier = this.weaponFireRateMultiplier();
+
+    this.pilotSystem = new PilotSystem(
+      this.saves.equippedPilot,
+      this.saves.equippedPilot === null ? 0 : this.saves.pilotLevel(this.saves.equippedPilot),
+      this.mecha,
+      this.weapon,
+      this.turrets,
+    );
 
     this.hud = new Hud(this, baseWidth);
     this.aimLine = new AimLine(this);
@@ -162,6 +185,10 @@ export class BattleScene extends Phaser.Scene {
       () => this.audio.play('ui_click', 0.4, -300),
     );
 
+    this.abilityButton = new AbilityButton(this, baseWidth, baseHeight, this.pilotSystem, () =>
+      this.activateAbility(),
+    );
+
     this.registerInput();
     this.cameras.main.setBackgroundColor(0x1a1512);
     this.audio.startDrone();
@@ -170,11 +197,38 @@ export class BattleScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.audio.destroy());
   }
 
-  /** The Hangar picks the loadout in Phase 3; until then, the first of each slot. */
+  /** Whatever the Hangar has equipped, falling back to the first main slot weapon. */
   private mainWeaponId(): string {
+    const equipped = this.saves.equippedMain;
+    if (this.saves.ownsWeapon(equipped)) return equipped;
+
     const main = weapons.find((weapon) => weapon.slot === 'main');
     if (!main) throw new Error('No weapon with slot "main" in src/data/weapons.json');
     return main.id;
+  }
+
+  /**
+   * Hangar card levels are cumulative: every entry up to the owned level adds
+   * its bonus. The pilot's cannon passive rides on top.
+   */
+  private weaponDamageMultiplier(): number {
+    const def = getWeaponDef(this.mainWeaponId());
+    const level = this.saves.weaponLevel(def.id);
+    let multiplier = 1;
+    for (let i = 0; i < level && i < def.upgradeTrack.length; i += 1) {
+      multiplier += def.upgradeTrack[i].damageBonus ?? 0;
+    }
+    return multiplier + this.saves.passiveBonus('cannon_damage');
+  }
+
+  private weaponFireRateMultiplier(): number {
+    const def = getWeaponDef(this.mainWeaponId());
+    const level = this.saves.weaponLevel(def.id);
+    let multiplier = 1;
+    for (let i = 0; i < level && i < def.upgradeTrack.length; i += 1) {
+      multiplier += def.upgradeTrack[i].fireRateBonus ?? 0;
+    }
+    return multiplier;
   }
 
   private turretWeaponId(): string {
@@ -200,6 +254,7 @@ export class BattleScene extends Phaser.Scene {
     this.turrets.update(deltaSeconds, enemies);
     this.projectiles.update(deltaSeconds, enemies);
     this.economy.update(deltaSeconds);
+    this.pilotSystem.update(deltaSeconds);
 
     this.updateBoss();
     this.updatePresentation(deltaSeconds);
@@ -211,7 +266,7 @@ export class BattleScene extends Phaser.Scene {
     this.bossBar.update(boss);
     if (boss !== null && boss.consumePhaseChange()) {
       this.audio.play('boss_phase');
-      this.vfx.shake(tuning.boss.entranceShakeIntensity);
+      this.vfx.shake(tuning.boss.default.entranceShakeIntensity);
     }
   }
 
@@ -233,6 +288,7 @@ export class BattleScene extends Phaser.Scene {
     this.focusMarker.update(this.targeting.focusTarget, deltaSeconds);
     this.scrapDrops.update(deltaSeconds);
     this.upgrades.update();
+    this.abilityButton.update();
     this.hud.update(
       this.mecha.hullHp,
       this.mecha.hullMax,
@@ -258,7 +314,7 @@ export class BattleScene extends Phaser.Scene {
 
     // A boss slam is its own event, not just a bigger bite.
     if (enemy.isBoss) {
-      this.vfx.shake(tuning.boss.slamShakeIntensity);
+      this.vfx.shake(tuning.boss.default.slamShakeIntensity);
     } else {
       this.vfx.shakeFromDamage(dealt);
     }
@@ -289,7 +345,7 @@ export class BattleScene extends Phaser.Scene {
   private onBossSpawned(boss: Boss): void {
     this.bossBar.show(boss);
     this.audio.play('boss_stinger');
-    this.vfx.shake(tuning.boss.entranceShakeIntensity);
+    this.vfx.shake(tuning.boss.default.entranceShakeIntensity);
   }
 
   /** Effects come from tuning.inBattleUpgrades; the panel owns the prices. */
@@ -310,6 +366,16 @@ export class BattleScene extends Phaser.Scene {
         break;
     }
     this.audio.play('upgrade', 0.7);
+  }
+
+  private activateAbility(): void {
+    if (this.battleOver) return;
+    if (this.pilotSystem.activate()) {
+      this.audio.play('upgrade', 0.8, 200);
+      this.vfx.shake(tuning.boss.default.slamShakeIntensity * 0.5);
+      return;
+    }
+    this.audio.play('ui_click', 0.4, -300);
   }
 
   private checkEndConditions(): void {
@@ -335,7 +401,20 @@ export class BattleScene extends Phaser.Scene {
     this.vfx.reset();
     this.bossBar.setVisible(false);
     this.upgrades.setVisible(false);
+    this.abilityButton.setVisible(false);
+    this.pilotSystem.reset();
     this.audio.stopDrone();
+
+    const hullFraction = this.mecha.hullFraction;
+    const stars = evaluateStars(this.level, won, hullFraction, this.repairsUsed);
+    const coresAwarded = this.saves.recordResult(
+      this.level.id,
+      won,
+      stars,
+      hullFraction,
+      this.level.rewards.firstClearCores,
+      this.level.rewards.coresPerStar,
+    );
 
     const result: BattleResult = {
       levelId: this.level.id,
@@ -347,6 +426,8 @@ export class BattleScene extends Phaser.Scene {
       hullMax: this.mecha.hullMax,
       durationSeconds: this.elapsedSeconds,
       repairsUsed: this.repairsUsed,
+      stars,
+      coresAwarded,
     };
 
     this.scene.start(SceneKeys.Results, result);

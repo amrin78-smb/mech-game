@@ -1,0 +1,66 @@
+{
+  "id": "level-13",
+  "name": "Vanguard Trial",
+  "zone": 3,
+  "background": "furnace",
+  "music": "bgm_zone3",
+  "scrollSpeed": 10,
+  "hpMultiplier": 2.4,
+  "economy": {
+    "startingScrap": 200,
+    "trickle": 2.8
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "rustcrawler",
+      "count": 6,
+      "interval": 0.8
+    },
+    {
+      "time": 14,
+      "enemyId": "elite_vanguard",
+      "count": 1,
+      "interval": 1,
+      "lane": 1
+    },
+    {
+      "time": 28,
+      "enemyId": "incinerator_tank",
+      "count": 2,
+      "interval": 5
+    },
+    {
+      "time": 40,
+      "enemyId": "elite_vanguard",
+      "count": 2,
+      "interval": 6
+    },
+    {
+      "time": 50,
+      "enemyId": "burrower",
+      "count": 5,
+      "interval": 1
+    },
+    {
+      "time": 62,
+      "enemyId": "elite_vanguard",
+      "count": 3,
+      "interval": 5.5,
+      "hpMultiplier": 1.1
+    },
+    {
+      "time": 70,
+      "enemyId": "drone_swarm",
+      "count": 10,
+      "interval": 0.3
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.5
+  },
+  "rewards": {
+    "firstClearCores": 35,
+    "coresPerStar": 7
+  }
+}

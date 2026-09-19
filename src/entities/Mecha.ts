@@ -34,6 +34,7 @@ interface Mount {
 export class Mecha extends Phaser.GameObjects.Container {
   readonly hullMax: number;
   private hull: number;
+  private absorb = 0;
 
   private readonly legs: Phaser.GameObjects.Image;
   private readonly torso: Phaser.GameObjects.Image;
@@ -231,9 +232,31 @@ export class Mecha extends Phaser.GameObjects.Container {
     return this.hull <= 0;
   }
 
-  /** Returns the damage actually absorbed, which matters once repairs exist. */
+  /** Mara's Aegis Field: a pool that eats damage before the hull does. */
+  grantAbsorb(amount: number): void {
+    this.absorb = Math.max(this.absorb, amount);
+  }
+
+  clearAbsorb(): void {
+    this.absorb = 0;
+  }
+
+  get absorbRemaining(): number {
+    return this.absorb;
+  }
+
+  /** Returns the damage that actually reached the hull, after any absorb pool. */
   applyDamage(amount: number): number {
-    const applied = Math.min(amount, this.hull);
+    let incoming = amount;
+
+    if (this.absorb > 0) {
+      const eaten = Math.min(this.absorb, incoming);
+      this.absorb -= eaten;
+      incoming -= eaten;
+      if (incoming <= 0) return 0;
+    }
+
+    const applied = Math.min(incoming, this.hull);
     this.hull -= applied;
     if (this.hull < 0) this.hull = 0;
     return applied;

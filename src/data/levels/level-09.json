@@ -1,0 +1,76 @@
+{
+  "id": "level-09",
+  "name": "Combined Arms",
+  "zone": 2,
+  "background": "ash_canyons",
+  "music": "bgm_zone2",
+  "scrollSpeed": 13,
+  "hpMultiplier": 1.8,
+  "economy": {
+    "startingScrap": 150,
+    "trickle": 2.3
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "plated_hulk",
+      "count": 2,
+      "interval": 4,
+      "lane": 1
+    },
+    {
+      "time": 10,
+      "enemyId": "drone_swarm",
+      "count": 8,
+      "interval": 0.35,
+      "lane": 0
+    },
+    {
+      "time": 22,
+      "enemyId": "gunner_walker",
+      "count": 2,
+      "interval": 5,
+      "lane": 2
+    },
+    {
+      "time": 32,
+      "enemyId": "shield_bearer",
+      "count": 2,
+      "interval": 5
+    },
+    {
+      "time": 42,
+      "enemyId": "scavenger_bike",
+      "count": 8,
+      "interval": 0.5
+    },
+    {
+      "time": 56,
+      "enemyId": "gunner_walker",
+      "count": 2,
+      "interval": 4,
+      "lane": 0
+    },
+    {
+      "time": 60,
+      "enemyId": "shield_bearer",
+      "count": 2,
+      "interval": 5,
+      "lane": 1
+    },
+    {
+      "time": 70,
+      "enemyId": "drone_swarm",
+      "count": 12,
+      "interval": 0.3,
+      "hpMultiplier": 1.1
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.55
+  },
+  "rewards": {
+    "firstClearCores": 28,
+    "coresPerStar": 6
+  }
+}

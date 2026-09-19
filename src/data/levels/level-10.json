@@ -1,0 +1,58 @@
+{
+  "id": "level-10",
+  "name": "Iron Matriarch",
+  "zone": 2,
+  "background": "ash_canyons",
+  "music": "bgm_boss",
+  "scrollSpeed": 9,
+  "hpMultiplier": 1.95,
+  "economy": {
+    "startingScrap": 180,
+    "trickle": 2.5
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "rustcrawler",
+      "count": 6,
+      "interval": 0.8
+    },
+    {
+      "time": 16,
+      "enemyId": "drone_swarm",
+      "count": 8,
+      "interval": 0.35
+    },
+    {
+      "time": 30,
+      "enemyId": "shield_bearer",
+      "count": 2,
+      "interval": 5,
+      "lane": 1
+    },
+    {
+      "time": 44,
+      "enemyId": "gunner_walker",
+      "count": 2,
+      "interval": 4.5
+    },
+    {
+      "time": 56,
+      "enemyId": "drone_swarm",
+      "count": 10,
+      "interval": 0.3
+    }
+  ],
+  "boss": {
+    "enemyId": "boss_iron_matriarch",
+    "time": 72,
+    "hpMultiplier": 0.821
+  },
+  "stars": {
+    "hullThreshold": 0.5
+  },
+  "rewards": {
+    "firstClearCores": 40,
+    "coresPerStar": 8
+  }
+}

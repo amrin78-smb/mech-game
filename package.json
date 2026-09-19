@@ -8,12 +8,14 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sim": "tsx sim/simulate.ts"
   },
   "dependencies": {
     "phaser": "^3.90.0"
   },
   "devDependencies": {
+    "@types/node": "^26.6.2",
     "ajv": "^8.20.0",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",

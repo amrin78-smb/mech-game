@@ -1,13 +1,12 @@
 import Phaser from 'phaser';
 
-import { levels } from '../data';
+import { SaveManager } from '../systems/SaveManager';
 import { createTextButton } from '../ui/TextButton';
 import { SceneKeys } from './SceneKeys';
 
 /**
- * Title and a way into each authored level. This is deliberately a plain list,
- * not the Phase 3 LevelSelectScene: no zone map, no locks, no stars, no save.
- * It exists so the Phase 2 content can be reached and played.
+ * Title, and the way into the campaign. Progress lives in the save, so this
+ * only needs to report it and hand off to the zone map.
  */
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -16,11 +15,12 @@ export class MainMenuScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
+    const saves = new SaveManager();
 
     this.cameras.main.setBackgroundColor(0x1a1512);
 
     this.add
-      .text(width * 0.5, height * 0.22, 'SCRAP TITAN', {
+      .text(width * 0.5, height * 0.26, 'SCRAP TITAN', {
         fontFamily: 'monospace',
         fontSize: '72px',
         color: '#c9a227',
@@ -28,42 +28,40 @@ export class MainMenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(width * 0.5, height * 0.33, 'Hold the line. The guns fight, you command.', {
+      .text(width * 0.5, height * 0.37, 'Hold the line. The guns fight, you command.', {
         fontFamily: 'monospace',
         fontSize: '18px',
         color: '#9a8f7c',
       })
       .setOrigin(0.5);
 
-    // A vertical list: level names vary in length, so a row would collide.
-    const rowHeight = 52;
-    const firstRowY = height * 0.44;
-    levels.forEach((level, index) => {
-      const number = level.id.replace('level-', '');
-      const label = level.boss ? `${number}  ${level.name}  *` : `${number}  ${level.name}`;
-      createTextButton(this, width * 0.5, firstRowY + index * rowHeight, label, () => {
-        this.scene.start(SceneKeys.Battle, { levelId: level.id });
-      });
+    createTextButton(this, width * 0.5, height * 0.52, 'DEPLOY', () => {
+      this.scene.start(SceneKeys.LevelSelect);
+    });
+
+    createTextButton(this, width * 0.5, height * 0.63, 'HANGAR', () => {
+      this.scene.start(SceneKeys.Hangar);
     });
 
     this.add
-      .text(width * 0.5, firstRowY + levels.length * rowHeight, '* boss level', {
-        fontFamily: 'monospace',
-        fontSize: '13px',
-        color: '#6f6a62',
-      })
+      .text(
+        width * 0.5,
+        height * 0.74,
+        `Cores ${saves.cores}   Stars ${saves.totalStars}`,
+        { fontFamily: 'monospace', fontSize: '16px', color: '#e8dcc6' },
+      )
       .setOrigin(0.5);
 
     this.add
       .text(
         width * 0.5,
-        height * 0.92,
+        height * 0.87,
         'Weapons fire on their own. Drag anywhere to take manual aim,\n' +
           'release for a precision shot. Tap an enemy to focus fire.\n' +
-          'Spend scrap on damage, fire rate and repairs while you fight.',
+          'Spend scrap mid battle, spend cores in the Hangar. Key 1 fires the pilot ability.',
         {
           fontFamily: 'monospace',
-          fontSize: '15px',
+          fontSize: '14px',
           color: '#6f6a62',
           align: 'center',
         },

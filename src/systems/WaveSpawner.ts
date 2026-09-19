@@ -87,6 +87,7 @@ export class WaveSpawner {
       mechaX,
       meleeStandoff: tuning.world.meleeStandoff,
       onAttack: onEnemyAttack,
+      onSpawnRequest: (parent, enemyId) => this.spawnFromParent(parent, enemyId),
     };
   }
 
@@ -157,8 +158,39 @@ export class WaveSpawner {
         ? Phaser.Math.Clamp(entry.lane, 0, this.laneY.length - 1)
         : Phaser.Math.RND.between(0, this.laneY.length - 1);
 
-    enemy.spawn(def, this.spawnX, this.laneY[laneIndex], laneIndex, hpMultiplier);
+    this.placeAndTrack(enemy, def, laneIndex, hpMultiplier, this.spawnXFor(def));
+  }
+
+  /**
+   * A spawner enemy emitting its brood. They appear beside the parent rather
+   * than at the spawn line, which is the point of a spawner.
+   */
+  private spawnFromParent(parent: Enemy, enemyId: string): void {
+    const enemy = this.pool.obtain();
+    if (enemy === null) return;
+
+    const def = getEnemyDef(enemyId);
+    const laneIndex = Phaser.Math.RND.between(0, this.laneY.length - 1);
+    this.placeAndTrack(enemy, def, laneIndex, this.levelHpMultiplier, parent.x);
+  }
+
+  private placeAndTrack(
+    enemy: Enemy,
+    def: ReturnType<typeof getEnemyDef>,
+    laneIndex: number,
+    hpMultiplier: number,
+    x: number,
+  ): void {
+    // Flyers ride above their lane so they read as airborne.
+    const y = this.laneY[laneIndex] - (def.flying ? tuning.world.flyingYOffset : 0);
+    enemy.spawn(def, x, y, laneIndex, hpMultiplier);
     this.live.push(enemy);
+  }
+
+  /** The `burrow` behaviour erupts mid field instead of walking in from the right. */
+  private spawnXFor(def: ReturnType<typeof getEnemyDef>): number {
+    if (!def.behaviors.includes('burrow')) return this.spawnX;
+    return tuning.world.baseWidth * tuning.world.burrowSpawnXFraction;
   }
 
   private spawnBossIfDue(): void {
@@ -171,14 +203,13 @@ export class WaveSpawner {
     // Bosses walk the middle lane so they read as the centre of the fight.
     const laneIndex = Math.floor(this.laneY.length / 2);
 
-    boss.spawn(
+    this.placeAndTrack(
+      boss,
       def,
-      this.spawnX,
-      this.laneY[laneIndex],
       laneIndex,
       this.levelHpMultiplier * (entry.hpMultiplier ?? 1),
+      this.spawnX,
     );
-    this.live.push(boss);
     this.bossSpawned = true;
     this.onBossSpawned(boss);
   }

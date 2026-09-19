@@ -1,0 +1,57 @@
+{
+  "id": "level-15",
+  "name": "The Leviathan Engine",
+  "zone": 3,
+  "background": "furnace",
+  "music": "bgm_boss",
+  "scrollSpeed": 8,
+  "hpMultiplier": 2.8,
+  "economy": {
+    "startingScrap": 250,
+    "trickle": 3.2
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "burrower",
+      "count": 4,
+      "interval": 1.2
+    },
+    {
+      "time": 18,
+      "enemyId": "elite_vanguard",
+      "count": 1,
+      "interval": 5
+    },
+    {
+      "time": 32,
+      "enemyId": "incinerator_tank",
+      "count": 2,
+      "interval": 5
+    },
+    {
+      "time": 48,
+      "enemyId": "drone_swarm",
+      "count": 8,
+      "interval": 0.35
+    },
+    {
+      "time": 62,
+      "enemyId": "shield_bearer",
+      "count": 2,
+      "interval": 4.5
+    }
+  ],
+  "boss": {
+    "enemyId": "boss_leviathan_engine",
+    "time": 78,
+    "hpMultiplier": 0.679
+  },
+  "stars": {
+    "hullThreshold": 0.45
+  },
+  "rewards": {
+    "firstClearCores": 60,
+    "coresPerStar": 10
+  }
+}

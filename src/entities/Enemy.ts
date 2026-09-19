@@ -19,6 +19,7 @@ const HP_BAR_HEIGHT = 5;
 const HP_BAR_GAP = 9;
 const HP_BAR_BG = 0x1a1512;
 const HP_BAR_FILL = 0xc23b2a;
+const SHIELD_BAR_FILL = 0x4a90a4;
 
 export interface EnemyUpdateContext {
   /** World x of the mecha, what enemies advance towards. */
@@ -27,6 +28,8 @@ export interface EnemyUpdateContext {
   readonly meleeStandoff: number;
   /** Called every time an enemy's attack interval comes round while in range. */
   readonly onAttack: (enemy: Enemy) => void;
+  /** Spawner behaviour asks the WaveSpawner for a unit; it owns the pool. */
+  readonly onSpawnRequest: (parent: Enemy, enemyId: string) => void;
 }
 
 export class Enemy extends Phaser.GameObjects.Container {
@@ -35,13 +38,18 @@ export class Enemy extends Phaser.GameObjects.Container {
   protected hpMax = 0;
   protected attackTimer = 0;
   protected inRange = false;
+  protected shield = 0;
+  protected shieldMax = 0;
 
   private laneIndex = 0;
   private flashRemaining = 0;
+  private spawnTimer = 0;
+  private spawnsRemaining = 0;
 
   protected readonly sprite: Phaser.GameObjects.Image;
   private readonly hpBarBg: Phaser.GameObjects.Rectangle;
   private readonly hpBarFill: Phaser.GameObjects.Rectangle;
+  private readonly shieldBarFill: Phaser.GameObjects.Rectangle;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
@@ -49,8 +57,11 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.sprite = scene.add.image(0, 0, AssetKeys.UI_PIXEL).setOrigin(0.5, 1);
     this.hpBarBg = scene.add.rectangle(0, 0, 1, HP_BAR_HEIGHT, HP_BAR_BG).setOrigin(0.5, 1);
     this.hpBarFill = scene.add.rectangle(0, 0, 1, HP_BAR_HEIGHT - 2, HP_BAR_FILL).setOrigin(0, 1);
+    this.shieldBarFill = scene.add
+      .rectangle(0, 0, 1, HP_BAR_HEIGHT - 2, SHIELD_BAR_FILL)
+      .setOrigin(0, 1);
 
-    this.add([this.sprite, this.hpBarBg, this.hpBarFill]);
+    this.add([this.sprite, this.hpBarBg, this.hpBarFill, this.shieldBarFill]);
     scene.add.existing(this);
     this.deactivate();
   }
@@ -132,9 +143,13 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.laneIndex = laneIndex;
     this.hpMax = def.hp * hpMultiplier;
     this.hp = this.hpMax;
+    this.shieldMax = def.behaviors.includes('shielded') ? (def.shieldHp ?? 0) * hpMultiplier : 0;
+    this.shield = this.shieldMax;
     this.attackTimer = 0;
     this.inRange = false;
     this.flashRemaining = 0;
+    this.spawnsRemaining = def.spawns?.count ?? 0;
+    this.spawnTimer = def.spawns?.interval ?? 0;
 
     // Textures are baked at the def's scale, so the sprite is never scaled here.
     this.sprite.setTexture(def.spriteKey);
@@ -145,6 +160,11 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.hpBarBg.setPosition(0, -this.sprite.height - HP_BAR_GAP);
     this.hpBarFill.setSize(this.sprite.width - 2, HP_BAR_HEIGHT - 2);
     this.hpBarFill.setPosition(-this.sprite.width * 0.5 + 1, -this.sprite.height - HP_BAR_GAP - 1);
+    this.shieldBarFill.setSize(this.sprite.width - 2, HP_BAR_HEIGHT - 2);
+    this.shieldBarFill.setPosition(
+      -this.sprite.width * 0.5 + 1,
+      -this.sprite.height - HP_BAR_GAP - 1,
+    );
     this.setHpBarVisible(false);
 
     this.setPosition(x, y);
@@ -159,6 +179,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     if (!this.active || def === null) return;
 
     this.updateFlash(deltaSeconds);
+    this.updateSpawner(deltaSeconds, ctx);
     this.updateBehavior(deltaSeconds, ctx);
 
     const stopX = this.stopDistanceX(def, ctx);
@@ -174,6 +195,22 @@ export class Enemy extends Phaser.GameObjects.Container {
       this.attackTimer -= def.attackInterval;
       ctx.onAttack(this);
     }
+  }
+
+  /**
+   * The `spawner` behaviour: emits its `spawns` block on an interval while it
+   * lives. The WaveSpawner owns the pool, so this only asks.
+   */
+  private updateSpawner(deltaSeconds: number, ctx: EnemyUpdateContext): void {
+    const spawns = this.def?.spawns;
+    if (spawns === undefined || this.spawnsRemaining <= 0) return;
+
+    this.spawnTimer -= deltaSeconds;
+    if (this.spawnTimer > 0) return;
+
+    this.spawnTimer = spawns.interval;
+    this.spawnsRemaining -= 1;
+    ctx.onSpawnRequest(this, spawns.enemyId);
   }
 
   /** Hook for Boss phase logic. Runs before movement each frame. */
@@ -198,6 +235,40 @@ export class Enemy extends Phaser.GameObjects.Container {
     return ctx.mechaX + ctx.meleeStandoff + this.sprite.width * 0.5;
   }
 
+  get hasShield(): boolean {
+    return this.shield > 0;
+  }
+
+  get shieldFraction(): number {
+    return this.shieldMax <= 0 ? 0 : this.shield / this.shieldMax;
+  }
+
+  /**
+   * Feeds a shield pool first. DamageSystem decides how much of the hit the
+   * shield actually takes, since only piercing gets through at full value.
+   * Returns the damage the shield did not absorb.
+   */
+  absorbWithShield(amount: number): number {
+    if (this.shield <= 0) return amount;
+    const absorbed = Math.min(this.shield, amount);
+    this.shield -= absorbed;
+    this.flash();
+    this.refreshBars();
+    return amount - absorbed;
+  }
+
+  /** Boss hook: drop the shield entirely, opening a vulnerable window. */
+  protected collapseShield(): void {
+    this.shield = 0;
+    this.refreshBars();
+  }
+
+  /** Boss hook: bring the shield back up to full. */
+  protected restoreShield(): void {
+    this.shield = this.shieldMax;
+    this.refreshBars();
+  }
+
   /** Raw damage, already multiplied by DamageSystem. Returns true if it died. */
   applyDamage(amount: number): boolean {
     if (!this.isAlive) return false;
@@ -208,10 +279,17 @@ export class Enemy extends Phaser.GameObjects.Container {
       this.hp = 0;
       return true;
     }
-    // The bar only appears once an enemy has actually been hurt.
-    this.setHpBarVisible(true);
-    this.hpBarFill.width = Math.max(0, (this.sprite.width - 2) * this.healthFraction);
+    this.refreshBars();
     return false;
+  }
+
+  /** The bars only appear once an enemy has actually been hurt. */
+  private refreshBars(): void {
+    this.setHpBarVisible(true);
+    const inner = this.sprite.width - 2;
+    this.hpBarFill.width = Math.max(0, inner * this.healthFraction);
+    this.shieldBarFill.width = Math.max(0, inner * this.shieldFraction);
+    this.shieldBarFill.setVisible(this.shield > 0);
   }
 
   /** White hot tint on hit, cleared by the timer in update. */
@@ -232,6 +310,9 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.def = null;
     this.hp = 0;
     this.hpMax = 0;
+    this.shield = 0;
+    this.shieldMax = 0;
+    this.spawnsRemaining = 0;
     this.inRange = false;
     this.flashRemaining = 0;
     this.sprite.clearTint();
@@ -243,5 +324,6 @@ export class Enemy extends Phaser.GameObjects.Container {
   private setHpBarVisible(visible: boolean): void {
     this.hpBarBg.setVisible(visible);
     this.hpBarFill.setVisible(visible);
+    this.shieldBarFill.setVisible(visible && this.shield > 0);
   }
 }
