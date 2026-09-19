@@ -1,0 +1,359 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "tuning.schema.json",
+  "title": "Tuning",
+  "description": "Global tuning constants that are not per entity. Hard rule 4: gameplay code reads its numbers from here.",
+  "type": "object",
+  "required": [
+    "damageMatrix",
+    "mecha",
+    "world",
+    "inBattleUpgrades",
+    "vfx",
+    "pools",
+    "targeting"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "armorMultipliers": {
+      "type": "object",
+      "required": [
+        "light",
+        "armored",
+        "shielded",
+        "swarm"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "light": {
+          "type": "number",
+          "minimum": 0
+        },
+        "armored": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shielded": {
+          "type": "number",
+          "minimum": 0
+        },
+        "swarm": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "upgradeTrack": {
+      "type": "object",
+      "required": [
+        "baseCost",
+        "costGrowth"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "baseCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "costGrowth": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "bonusPerLevel": {
+          "type": "number",
+          "minimum": 0
+        },
+        "healFraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  },
+  "properties": {
+    "damageMatrix": {
+      "type": "object",
+      "description": "damage type to armor class multipliers, applied only inside DamageSystem",
+      "required": [
+        "kinetic",
+        "chemical",
+        "piercing",
+        "explosive"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kinetic": {
+          "$ref": "#/definitions/armorMultipliers"
+        },
+        "chemical": {
+          "$ref": "#/definitions/armorMultipliers"
+        },
+        "piercing": {
+          "$ref": "#/definitions/armorMultipliers"
+        },
+        "explosive": {
+          "$ref": "#/definitions/armorMultipliers"
+        }
+      }
+    },
+    "mecha": {
+      "type": "object",
+      "required": [
+        "baseHullHp",
+        "lanesY",
+        "turretMountCount"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "baseHullHp": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "lanesY": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "description": "lane centres as a fraction of screen height"
+        },
+        "turretMountCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bobAmplitude": {
+          "type": "number",
+          "minimum": 0,
+          "description": "idle torso bob, px"
+        },
+        "bobPeriod": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "seconds per bob cycle"
+        },
+        "swayAmplitude": {
+          "type": "number",
+          "minimum": 0,
+          "description": "idle torso sway, degrees"
+        },
+        "swayPeriod": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "seconds per sway cycle"
+        }
+      }
+    },
+    "world": {
+      "type": "object",
+      "required": [
+        "baseWidth",
+        "baseHeight",
+        "mechaXFraction",
+        "spawnXFraction",
+        "despawnXFraction",
+        "meleeStandoff",
+        "projectileRadius",
+        "projectileLifetime",
+        "parallax",
+        "maxFrameSeconds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "baseWidth": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "baseHeight": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "mechaXFraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "spawnXFraction": {
+          "type": "number",
+          "description": "enemy spawn x as a fraction of width, above 1 is off screen right"
+        },
+        "despawnXFraction": {
+          "type": "number",
+          "description": "x fraction past which a projectile is recycled"
+        },
+        "meleeStandoff": {
+          "type": "number",
+          "minimum": 0,
+          "description": "px from the mecha centre where melee enemies stop and attack"
+        },
+        "projectileRadius": {
+          "type": "number",
+          "minimum": 0,
+          "description": "collision radius of a shell, added to the target radius"
+        },
+        "projectileLifetime": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "seconds before an unspent shell is recycled"
+        },
+        "parallax": {
+          "type": "object",
+          "required": [
+            "sky",
+            "ruins",
+            "ground"
+          ],
+          "additionalProperties": false,
+          "description": "scroll speed factors applied to the level scrollSpeed",
+          "properties": {
+            "sky": {
+              "type": "number",
+              "minimum": 0
+            },
+            "ruins": {
+              "type": "number",
+              "minimum": 0
+            },
+            "ground": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "maxFrameSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "largest delta a single frame may apply, so a backgrounded tab does not teleport the wave"
+        }
+      }
+    },
+    "inBattleUpgrades": {
+      "type": "object",
+      "required": [
+        "damage",
+        "fireRate",
+        "repair"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "damage": {
+          "$ref": "#/definitions/upgradeTrack"
+        },
+        "fireRate": {
+          "$ref": "#/definitions/upgradeTrack"
+        },
+        "repair": {
+          "$ref": "#/definitions/upgradeTrack"
+        }
+      }
+    },
+    "vfx": {
+      "type": "object",
+      "required": [
+        "maxParticlesDesktop",
+        "maxParticlesMobile",
+        "shakeMaxIntensity",
+        "damageNumberPoolSize"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "maxParticlesDesktop": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxParticlesMobile": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shakeMaxIntensity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "damageNumberPoolSize": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scrapPickupRiseSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "scrapPickupLifetime": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "pools": {
+      "type": "object",
+      "required": [
+        "projectiles",
+        "enemies"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "projectiles": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "enemies": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scrapPickups": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "targeting": {
+      "type": "object",
+      "required": [
+        "priorityOrder",
+        "manualShotDamageMultiplier",
+        "autoFireResumeDelay"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "priorityOrder": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "focus",
+              "ranged_in_range",
+              "closest"
+            ]
+          }
+        },
+        "manualShotDamageMultiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "autoFireResumeDelay": {
+          "type": "number",
+          "minimum": 0,
+          "description": "seconds of auto fire pause after a manual shot"
+        },
+        "manualDragThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "description": "px of pointer travel that turns a tap into a manual aim drag"
+        },
+        "touchDragOriginMinYFraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "touch drags must start below this fraction of screen height so fingers do not cover the action"
+        },
+        "touchAimOffsetY": {
+          "type": "number",
+          "minimum": 0,
+          "description": "px the touch aim point sits above the finger so it never covers the target"
+        }
+      }
+    }
+  }
+}

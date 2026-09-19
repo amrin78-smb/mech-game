@@ -3,26 +3,26 @@
     "kinetic": {
       "light": 1.5,
       "armored": 0.5,
-      "shielded": 1.0,
-      "swarm": 1.0
+      "shielded": 1,
+      "swarm": 1
     },
     "chemical": {
-      "light": 1.0,
+      "light": 1,
       "armored": 1.75,
       "shielded": 0.5,
       "swarm": 0.75
     },
     "piercing": {
       "light": 0.75,
-      "armored": 1.0,
-      "shielded": 2.0,
+      "armored": 1,
+      "shielded": 2,
       "swarm": 0.5
     },
     "explosive": {
-      "light": 1.0,
+      "light": 1,
       "armored": 0.5,
       "shielded": 0.75,
-      "swarm": 2.0
+      "swarm": 2
     }
   },
   "mecha": {
@@ -32,7 +32,27 @@
       0.68,
       0.82
     ],
-    "turretMountCount": 3
+    "turretMountCount": 3,
+    "bobAmplitude": 5,
+    "bobPeriod": 1.9,
+    "swayAmplitude": 1.6,
+    "swayPeriod": 4.3
+  },
+  "world": {
+    "baseWidth": 1280,
+    "baseHeight": 720,
+    "mechaXFraction": 0.2,
+    "spawnXFraction": 1.08,
+    "despawnXFraction": -0.12,
+    "meleeStandoff": 92,
+    "projectileRadius": 7,
+    "projectileLifetime": 3,
+    "parallax": {
+      "sky": 0.12,
+      "ruins": 0.42,
+      "ground": 1
+    },
+    "maxFrameSeconds": 0.05
   },
   "inBattleUpgrades": {
     "damage": {
@@ -55,11 +75,14 @@
     "maxParticlesDesktop": 600,
     "maxParticlesMobile": 250,
     "shakeMaxIntensity": 0.012,
-    "damageNumberPoolSize": 60
+    "damageNumberPoolSize": 60,
+    "scrapPickupRiseSpeed": 46,
+    "scrapPickupLifetime": 0.75
   },
   "pools": {
     "projectiles": 128,
-    "enemies": 96
+    "enemies": 96,
+    "scrapPickups": 48
   },
   "targeting": {
     "priorityOrder": [
@@ -68,6 +91,9 @@
       "closest"
     ],
     "manualShotDamageMultiplier": 1.5,
-    "autoFireResumeDelay": 0.8
+    "autoFireResumeDelay": 0.8,
+    "manualDragThreshold": 22,
+    "touchDragOriginMinYFraction": 0.5,
+    "touchAimOffsetY": 90
   }
 }
