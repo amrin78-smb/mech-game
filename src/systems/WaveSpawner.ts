@@ -125,6 +125,15 @@ export class WaveSpawner {
     return Phaser.Math.Clamp(this.elapsed / this.lastSpawnTime, 0, 1);
   }
 
+  /** How many timeline entries have started spawning; endless scores this. */
+  get wavesSpawned(): number {
+    let count = 0;
+    for (const wave of this.waves) {
+      if (wave.spawned > 0) count += 1;
+    }
+    return count;
+  }
+
   get elapsedSeconds(): number {
     return this.elapsed;
   }

@@ -9,7 +9,7 @@ import { levels, pilots, tuning } from '../data/core';
  * falls back to a fresh one rather than crashing the game.
  */
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 const STORAGE_KEY = 'scrap-titan.save';
 
 /** Player settings, added in save version 2. */
@@ -54,6 +54,8 @@ export interface SaveData {
   pilots: Record<string, number>;
   equippedPilot: string | null;
   settings: SaveSettings;
+  /** Furthest wave reached in endless mode. */
+  bestEndlessWave: number;
 }
 
 /** A migration takes the previous shape and returns the next one. */
@@ -65,6 +67,7 @@ type Migration = (save: SaveData) => SaveData;
  */
 const MIGRATIONS: Record<number, Migration> = {
   1: (save) => ({ ...save, version: 2, settings: defaultSettings() }),
+  2: (save) => ({ ...save, version: 3, bestEndlessWave: 0 }),
 };
 
 export function createFreshSave(): SaveData {
@@ -84,6 +87,7 @@ export function createFreshSave(): SaveData {
     pilots: {},
     equippedPilot: null,
     settings: defaultSettings(),
+    bestEndlessWave: 0,
   };
 }
 
@@ -273,6 +277,32 @@ export class SaveManager {
 
   get equippedPilot(): string | null {
     return this.data.equippedPilot;
+  }
+
+  // Endless -----------------------------------------------------------------
+
+  get bestEndlessWave(): number {
+    return this.data.bestEndlessWave;
+  }
+
+  /**
+   * Records an endless run and pays cores only for waves beyond the previous
+   * best, so replaying an easy stretch cannot be farmed.
+   */
+  recordEndless(wavesSurvived: number): number {
+    const gained = Math.max(0, wavesSurvived - this.data.bestEndlessWave);
+    if (gained <= 0) return 0;
+
+    const awarded = gained * tuning.endless.coresPerNewWave;
+    this.data.bestEndlessWave = wavesSurvived;
+    this.data.cores += awarded;
+    this.persist();
+    return awarded;
+  }
+
+  /** Endless opens once the campaign has shown you a boss. */
+  get endlessUnlocked(): boolean {
+    return this.progressFor(tuning.endless.unlockAfterLevel).cleared;
   }
 
   // Settings ---------------------------------------------------------------

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import { levels } from '../data';
+import { ENDLESS_LEVEL_ID } from '../systems/EndlessTimeline';
 import { SaveManager } from '../systems/SaveManager';
 import type { LevelDef } from '../types';
 import { Depths } from '../ui/Depths';
@@ -72,6 +73,24 @@ export class LevelSelectScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.drawZones(width, height);
+
+    if (this.saves.endlessUnlocked) {
+      const best = this.saves.bestEndlessWave;
+      createTextButton(
+        this,
+        width * 0.5,
+        height - 42,
+        best > 0 ? `ENDLESS  best wave ${best}` : 'ENDLESS',
+        () => this.scene.start(SceneKeys.Battle, { levelId: ENDLESS_LEVEL_ID }),
+      );
+      createTextButton(this, width * 0.18, height - 42, 'HANGAR', () => {
+        this.scene.start(SceneKeys.Hangar);
+      });
+      createTextButton(this, width * 0.82, height - 42, 'MENU', () => {
+        this.scene.start(SceneKeys.MainMenu);
+      });
+      return;
+    }
 
     createTextButton(this, width * 0.34, height - 42, 'HANGAR', () => {
       this.scene.start(SceneKeys.Hangar);

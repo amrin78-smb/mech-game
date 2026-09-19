@@ -78,4 +78,6 @@ Dieselpunk palette: rust, brass, ash sky, oil smoke. Three layer parallax per zo
 
 ## 12. Out of scope at launch
 
-Ads, IAP, idle offline earnings, endless mode, multiplayer, cloud saves. Endless mode is the first post launch candidate since it reuses the spawner with a generated timeline.
+Ads, IAP, idle offline earnings, multiplayer, cloud saves.
+
+Endless mode was the first post launch candidate and is now built, exactly as predicted here: it reuses the spawner with a generated timeline (`src/systems/EndlessTimeline.ts`), unlocks after the level in `tuning.endless.unlockAfterLevel`, and pays cores only for waves beyond your previous best so it cannot be farmed.

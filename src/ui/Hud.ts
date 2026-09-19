@@ -30,11 +30,13 @@ export class Hud {
   private readonly scrapText: Phaser.GameObjects.Text;
   private readonly waveBarFill: Phaser.GameObjects.Rectangle;
   private readonly hintText: Phaser.GameObjects.Text;
+  private readonly waveText: Phaser.GameObjects.Text;
   private readonly hullBarWidthMax: number;
   private readonly waveBarWidthMax: number;
 
   private lastHullShown = -1;
   private lastScrapShown = -1;
+  private lastWaveShown = -1;
 
   constructor(scene: Phaser.Scene, width: number, onPause?: () => void) {
     const barTop = MARGIN + WAVE_BAR_HEIGHT + 10;
@@ -80,6 +82,18 @@ export class Hud {
       .setOrigin(1, 0)
       .setScrollFactor(0)
       .setDepth(Depths.HUD);
+
+    // Endless has no finish line, so the bar gives way to a wave counter.
+    this.waveText = scene.add
+      .text(width * 0.5, barTop, '', {
+        fontFamily: 'monospace',
+        fontSize: '22px',
+        color: TEXT_COLOR,
+      })
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0)
+      .setDepth(Depths.HUD)
+      .setVisible(false);
 
     this.hintText = scene.add
       .text(width - MARGIN, barTop + 30, 'Drag to aim, release to fire. Tap an enemy to focus.', {
@@ -132,6 +146,18 @@ export class Hud {
     }
 
     this.waveBarFill.width = this.waveBarWidthMax * Phaser.Math.Clamp(waveProgress, 0, 1);
+  }
+
+  /** Swaps the progress bar for a counter, for modes that never finish. */
+  showWaveCounter(): void {
+    this.waveText.setVisible(true);
+    this.waveBarFill.setVisible(false);
+  }
+
+  setWave(wave: number): void {
+    if (wave === this.lastWaveShown) return;
+    this.lastWaveShown = wave;
+    this.waveText.setText(`WAVE ${wave}`);
   }
 
   hideHint(): void {

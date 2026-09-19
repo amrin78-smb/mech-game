@@ -16,7 +16,8 @@
     "audio",
     "combat",
     "meta",
-    "tutorial"
+    "tutorial",
+    "endless"
   ],
   "additionalProperties": false,
   "definitions": {
@@ -694,6 +695,93 @@
                 "type": "string"
               }
             }
+          }
+        }
+      }
+    },
+    "endless": {
+      "type": "object",
+      "description": "Endless mode, GAME_DESIGN section 12: a generated timeline fed to the same WaveSpawner.",
+      "required": [
+        "firstWaveAt",
+        "waveInterval",
+        "waveCount",
+        "hpGrowth",
+        "countGrowth",
+        "tiers",
+        "elites"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "firstWaveAt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "waveInterval": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "waveCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "long enough that nobody reaches the end"
+        },
+        "hpGrowth": {
+          "type": "number",
+          "minimum": 0,
+          "description": "added hp multiplier per wave"
+        },
+        "countGrowth": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maxCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "eliteEvery": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "a boss statted enemy arrives this often"
+        },
+        "coresPerNewWave": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "cores per wave beyond your previous best"
+        },
+        "unlockAfterLevel": {
+          "type": "string"
+        },
+        "tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "fromWave",
+              "enemies"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "fromWave": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "enemies": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "elites": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
           }
         }
       }

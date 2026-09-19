@@ -226,6 +226,21 @@ export interface Tuning {
       text: string;
     }>;
   };
+  /** Endless mode; a generated timeline fed to the same WaveSpawner. */
+  endless: {
+    firstWaveAt: number;
+    waveInterval: number;
+    /** Long enough that nobody reaches the end. */
+    waveCount: number;
+    hpGrowth: number;
+    countGrowth: number;
+    maxCount: number;
+    eliteEvery: number;
+    coresPerNewWave: number;
+    unlockAfterLevel: string;
+    tiers: Array<{ fromWave: number; enemies: string[] }>;
+    elites: string[];
+  };
   /** Hangar economy. Weapon and pilot stat tracks stay in their own files. */
   meta: {
     startingWeapons: string[];
@@ -303,4 +318,8 @@ export interface BattleResult {
   stars: number;
   /** Cores paid out for this run, after the save recorded it. */
   coresAwarded: number;
+  /** Endless only: waves survived. */
+  endlessWaves?: number;
+  /** Endless only: whether this run beat the previous best wave. */
+  endlessRecord?: boolean;
 }

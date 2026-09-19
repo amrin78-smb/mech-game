@@ -14,6 +14,7 @@ import { TargetingSystem } from '../systems/TargetingSystem';
 import { TurretSystem } from '../systems/TurretSystem';
 import { PilotSystem } from '../systems/PilotSystem';
 import { SaveManager, type SaveSettings } from '../systems/SaveManager';
+import { ENDLESS_LEVEL_ID, buildEndlessLevel } from '../systems/EndlessTimeline';
 import { evaluateStars } from '../systems/StarRating';
 import { VfxManager } from '../systems/VfxManager';
 import { WaveSpawner } from '../systems/WaveSpawner';
@@ -96,7 +97,9 @@ export class BattleScene extends Phaser.Scene {
   }
 
   init(data: BattleSceneData): void {
-    this.level = getLevelDef(data?.levelId ?? levels[0].id);
+    const requested = data?.levelId ?? levels[0].id;
+    this.level =
+      requested === ENDLESS_LEVEL_ID ? buildEndlessLevel() : getLevelDef(requested);
     this.saves = new SaveManager();
     this.enemiesKilled = 0;
     this.repairsUsed = 0;
@@ -204,6 +207,7 @@ export class BattleScene extends Phaser.Scene {
     );
 
     this.hud = new Hud(this, baseWidth, () => this.pauseBattle());
+    if (this.level.id === ENDLESS_LEVEL_ID) this.hud.showWaveCounter();
     this.aimLine = new AimLine(this);
     this.focusMarker = new FocusMarker(this);
     this.scrapDrops = new ScrapDrops(this);
@@ -345,6 +349,7 @@ export class BattleScene extends Phaser.Scene {
       this.economy.balance,
       this.spawner.progress,
     );
+    if (this.level.id === ENDLESS_LEVEL_ID) this.hud.setWave(this.spawner.wavesSpawned);
   }
 
   private onEnemyHit(enemy: Enemy, result: DamageResult): void {
@@ -489,6 +494,31 @@ export class BattleScene extends Phaser.Scene {
     this.audio.stopDrone();
 
     const hullFraction = this.mecha.hullFraction;
+    const endless = this.level.id === ENDLESS_LEVEL_ID;
+
+    if (endless) {
+      const waves = this.spawner.wavesSpawned;
+      // Read the best before recording, so the results screen can say so.
+      const record = waves > this.saves.bestEndlessWave;
+      const result: BattleResult = {
+        levelId: ENDLESS_LEVEL_ID,
+        levelName: 'Endless',
+        won,
+        scrapEarned: this.economy.totalEarned,
+        enemiesKilled: this.enemiesKilled,
+        hullRemaining: this.mecha.hullHp,
+        hullMax: this.mecha.hullMax,
+        durationSeconds: this.elapsedSeconds,
+        repairsUsed: this.repairsUsed,
+        stars: 0,
+        coresAwarded: this.saves.recordEndless(waves),
+        endlessWaves: waves,
+        endlessRecord: record,
+      };
+      this.scene.start(SceneKeys.Results, result);
+      return;
+    }
+
     const stars = evaluateStars(this.level, won, hullFraction, this.repairsUsed);
     const coresAwarded = this.saves.recordResult(
       this.level.id,

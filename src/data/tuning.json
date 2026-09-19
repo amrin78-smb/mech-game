@@ -220,5 +220,67 @@
         "text": "Anything that reaches the mecha chews on the hull."
       }
     ]
+  },
+  "endless": {
+    "firstWaveAt": 4,
+    "waveInterval": 7,
+    "waveCount": 150,
+    "hpGrowth": 0.055,
+    "countGrowth": 0.06,
+    "maxCount": 18,
+    "eliteEvery": 10,
+    "coresPerNewWave": 2,
+    "unlockAfterLevel": "level-05",
+    "tiers": [
+      {
+        "fromWave": 1,
+        "enemies": [
+          "rustcrawler",
+          "scavenger_bike"
+        ]
+      },
+      {
+        "fromWave": 5,
+        "enemies": [
+          "rustcrawler",
+          "scavenger_bike",
+          "plated_hulk"
+        ]
+      },
+      {
+        "fromWave": 11,
+        "enemies": [
+          "scavenger_bike",
+          "plated_hulk",
+          "gunner_walker",
+          "drone_swarm"
+        ]
+      },
+      {
+        "fromWave": 19,
+        "enemies": [
+          "plated_hulk",
+          "gunner_walker",
+          "drone_swarm",
+          "shield_bearer",
+          "burrower"
+        ]
+      },
+      {
+        "fromWave": 29,
+        "enemies": [
+          "shield_bearer",
+          "incinerator_tank",
+          "burrower",
+          "elite_vanguard",
+          "drone_swarm"
+        ]
+      }
+    ],
+    "elites": [
+      "boss_compactor",
+      "boss_iron_matriarch",
+      "boss_leviathan_engine"
+    ]
   }
 }
