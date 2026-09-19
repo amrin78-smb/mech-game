@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Scrap Titan</string>
+    <string name="title_activity_main">Scrap Titan</string>
+    <string name="package_name">com.scraptitan.game</string>
+    <string name="custom_url_scheme">com.scraptitan.game</string>
+</resources>
