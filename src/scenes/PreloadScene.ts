@@ -36,6 +36,9 @@ import acidSpitterUrl from '../../assets/sprites/weapon_acid_spitter.png';
 import railgunUrl from '../../assets/sprites/weapon_railgun.png';
 import scrapHoundUrl from '../../assets/sprites/escort_scrap_hound.png';
 import bulwarkUrl from '../../assets/sprites/escort_bulwark.png';
+import portraitVexUrl from '../../assets/sprites/portrait_vex.png';
+import portraitMaraUrl from '../../assets/sprites/portrait_mara.png';
+import titleEmblemUrl from '../../assets/sprites/title_emblem.png';
 import bgAshSkyUrl from '../../assets/sprites/bg_ash_canyons_sky.png';
 import bgAshRuinsUrl from '../../assets/sprites/bg_ash_canyons_ruins.png';
 import bgAshGroundUrl from '../../assets/sprites/bg_ash_canyons_ground.png';
@@ -85,6 +88,9 @@ const ZONE_ONE_SPRITES: ReadonlyArray<readonly [string, string]> = [
   ['weapon_railgun', railgunUrl],
   ['escort_scrap_hound', scrapHoundUrl],
   ['escort_bulwark', bulwarkUrl],
+  ['portrait_vex', portraitVexUrl],
+  ['portrait_mara', portraitMaraUrl],
+  ['title_emblem', titleEmblemUrl],
 ];
 
 /** All three zones' parallax now comes from the AI set. */

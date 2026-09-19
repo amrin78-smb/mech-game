@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { portraitFor } from '../AssetKeys';
+import { bindArt } from '../ArtBinding';
 import { pilots, tuning, weapons } from '../data';
 import { SaveManager } from '../systems/SaveManager';
 import type { PilotDef, WeaponDef } from '../types';
@@ -258,6 +260,20 @@ export class HangarScene extends Phaser.Scene {
     ];
 
     this.card(x, y, lines, this.pilotAction(pilot, hired, level, equipped), equipped);
+
+    // Portrait sits on the right of the card, dimmed until hired.
+    const art = portraitFor(pilot.id);
+    if (art !== null) {
+      const portrait = bindArt(this, this.add.image(0, 0, art), art);
+      // Sized to clear the card text rather than fill the card.
+      const fit = (CARD_HEIGHT - 44) / portrait.displayHeight;
+      portrait
+        .setPosition(x + CARD_WIDTH - 10, y + CARD_HEIGHT - 6)
+        .setOrigin(1, 1)
+        .setScale(portrait.scale * fit)
+        .setAlpha(hired ? 0.95 : 0.3)
+        .setDepth(Depths.HUD + 1);
+    }
   }
 
   private pilotAction(

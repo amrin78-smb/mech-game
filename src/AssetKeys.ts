@@ -21,6 +21,10 @@ export const AssetKeys = {
   PROJECTILE_FLAK: 'projectile_flak',
   SCRAP_PICKUP: 'scrap_pickup',
 
+  PORTRAIT_VEX: 'portrait_vex',
+  PORTRAIT_MARA: 'portrait_mara',
+  TITLE_EMBLEM: 'title_emblem',
+
   MUZZLE_FLASH: 'muzzle_flash',
   SPARK: 'spark',
   SMOKE_PUFF: 'smoke_puff',
@@ -52,6 +56,16 @@ const CANNON_ART: Record<string, string> = {
   acid_spitter: 'weapon_acid_spitter',
   railgun: 'weapon_railgun',
 };
+
+/** Portrait frame for a pilot id, or null when that pilot has no art yet. */
+const PILOT_ART: Record<string, string> = {
+  vex: 'portrait_vex',
+  mara: 'portrait_mara',
+};
+
+export function portraitFor(pilotId: string): string | null {
+  return PILOT_ART[pilotId] ?? null;
+}
 
 export function cannonArtFor(weaponId: string): string {
   return CANNON_ART[weaponId] ?? 'mecha_cannon';

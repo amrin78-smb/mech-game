@@ -141,6 +141,15 @@ const ASSETS: Asset[] = [
     prompt: "A small friendly ALLIED WALKER escort robot, facing RIGHT. Two legged scrappy light mech about knee height to a titan, welded plate armour, a short autocannon on its back, a bright cyan running light on its head. Clearly allied and scrappy rather than menacing." },
   { key: "escort_bulwark", size: "1024x1024", transparent: true,
     prompt: "A friendly ALLIED SHIELD VEHICLE escort, facing RIGHT. Squat heavy tracked vehicle with a large angled blast shield raised on its RIGHT front, thick riveted armour, a bright cyan running light. Clearly allied and defensive, built to absorb hits." },
+
+  // UI art. Portraits and an emblem only: image models are unreliable at small
+  // icons and at text, so frames and icons stay procedural in tools/art.
+  { key: "portrait_vex", size: "1024x1024", transparent: true,
+    prompt: "Character PORTRAIT bust of VEX, an aggressive young female mech pilot, head and shoulders, facing slightly left. Grease streaked face, cropped dark hair, a cracked orange visor pushed up on her forehead, worn leather flight jacket with hazard stripe trim, confident smirk. Warm rim light from below like a cockpit glow. Same hand painted cel shaded dieselpunk style as the vehicles." },
+  { key: "portrait_mara", size: "1024x1024", transparent: true,
+    prompt: "Character PORTRAIT bust of MARA, a calm veteran female mech pilot, head and shoulders, facing slightly right. Older, scarred cheek, grey streaked hair tied back, heavy armored shoulder plates, a cyan holographic monocle over one eye, steady unimpressed expression. Cool cyan rim light. Same hand painted cel shaded dieselpunk style as the vehicles." },
+  { key: "title_emblem", size: "1024x1024", transparent: true,
+    prompt: "A heraldic GAME LOGO EMBLEM, no text and no letters at all: the front silhouette of a colossal dieselpunk mecha head with a single glowing amber eye slit, framed by a riveted brass gear ring and two crossed cannon barrels behind it. Bold, symmetrical, readable as a badge at small size. Rust and brass palette." },
 ];
 
 type Provider = "gemini" | "openai";

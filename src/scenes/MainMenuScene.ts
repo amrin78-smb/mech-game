@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { AssetKeys } from '../AssetKeys';
+import { bindArt } from '../ArtBinding';
 import { SaveManager } from '../systems/SaveManager';
 import { createTextButton } from '../ui/TextButton';
 import { SceneKeys } from './SceneKeys';
@@ -19,8 +21,14 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(0x1a1512);
 
+    bindArt(
+      this,
+      this.add.image(width * 0.5, height * 0.2, AssetKeys.TITLE_EMBLEM).setOrigin(0.5),
+      AssetKeys.TITLE_EMBLEM,
+    );
+
     this.add
-      .text(width * 0.5, height * 0.26, 'SCRAP TITAN', {
+      .text(width * 0.5, height * 0.38, 'SCRAP TITAN', {
         fontFamily: 'monospace',
         fontSize: '72px',
         color: '#c9a227',
@@ -28,25 +36,25 @@ export class MainMenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(width * 0.5, height * 0.37, 'Hold the line. The guns fight, you command.', {
+      .text(width * 0.5, height * 0.46, 'Hold the line. The guns fight, you command.', {
         fontFamily: 'monospace',
         fontSize: '18px',
         color: '#9a8f7c',
       })
       .setOrigin(0.5);
 
-    createTextButton(this, width * 0.5, height * 0.52, 'DEPLOY', () => {
+    createTextButton(this, width * 0.5, height * 0.58, 'DEPLOY', () => {
       this.scene.start(SceneKeys.LevelSelect);
     });
 
-    createTextButton(this, width * 0.5, height * 0.63, 'HANGAR', () => {
+    createTextButton(this, width * 0.5, height * 0.69, 'HANGAR', () => {
       this.scene.start(SceneKeys.Hangar);
     });
 
     this.add
       .text(
         width * 0.5,
-        height * 0.74,
+        height * 0.79,
         `Cores ${saves.cores}   Stars ${saves.totalStars}`,
         { fontFamily: 'monospace', fontSize: '16px', color: '#e8dcc6' },
       )
