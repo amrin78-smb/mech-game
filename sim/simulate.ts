@@ -10,6 +10,10 @@
  * shells with real travel time (so a shot at a dying target is wasted), the
  * armor matrix, shields, and the economy. Presentation is ignored.
  *
+ * Known gaps, which make it conservative rather than optimistic for the
+ * weapons concerned: piercing is not modelled, so the Railgun scores as if it
+ * hit one target per shot, and lobbed arcs fly straight.
+ *
  * Usage:
  *   npm run sim
  *   npm run sim -- --weapon=railgun --cards=2 --mounts=2 --hull=3

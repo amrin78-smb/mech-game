@@ -8,6 +8,9 @@ import type { WeaponDef } from '../types';
 import type { ProjectileSystem } from './ProjectileSystem';
 import type { TargetingSystem } from './TargetingSystem';
 
+/** How far a hitscan beam carries. The engagement line is the screen edge. */
+const HITSCAN_RANGE = tuning.world.baseWidth * 1.2;
+
 /**
  * The main cannon, exactly as hard rule 9 describes it.
  *
@@ -27,6 +30,8 @@ export interface WeaponSystemOptions {
   /** Weapon id from src/data/weapons.json. */
   readonly weaponId: string;
   readonly onShotFired: (x: number, y: number, rotation: number, isManual: boolean) => void;
+  /** Hitscan weapons draw a beam instead of a travelling shell. */
+  readonly onBeam?: (x: number, y: number, rotation: number, length: number) => void;
 }
 
 export class WeaponSystem {
@@ -40,6 +45,9 @@ export class WeaponSystem {
     rotation: number,
     isManual: boolean,
   ) => void;
+  private readonly onBeam:
+    | ((x: number, y: number, rotation: number, length: number) => void)
+    | undefined;
 
   /** Multipliers the in battle upgrade panel drives. */
   damageMultiplier = 1;
@@ -47,6 +55,8 @@ export class WeaponSystem {
 
   private cooldown = 0;
   private autoPauseRemaining = 0;
+  /** Hitscan needs the live list at fire time, including on a manual release. */
+  private lastEnemies: readonly Enemy[] = [];
 
   private manualAiming = false;
   private manualAimX = 0;
@@ -63,6 +73,7 @@ export class WeaponSystem {
     lifetimeSeconds: number;
     isManualShot: boolean;
     aoeRadius: number;
+    pierce: boolean;
   };
 
   constructor(options: WeaponSystemOptions) {
@@ -71,6 +82,7 @@ export class WeaponSystem {
     this.projectiles = options.projectiles;
     this.weapon = getWeaponDef(options.weaponId);
     this.onShotFired = options.onShotFired;
+    this.onBeam = options.onBeam;
 
     this.spec = {
       textureKey: shellTextureFor(this.weapon),
@@ -80,6 +92,7 @@ export class WeaponSystem {
       lifetimeSeconds: tuning.world.projectileLifetime,
       isManualShot: false,
       aoeRadius: this.weapon.projectile.aoeRadius ?? 0,
+      pierce: this.weapon.projectile.pierce === true,
     };
   }
 
@@ -136,7 +149,13 @@ export class WeaponSystem {
     this.autoPauseRemaining = tuning.targeting.autoFireResumeDelay;
   }
 
+  /** The Railgun is hitscan: no shell, a beam resolved the moment it fires. */
+  private get isHitscan(): boolean {
+    return this.weapon.projectile.kind === 'hitscan';
+  }
+
   update(deltaSeconds: number, enemies: readonly Enemy[]): void {
+    this.lastEnemies = enemies;
     if (this.autoPauseRemaining > 0) {
       this.autoPauseRemaining -= deltaSeconds;
     }
@@ -178,6 +197,21 @@ export class WeaponSystem {
 
     this.spec.damage = damage;
     this.spec.isManualShot = isManual;
+
+    if (this.isHitscan) {
+      const reach = this.projectiles.fireHitscan(
+        muzzle.x,
+        muzzle.y,
+        rotation,
+        this.spec,
+        this.lastEnemies,
+        HITSCAN_RANGE,
+      );
+      this.mecha.kickCannon();
+      this.onShotFired(muzzle.x, muzzle.y, rotation, isManual);
+      this.onBeam?.(muzzle.x, muzzle.y, rotation, reach);
+      return;
+    }
 
     if (!this.projectiles.fire(muzzle.x, muzzle.y, rotation, this.spec)) return;
 

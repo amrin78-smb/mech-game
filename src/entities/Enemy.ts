@@ -292,8 +292,15 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.shieldBarFill.setVisible(this.shield > 0);
   }
 
-  /** White hot tint on hit, cleared by the timer in update. */
+  /**
+   * White hot tint on hit, cleared by the timer in update.
+   *
+   * Re-flashing while one is already running is skipped: a boss under three
+   * turrets takes hits faster than the flash expires, and holding the fill on
+   * turns it into a solid silhouette-less blob.
+   */
   flash(): void {
+    if (this.flashRemaining > 0) return;
     this.flashRemaining = tuning.vfx.hitFlashDuration;
     this.sprite.setTintFill(tuning.vfx.hitFlashTint);
   }

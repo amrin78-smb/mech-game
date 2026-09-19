@@ -42,6 +42,8 @@ export class TurretSystem {
   fireRateMultiplier = 1;
 
   private readonly aimPoint = new Phaser.Math.Vector2();
+  /** Hitscan resolves at fire time, so the live list has to be to hand. */
+  private lastEnemies: readonly Enemy[] = [];
   private readonly spec: {
     textureKey: string;
     speed: number;
@@ -50,6 +52,7 @@ export class TurretSystem {
     lifetimeSeconds: number;
     isManualShot: boolean;
     aoeRadius: number;
+    pierce: boolean;
   };
 
   constructor(options: TurretSystemOptions) {
@@ -71,6 +74,7 @@ export class TurretSystem {
       lifetimeSeconds: tuning.world.projectileLifetime,
       isManualShot: false,
       aoeRadius: this.weapon.projectile.aoeRadius ?? 0,
+      pierce: this.weapon.projectile.pierce === true,
     };
   }
 
@@ -99,6 +103,7 @@ export class TurretSystem {
 
   update(deltaSeconds: number, enemies: readonly Enemy[]): void {
     if (this.mounts.length === 0) return;
+    this.lastEnemies = enemies;
 
     const interval = 1 / this.fireRate;
 
@@ -128,6 +133,23 @@ export class TurretSystem {
     const rotation = this.mecha.turretRotation(mount.index);
 
     this.spec.damage = this.shotDamage;
+
+    // A hitscan turret would otherwise fire a shell with zero speed that never
+    // moves, which is exactly how the Railgun was broken before.
+    if (this.weapon.projectile.kind === 'hitscan') {
+      this.projectiles.fireHitscan(
+        muzzle.x,
+        muzzle.y,
+        rotation,
+        this.spec,
+        this.lastEnemies,
+        tuning.world.baseWidth * 1.2,
+      );
+      this.mecha.kickTurret(mount.index);
+      this.onShotFired(muzzle.x, muzzle.y, rotation);
+      return;
+    }
+
     if (!this.projectiles.fire(muzzle.x, muzzle.y, rotation, this.spec)) return;
 
     this.mecha.kickTurret(mount.index);

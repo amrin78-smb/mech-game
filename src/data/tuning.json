@@ -94,7 +94,7 @@
     "damageNumberPoolSize": 60,
     "scrapPickupRiseSpeed": 46,
     "scrapPickupLifetime": 0.75,
-    "hitFlashDuration": 0.09,
+    "hitFlashDuration": 0.05,
     "hitFlashTint": 16768392,
     "damageNumberRise": 70,
     "damageNumberLifetime": 0.8,

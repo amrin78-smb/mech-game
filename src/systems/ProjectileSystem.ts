@@ -19,21 +19,17 @@ export interface ProjectileSystemOptions {
   readonly scene: Phaser.Scene;
   readonly damage: DamageSystem;
   readonly onEnemyKilled: (enemy: Enemy) => void;
-  readonly onEnemyHit: (enemy: Enemy, result: DamageResult, projectile: Projectile) => void;
-  readonly onImpact: (x: number, y: number, projectile: Projectile, hitSomething: boolean) => void;
+  readonly onEnemyHit: (enemy: Enemy, result: DamageResult) => void;
+  /** heavy drives the bigger impact burst: manual shots, blasts and beams. */
+  readonly onImpact: (x: number, y: number, heavy: boolean, hitSomething: boolean) => void;
 }
 
 export class ProjectileSystem {
   private readonly pool: Pool<Projectile>;
   private readonly damage: DamageSystem;
   private readonly onEnemyKilled: (enemy: Enemy) => void;
-  private readonly onEnemyHit: (enemy: Enemy, result: DamageResult, projectile: Projectile) => void;
-  private readonly onImpact: (
-    x: number,
-    y: number,
-    projectile: Projectile,
-    hitSomething: boolean,
-  ) => void;
+  private readonly onEnemyHit: (enemy: Enemy, result: DamageResult) => void;
+  private readonly onImpact: (x: number, y: number, heavy: boolean, hitSomething: boolean) => void;
 
   private readonly minX: number;
   private readonly maxX: number;
@@ -63,6 +59,71 @@ export class ProjectileSystem {
     return this.pool.activeCount;
   }
 
+  /**
+   * A hitscan weapon (the Railgun) resolves along its aim ray the instant it
+   * fires, rather than launching a shell. With `pierce` it keeps going through
+   * everything on the line, which is the whole reason to own one.
+   *
+   * Returns the distance to the furthest thing hit, so the beam can be drawn to
+   * where it actually stopped, or the full range when it hit nothing.
+   */
+  fireHitscan(
+    x: number,
+    y: number,
+    rotation: number,
+    spec: ProjectileSpec,
+    enemies: readonly Enemy[],
+    maxRange: number,
+  ): number {
+    const dirX = Math.cos(rotation);
+    const dirY = Math.sin(rotation);
+    const shellRadius = tuning.world.projectileRadius;
+
+    this.splashVictims.length = 0;
+
+    for (const enemy of enemies) {
+      if (!enemy.isAlive) continue;
+
+      // Project the enemy onto the ray; behind the muzzle does not count.
+      const toX = enemy.x - x;
+      const toY = enemy.centerY - y;
+      const along = toX * dirX + toY * dirY;
+      if (along < 0 || along > maxRange) continue;
+
+      // Perpendicular distance from the ray to the enemy centre.
+      const perpX = toX - dirX * along;
+      const perpY = toY - dirY * along;
+      const reach = enemy.radius + shellRadius;
+      if (perpX * perpX + perpY * perpY > reach * reach) continue;
+
+      this.splashVictims.push(enemy);
+    }
+
+    if (this.splashVictims.length === 0) {
+      return maxRange;
+    }
+
+    // Nearest first, so a non piercing shot stops at the right target.
+    this.splashVictims.sort((a, b) => {
+      const da = (a.x - x) * dirX + (a.centerY - y) * dirY;
+      const db = (b.x - x) * dirX + (b.centerY - y) * dirY;
+      return da - db;
+    });
+
+    const pierce = spec.pierce === true;
+    const victims = pierce ? this.splashVictims : this.splashVictims.slice(0, 1);
+    let furthest = 0;
+
+    for (const victim of victims) {
+      const along = (victim.x - x) * dirX + (victim.centerY - y) * dirY;
+      furthest = Math.max(furthest, along);
+      this.applyTo(victim, spec.damage, spec.damageType, spec.isManualShot);
+    }
+
+    this.splashVictims.length = 0;
+    return pierce ? maxRange : furthest;
+  }
+
   /** Returns false when the pool is dry, so the caller can skip its muzzle VFX. */
   fire(x: number, y: number, rotation: number, spec: ProjectileSpec): boolean {
     const projectile = this.pool.obtain();
@@ -89,7 +150,7 @@ export class ProjectileSystem {
       ) {
         // A timed out explosive round still goes off where it died.
         if (!alive && projectile.aoeRadius > 0) {
-          this.onImpact(projectile.x, projectile.y, projectile, false);
+          this.onImpact(projectile.x, projectile.y, true, false);
         }
         this.recycle(projectile);
         continue;
@@ -101,13 +162,13 @@ export class ProjectileSystem {
       const impactX = projectile.x;
       const impactY = projectile.y;
       this.resolveHit(projectile, hit, enemies);
-      this.onImpact(impactX, impactY, projectile, true);
+      this.onImpact(impactX, impactY, projectile.isManualShot || projectile.aoeRadius > 0, true);
       this.recycle(projectile);
     }
   }
 
   private resolveHit(projectile: Projectile, hit: Enemy, enemies: readonly Enemy[]): void {
-    this.applyTo(hit, projectile);
+    this.applyTo(hit, projectile.damage, projectile.damageType, projectile.isManualShot);
 
     if (projectile.aoeRadius <= 0) return;
 
@@ -123,14 +184,19 @@ export class ProjectileSystem {
       }
     }
     for (const victim of this.splashVictims) {
-      this.applyTo(victim, projectile);
+      this.applyTo(victim, projectile.damage, projectile.damageType, projectile.isManualShot);
     }
     this.splashVictims.length = 0;
   }
 
-  private applyTo(enemy: Enemy, projectile: Projectile): void {
-    const result = this.damage.applyToEnemy(enemy, projectile.damage, projectile.damageType);
-    this.onEnemyHit(enemy, result, projectile);
+  private applyTo(
+    enemy: Enemy,
+    damageAmount: number,
+    damageType: Projectile['damageType'],
+    _isManual: boolean,
+  ): void {
+    const result = this.damage.applyToEnemy(enemy, damageAmount, damageType);
+    this.onEnemyHit(enemy, result);
     if (result.killed) {
       this.onEnemyKilled(enemy);
     }

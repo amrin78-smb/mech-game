@@ -22,6 +22,18 @@ const DAMAGE_COLOR_STRONG = '#ffd75e';
 const DAMAGE_COLOR_NEUTRAL = '#e8dcc6';
 const DAMAGE_COLOR_WEAK = '#8e8880';
 const DAMAGE_NUMBER_DRIFT = 18;
+/** Seconds a hitscan beam stays on screen. */
+const BEAM_DURATION = 0.12;
+/** Concurrent beams. The Railgun is slow, so a handful is plenty. */
+const BEAM_SLOTS = 6;
+
+interface Beam {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  remaining: number;
+}
 
 interface Flash {
   readonly image: Phaser.GameObjects.Image;
@@ -43,6 +55,9 @@ export class VfxManager {
   private readonly debris: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly smoke: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly exhaust: Phaser.GameObjects.Particles.ParticleEmitter;
+
+  private readonly beamGraphics: Phaser.GameObjects.Graphics;
+  private readonly beams: Beam[] = [];
 
   private readonly flashDuration = tuning.vfx.muzzleFlashDuration;
   private readonly numberLifetime = tuning.vfx.damageNumberLifetime;
@@ -116,6 +131,11 @@ export class VfxManager {
     });
     this.exhaust.setDepth(Depths.MECHA - 1);
 
+    this.beamGraphics = scene.add.graphics().setDepth(Depths.PROJECTILES + 2).setVisible(false);
+    for (let i = 0; i < BEAM_SLOTS; i += 1) {
+      this.beams.push({ x1: 0, y1: 0, x2: 0, y2: 0, remaining: 0 });
+    }
+
     this.flashes = new Pool<Flash>(tuning.vfx.muzzleFlashPoolSize, () => {
       const image = scene.add
         .image(0, 0, ATLAS, AssetKeys.MUZZLE_FLASH)
@@ -188,6 +208,42 @@ export class VfxManager {
       .setVisible(true);
   }
 
+  /**
+   * A hitscan beam: drawn instantly and faded out over a few frames, since
+   * there is no shell to watch. One Graphics redrawn in place, so concurrent
+   * beams cost nothing extra.
+   */
+  beam(x: number, y: number, rotation: number, length: number): void {
+    const entry = this.beams.find((candidate) => candidate.remaining <= 0);
+    if (entry === undefined) return;
+    entry.remaining = BEAM_DURATION;
+    entry.x1 = x;
+    entry.y1 = y;
+    entry.x2 = x + Math.cos(rotation) * length;
+    entry.y2 = y + Math.sin(rotation) * length;
+    this.sparks.emitParticleAt(entry.x2, entry.y2, 4);
+  }
+
+  private drawBeams(deltaSeconds: number): void {
+    let anyAlive = false;
+    this.beamGraphics.clear();
+
+    for (const entry of this.beams) {
+      if (entry.remaining <= 0) continue;
+      entry.remaining -= deltaSeconds;
+      if (entry.remaining <= 0) continue;
+
+      anyAlive = true;
+      const alpha = entry.remaining / BEAM_DURATION;
+      this.beamGraphics.lineStyle(6, 0x7fd0e0, alpha * 0.28);
+      this.beamGraphics.lineBetween(entry.x1, entry.y1, entry.x2, entry.y2);
+      this.beamGraphics.lineStyle(2, 0xfffdf0, alpha);
+      this.beamGraphics.lineBetween(entry.x1, entry.y1, entry.x2, entry.y2);
+    }
+
+    this.beamGraphics.setVisible(anyAlive);
+  }
+
   /** Hull hits shake the camera in proportion to the bite taken out of it. */
   shakeFromDamage(damage: number): void {
     this.shake(damage * tuning.vfx.shakePerDamage);
@@ -200,6 +256,8 @@ export class VfxManager {
   }
 
   update(deltaSeconds: number): void {
+    this.drawBeams(deltaSeconds);
+
     const flashes = this.flashes.active;
     for (let i = flashes.length - 1; i >= 0; i -= 1) {
       const flash = flashes[i];
@@ -240,6 +298,10 @@ export class VfxManager {
       numbers[i].text.setVisible(false);
     }
     this.damageNumbers.releaseAll();
+
+    for (const entry of this.beams) entry.remaining = 0;
+    this.beamGraphics.clear();
+    this.beamGraphics.setVisible(false);
 
     this.sparks.killAll();
     this.debris.killAll();

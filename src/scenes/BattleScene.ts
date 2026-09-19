@@ -4,7 +4,6 @@ import { getLevelDef, getWeaponDef, levels, tuning, weapons } from '../data';
 import type { Boss } from '../entities/Boss';
 import type { Enemy } from '../entities/Enemy';
 import { Mecha } from '../entities/Mecha';
-import type { Projectile } from '../entities/Projectile';
 import { AudioManager } from '../systems/AudioManager';
 import { DamageSystem, type DamageResult } from '../systems/DamageSystem';
 import { EconomySystem } from '../systems/EconomySystem';
@@ -124,8 +123,8 @@ export class BattleScene extends Phaser.Scene {
       scene: this,
       damage: this.damage,
       onEnemyKilled: (enemy) => this.onEnemyKilled(enemy),
-      onEnemyHit: (enemy, result, projectile) => this.onEnemyHit(enemy, result, projectile),
-      onImpact: (x, y, projectile, hitSomething) => this.onImpact(x, y, projectile, hitSomething),
+      onEnemyHit: (enemy, result) => this.onEnemyHit(enemy, result),
+      onImpact: (x, y, heavy, hitSomething) => this.onImpact(x, y, heavy, hitSomething),
     });
 
     this.spawner = new WaveSpawner({
@@ -147,6 +146,7 @@ export class BattleScene extends Phaser.Scene {
         this.vfx.muzzleFlash(x, y, rotation, CANNON_FLASH_SCALE);
         this.audio.play('cannon', isManual ? 1 : 0.8, isManual ? -120 : 0);
       },
+      onBeam: (x, y, rotation, length) => this.vfx.beam(x, y, rotation, length),
     });
 
     this.turrets = new TurretSystem({
@@ -308,14 +308,14 @@ export class BattleScene extends Phaser.Scene {
     );
   }
 
-  private onEnemyHit(enemy: Enemy, result: DamageResult, _projectile: Projectile): void {
+  private onEnemyHit(enemy: Enemy, result: DamageResult): void {
     this.vfx.damageNumber(enemy.x, enemy.centerY, result.amount, result.multiplier);
   }
 
-  private onImpact(x: number, y: number, projectile: Projectile, hitSomething: boolean): void {
-    this.vfx.impact(x, y, projectile.isManualShot || projectile.aoeRadius > 0);
+  private onImpact(x: number, y: number, heavy: boolean, hitSomething: boolean): void {
+    this.vfx.impact(x, y, heavy);
     if (hitSomething) {
-      this.audio.play('impact', projectile.isManualShot ? 0.8 : 0.45);
+      this.audio.play('impact', heavy ? 0.8 : 0.45);
     }
   }
 

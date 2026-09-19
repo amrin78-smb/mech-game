@@ -18,6 +18,8 @@ export interface ProjectileSpec {
   readonly isManualShot: boolean;
   /** Above 0 turns the impact into a blast that also hits nearby enemies. */
   readonly aoeRadius: number;
+  /** Hitscan only: pass through every target on the line. */
+  readonly pierce?: boolean;
 }
 
 export class Projectile extends Phaser.GameObjects.Image {
