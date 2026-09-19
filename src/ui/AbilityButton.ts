@@ -26,7 +26,7 @@ export class AbilityButton {
   private readonly status: Phaser.GameObjects.Text;
   private readonly pilots: PilotSystem;
 
-  private lastStatus = '';
+  private lastStatusKey = Number.NaN;
 
   constructor(
     scene: Phaser.Scene,
@@ -88,15 +88,23 @@ export class AbilityButton {
   update(): void {
     if (!this.pilots.hasPilot) return;
 
-    const status = this.pilots.isActive
-      ? `${this.pilots.activeSecondsLeft.toFixed(1)}s`
+    // Compare a cheap numeric key first: building the label every frame would
+    // allocate a string 60 times a second for a readout that changes ~10 times.
+    const key = this.pilots.isActive
+      ? Math.ceil(this.pilots.activeSecondsLeft * 10)
       : this.pilots.isReady
-        ? 'READY'
-        : `${Math.ceil(this.pilots.cooldown)}s`;
+        ? -1
+        : -2 - Math.ceil(this.pilots.cooldown);
 
-    if (status !== this.lastStatus) {
-      this.lastStatus = status;
-      this.status.setText(status);
+    if (key !== this.lastStatusKey) {
+      this.lastStatusKey = key;
+      this.status.setText(
+        this.pilots.isActive
+          ? `${this.pilots.activeSecondsLeft.toFixed(1)}s`
+          : this.pilots.isReady
+            ? 'READY'
+            : `${Math.ceil(this.pilots.cooldown)}s`,
+      );
 
       const ready = this.pilots.isReady;
       const active = this.pilots.isActive;

@@ -12,7 +12,7 @@ import { ProjectileSystem } from '../systems/ProjectileSystem';
 import { TargetingSystem } from '../systems/TargetingSystem';
 import { TurretSystem } from '../systems/TurretSystem';
 import { PilotSystem } from '../systems/PilotSystem';
-import { SaveManager } from '../systems/SaveManager';
+import { SaveManager, type SaveSettings } from '../systems/SaveManager';
 import { evaluateStars } from '../systems/StarRating';
 import { VfxManager } from '../systems/VfxManager';
 import { WaveSpawner } from '../systems/WaveSpawner';
@@ -24,7 +24,9 @@ import { BossBar } from '../ui/BossBar';
 import { FocusMarker } from '../ui/FocusMarker';
 import { Hud } from '../ui/Hud';
 import { ParallaxBackground } from '../ui/ParallaxBackground';
+import { PerfOverlay } from '../ui/PerfOverlay';
 import { ScrapDrops } from '../ui/ScrapDrops';
+import { TutorialHints } from '../ui/TutorialHints';
 import { UpgradePanel, type UpgradeKind } from '../ui/UpgradePanel';
 import { SceneKeys } from './SceneKeys';
 
@@ -74,6 +76,8 @@ export class BattleScene extends Phaser.Scene {
   private upgrades!: UpgradePanel;
   private bossBar!: BossBar;
   private abilityButton!: AbilityButton;
+  private hints!: TutorialHints;
+  private perf!: PerfOverlay;
 
   private enemiesKilled = 0;
   private repairsUsed = 0;
@@ -113,8 +117,8 @@ export class BattleScene extends Phaser.Scene {
     this.targeting = new TargetingSystem();
     this.damage = new DamageSystem();
     this.economy = new EconomySystem(this.level);
-    this.vfx = new VfxManager(this);
-    this.audio = new AudioManager(this);
+    this.vfx = new VfxManager(this, this.saves.settings);
+    this.audio = new AudioManager(this, this.saves.settings);
 
     this.projectiles = new ProjectileSystem({
       scene: this,
@@ -172,7 +176,7 @@ export class BattleScene extends Phaser.Scene {
       this.turrets,
     );
 
-    this.hud = new Hud(this, baseWidth);
+    this.hud = new Hud(this, baseWidth, () => this.pauseBattle());
     this.aimLine = new AimLine(this);
     this.focusMarker = new FocusMarker(this);
     this.scrapDrops = new ScrapDrops(this);
@@ -188,6 +192,8 @@ export class BattleScene extends Phaser.Scene {
     this.abilityButton = new AbilityButton(this, baseWidth, baseHeight, this.pilotSystem, () =>
       this.activateAbility(),
     );
+    this.hints = new TutorialHints(this, this.level.id, baseWidth, baseHeight);
+    this.perf = new PerfOverlay(this);
 
     this.registerInput();
     this.cameras.main.setBackgroundColor(0x1a1512);
@@ -289,6 +295,11 @@ export class BattleScene extends Phaser.Scene {
     this.scrapDrops.update(deltaSeconds);
     this.upgrades.update();
     this.abilityButton.update();
+    this.hints.update(deltaSeconds);
+    this.perf.update(deltaSeconds, {
+      enemies: this.spawner.aliveCount,
+      projectiles: this.projectiles.activeCount,
+    });
     this.hud.update(
       this.mecha.hullHp,
       this.mecha.hullMax,
@@ -366,6 +377,29 @@ export class BattleScene extends Phaser.Scene {
         break;
     }
     this.audio.play('upgrade', 0.7);
+  }
+
+  /**
+   * Pause runs PauseScene as an overlay rather than a panel inside this scene,
+   * so its buttons stay live while this scene's update loop is stopped.
+   */
+  private pauseBattle(): void {
+    if (this.battleOver || this.scene.isPaused()) return;
+
+    this.weapon.cancelManualAim();
+    this.pointerDown = false;
+    this.audio.play('ui_click', 0.5);
+
+    this.scene.pause();
+    this.scene.launch(SceneKeys.Pause, {
+      resumeKey: SceneKeys.Battle,
+      onSettingsChanged: (settings: SaveSettings) => {
+        // Applied live; particle budgets are fixed at construction, so a
+        // quality change lands on the next level rather than mid fight.
+        this.audio.applySettings(settings);
+        this.vfx.shakeEnabled = settings.shakeEnabled;
+      },
+    });
   }
 
   private activateAbility(): void {
@@ -503,6 +537,9 @@ export class BattleScene extends Phaser.Scene {
       this.pointerDown = false;
       this.weapon.cancelManualAim();
     });
+
+    this.input.keyboard?.on("keydown-ESC", () => this.pauseBattle());
+    this.input.keyboard?.on("keydown-P", () => this.pauseBattle());
 
     this.input.on(Phaser.Input.Events.GAME_OUT, () => {
       this.pointerDown = false;

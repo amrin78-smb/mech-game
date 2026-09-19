@@ -6,6 +6,7 @@ export const SceneKeys = {
   Hangar: 'HangarScene',
   Battle: 'BattleScene',
   Results: 'ResultsScene',
+  Pause: 'PauseScene',
 } as const;
 
 export type SceneKey = (typeof SceneKeys)[keyof typeof SceneKeys];

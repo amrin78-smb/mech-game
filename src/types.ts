@@ -194,6 +194,16 @@ export interface Tuning {
     /** GAME_DESIGN section 6: only piercing damages a shield pool at full value. */
     shieldNonPiercingFactor: number;
   };
+  /** Tutorial hints, shown only on the named level. */
+  tutorial: {
+    levelId: string;
+    steps: Array<{
+      /** Seconds from battle start. */
+      at: number;
+      duration: number;
+      text: string;
+    }>;
+  };
   /** Hangar economy. Weapon and pilot stat tracks stay in their own files. */
   meta: {
     startingWeapons: string[];

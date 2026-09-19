@@ -186,5 +186,35 @@
       ],
       "bonusPerLevel": 0.12
     }
+  },
+  "tutorial": {
+    "levelId": "level-01",
+    "steps": [
+      {
+        "at": 1.5,
+        "duration": 6,
+        "text": "Your guns fire on their own. Watch them work."
+      },
+      {
+        "at": 9,
+        "duration": 6,
+        "text": "Drag anywhere and release for a precision shot."
+      },
+      {
+        "at": 20,
+        "duration": 6,
+        "text": "Tap an enemy to focus every weapon on it."
+      },
+      {
+        "at": 32,
+        "duration": 7,
+        "text": "Spend scrap bottom left on damage, fire rate or repairs."
+      },
+      {
+        "at": 46,
+        "duration": 6,
+        "text": "Anything that reaches the mecha chews on the hull."
+      }
+    ]
   }
 }

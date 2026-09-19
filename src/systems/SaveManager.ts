@@ -1,4 +1,4 @@
-import { levels, pilots, tuning } from '../data';
+import { levels, pilots, tuning } from '../data/core';
 
 /**
  * Persistent progress in localStorage.
@@ -9,8 +9,28 @@ import { levels, pilots, tuning } from '../data';
  * falls back to a fresh one rather than crashing the game.
  */
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 const STORAGE_KEY = 'scrap-titan.save';
+
+/** Player settings, added in save version 2. */
+export interface SaveSettings {
+  /** 0 to 1. 0 mutes everything. */
+  masterVolume: number;
+  musicEnabled: boolean;
+  /** Camera shake is the first thing people turn off. */
+  shakeEnabled: boolean;
+  /** Halves the particle budget for weaker hardware. */
+  lowQuality: boolean;
+}
+
+export function defaultSettings(): SaveSettings {
+  return {
+    masterVolume: tuning.audio.masterVolume,
+    musicEnabled: true,
+    shakeEnabled: true,
+    lowQuality: false,
+  };
+}
 
 export interface LevelProgress {
   /** Best stars earned, 0 to 3. */
@@ -33,17 +53,19 @@ export interface SaveData {
   /** Pilot id to level; presence means hired. */
   pilots: Record<string, number>;
   equippedPilot: string | null;
+  settings: SaveSettings;
 }
 
 /** A migration takes the previous shape and returns the next one. */
 type Migration = (save: SaveData) => SaveData;
 
 /**
- * Keyed by the version being migrated FROM. Version 1 is the first shipped
- * schema, so there is nothing to migrate yet; the map is the mechanism that
- * keeps the next change cheap.
+ * Keyed by the version being migrated FROM. A player who cleared zone 1 on
+ * version 1 keeps their stars and cores; they just gain default settings.
  */
-const MIGRATIONS: Record<number, Migration> = {};
+const MIGRATIONS: Record<number, Migration> = {
+  1: (save) => ({ ...save, version: 2, settings: defaultSettings() }),
+};
 
 export function createFreshSave(): SaveData {
   const weapons: Record<string, number> = {};
@@ -61,6 +83,7 @@ export function createFreshSave(): SaveData {
     hullLevel: 0,
     pilots: {},
     equippedPilot: null,
+    settings: defaultSettings(),
   };
 }
 
@@ -252,6 +275,17 @@ export class SaveManager {
     return this.data.equippedPilot;
   }
 
+  // Settings ---------------------------------------------------------------
+
+  get settings(): Readonly<SaveSettings> {
+    return this.data.settings;
+  }
+
+  updateSettings(patch: Partial<SaveSettings>): void {
+    this.data.settings = { ...this.data.settings, ...patch };
+    this.persist();
+  }
+
   /** The equipped pilot's passive bonus of a given kind, 0 when not applicable. */
   passiveBonus(kind: string): number {
     const pilotId = this.data.equippedPilot;
@@ -279,6 +313,13 @@ function migrate(save: SaveData): SaveData {
     current = migration(current);
   }
 
-  // Fill anything a partial or hand edited save is missing.
-  return { ...createFreshSave(), ...current, version: SAVE_VERSION };
+  // Fill anything a partial or hand edited save is missing. Settings are merged
+  // one level deeper, so a save carrying only some of them still gets the rest.
+  const fresh = createFreshSave();
+  return {
+    ...fresh,
+    ...current,
+    settings: { ...fresh.settings, ...(current.settings ?? {}) },
+    version: SAVE_VERSION,
+  };
 }

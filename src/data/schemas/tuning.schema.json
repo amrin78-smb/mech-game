@@ -15,7 +15,8 @@
     "boss",
     "audio",
     "combat",
-    "meta"
+    "meta",
+    "tutorial"
   ],
   "additionalProperties": false,
   "definitions": {
@@ -633,6 +634,46 @@
               "type": "number",
               "minimum": 0,
               "description": "additive hull fraction per level"
+            }
+          }
+        }
+      }
+    },
+    "tutorial": {
+      "type": "object",
+      "description": "Phase 4 tutorial hints. Shown only on the named level.",
+      "required": [
+        "levelId",
+        "steps"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "levelId": {
+          "type": "string"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "at",
+              "duration",
+              "text"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "at": {
+                "type": "number",
+                "minimum": 0,
+                "description": "seconds from battle start"
+              },
+              "duration": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "text": {
+                "type": "string"
+              }
             }
           }
         }

@@ -4,6 +4,7 @@ import { AssetKeys } from '../AssetKeys';
 import { tuning } from '../data';
 import { Depths } from '../ui/Depths';
 import { Pool } from './Pool';
+import type { SaveSettings } from './SaveManager';
 
 /**
  * Every bit of combat juice in one place (GAME_DESIGN section 11's VFX
@@ -49,12 +50,15 @@ export class VfxManager {
   /** Set false by the Phase 4 settings toggle; shake is the first thing people turn off. */
   shakeEnabled = true;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, settings?: SaveSettings) {
     this.scene = scene;
+    this.shakeEnabled = settings?.shakeEnabled ?? true;
 
-    const budget = scene.game.device.os.desktop
+    // Mobile gets the smaller budget automatically; low quality halves it again.
+    const deviceBudget = scene.game.device.os.desktop
       ? tuning.vfx.maxParticlesDesktop
       : tuning.vfx.maxParticlesMobile;
+    const budget = settings?.lowQuality === true ? Math.floor(deviceBudget / 2) : deviceBudget;
     // Split the budget so no single effect can starve the others.
     const burstBudget = Math.floor(budget * 0.4);
     const smokeBudget = Math.floor(budget * 0.2);

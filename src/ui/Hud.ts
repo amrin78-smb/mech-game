@@ -36,7 +36,7 @@ export class Hud {
   private lastHullShown = -1;
   private lastScrapShown = -1;
 
-  constructor(scene: Phaser.Scene, width: number) {
+  constructor(scene: Phaser.Scene, width: number, onPause?: () => void) {
     const barTop = MARGIN + WAVE_BAR_HEIGHT + 10;
 
     scene.add
@@ -90,6 +90,27 @@ export class Hud {
       .setOrigin(1, 0)
       .setScrollFactor(0)
       .setDepth(Depths.HUD);
+
+    if (onPause !== undefined) {
+      const size = 34;
+      const button = scene.add
+        .rectangle(width - MARGIN - size, barTop + 58, size, size, BAR_BG)
+        .setOrigin(0, 0)
+        .setStrokeStyle(2, BAR_BORDER)
+        .setScrollFactor(0)
+        .setDepth(Depths.HUD)
+        .setInteractive({ useHandCursor: true });
+      scene.add
+        .text(width - MARGIN - size * 0.5, barTop + 58 + size * 0.5, "II", {
+          fontFamily: "monospace",
+          fontSize: "16px",
+          color: TEXT_COLOR,
+        })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(Depths.HUD + 1);
+      button.on("pointerup", onPause);
+    }
 
     this.hullBarWidthMax = HULL_BAR_WIDTH - 4;
     this.waveBarWidthMax = width;

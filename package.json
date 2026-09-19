@@ -9,12 +9,17 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "sim": "tsx sim/simulate.ts"
+    "sim": "tsx sim/simulate.ts",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android"
   },
   "dependencies": {
     "phaser": "^3.90.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^7.6.9",
+    "@capacitor/core": "^8.5.2",
     "@types/node": "^26.6.2",
     "ajv": "^8.20.0",
     "tsx": "^4.23.13",

@@ -6,6 +6,7 @@ import { BootScene } from './scenes/BootScene';
 import { HangarScene } from './scenes/HangarScene';
 import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
+import { PauseScene } from './scenes/PauseScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { ResultsScene } from './scenes/ResultsScene';
 
@@ -47,7 +48,11 @@ const config: Phaser.Types.Core.GameConfig = {
     HangarScene,
     BattleScene,
     ResultsScene,
+    PauseScene,
   ],
 };
+
+// A long press to aim would otherwise open the browser context menu on Android.
+window.addEventListener('contextmenu', (event) => event.preventDefault());
 
 export default new Phaser.Game(config);

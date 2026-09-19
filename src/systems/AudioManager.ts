@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import { tuning } from '../data';
+import type { SaveSettings } from './SaveManager';
 import type { ArmorClass } from '../types';
 
 /**
@@ -58,8 +59,10 @@ export class AudioManager {
   private droneGain: GainNode | null = null;
 
   private muted = false;
+  private settings: SaveSettings | null = null;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, settings?: SaveSettings) {
+    this.settings = settings ?? null;
     this.context = readContext(scene);
 
     if (this.context === null) {
@@ -69,10 +72,35 @@ export class AudioManager {
     }
 
     this.master = this.context.createGain();
-    this.master.gain.value = tuning.audio.masterVolume;
+    this.master.gain.value = this.masterVolume;
     this.master.connect(this.context.destination);
 
     this.renderAll(this.context);
+  }
+
+  /** tuning.audio is the ceiling; the settings slider scales it. */
+  private get masterVolume(): number {
+    const scale = this.settings?.masterVolume ?? tuning.audio.masterVolume;
+    return Math.max(0, Math.min(1, scale));
+  }
+
+  /** Applies a settings change live, without rebuilding the graph. */
+  applySettings(settings: SaveSettings): void {
+    this.settings = settings;
+    if (this.master !== null && this.context !== null) {
+      this.master.gain.setTargetAtTime(
+        this.muted ? 0 : this.masterVolume,
+        this.context.currentTime,
+        0.02,
+      );
+    }
+    if (this.droneGain !== null && this.context !== null) {
+      this.droneGain.gain.setTargetAtTime(
+        settings.musicEnabled ? tuning.audio.musicVolume : 0,
+        this.context.currentTime,
+        0.05,
+      );
+    }
   }
 
   get available(): boolean {
@@ -83,7 +111,7 @@ export class AudioManager {
     this.muted = muted;
     if (this.master !== null && this.context !== null) {
       this.master.gain.setTargetAtTime(
-        muted ? 0 : tuning.audio.masterVolume,
+        muted ? 0 : this.masterVolume,
         this.context.currentTime,
         0.02,
       );
@@ -154,7 +182,7 @@ export class AudioManager {
     });
 
     const gain = ctx.createGain();
-    gain.gain.value = tuning.audio.musicVolume;
+    gain.gain.value = this.settings?.musicEnabled === false ? 0 : tuning.audio.musicVolume;
 
     const source = ctx.createBufferSource();
     source.buffer = buffer;
