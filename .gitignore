@@ -6,3 +6,6 @@ dist/
 
 # playwright mcp scratch output
 .playwright-mcp/
+
+# art proofing output
+tools/art/preview.png

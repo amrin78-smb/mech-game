@@ -1,8 +1,12 @@
 /**
- * Hard rule 5: every texture key in the game is named here. Placeholder art is
- * generated at runtime in PreloadScene, so swapping in a real sprite sheet later
- * only touches PreloadScene, never gameplay code.
+ * Hard rule 5: every texture key in the game is named here.
+ *
+ * Sprites live in one packed atlas built by `npm run art` from tools/art, so
+ * these names are atlas frame names: `scene.add.image(x, y, ATLAS, AssetKeys.X)`.
+ * The parallax strips are separate images, since they are large and tile.
  */
+export const ATLAS = 'sprites';
+
 export const AssetKeys = {
   MECHA_LEGS: 'mecha_legs',
   MECHA_TORSO: 'mecha_torso',

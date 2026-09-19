@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "sim": "tsx sim/simulate.ts",
     "android:sync": "npm run build && cap sync android",
-    "android:open": "cap open android"
+    "android:open": "cap open android",
+    "art": "node tools/art/build.mjs",
+    "art:preview": "node tools/art/preview.mjs"
   },
   "dependencies": {
     "phaser": "^3.90.0"
@@ -20,6 +22,7 @@
     "@capacitor/android": "^8.5.2",
     "@capacitor/cli": "^7.6.9",
     "@capacitor/core": "^8.5.2",
+    "@napi-rs/canvas": "^1.0.9",
     "@types/node": "^26.6.2",
     "ajv": "^8.20.0",
     "tsx": "^4.23.13",

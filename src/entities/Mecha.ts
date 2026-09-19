@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { AssetKeys } from '../AssetKeys';
+import { ATLAS, AssetKeys } from '../AssetKeys';
 import { tuning } from '../data';
 import { Depths } from '../ui/Depths';
 
@@ -51,15 +51,16 @@ export class Mecha extends Phaser.GameObjects.Container {
     this.hullMax = hullMax;
     this.hull = hullMax;
 
-    this.legs = scene.add.image(0, 0, AssetKeys.MECHA_LEGS).setOrigin(0.5, 1);
+    this.legs = scene.add.image(0, 0, ATLAS, AssetKeys.MECHA_LEGS).setOrigin(0.5, 1);
 
     this.upper = scene.add.container(0, -this.legs.height + TORSO_OVERLAP);
-    this.torso = scene.add.image(0, 0, AssetKeys.MECHA_TORSO).setOrigin(0.5, 1);
+    this.torso = scene.add.image(0, 0, ATLAS, AssetKeys.MECHA_TORSO).setOrigin(0.5, 1);
 
     const cannonImage = scene.add
       .image(
         this.torso.width * CANNON_ANCHOR_X,
         this.torso.height * CANNON_ANCHOR_Y,
+        ATLAS,
         AssetKeys.MECHA_CANNON,
       )
       .setOrigin(CANNON_ORIGIN_X, 0.5);
@@ -92,7 +93,7 @@ export class Mecha extends Phaser.GameObjects.Container {
     }
     const [offsetX, offsetY] = offsets[mountIndex];
     const image = scene.add
-      .image(offsetX, offsetY, AssetKeys.MECHA_TURRET)
+      .image(offsetX, offsetY, ATLAS, AssetKeys.MECHA_TURRET)
       .setOrigin(TURRET_ORIGIN_X, 0.5);
     this.upper.add(image);
 

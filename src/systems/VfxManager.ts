@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { AssetKeys } from '../AssetKeys';
+import { ATLAS, AssetKeys } from '../AssetKeys';
 import { tuning } from '../data';
 import { Depths } from '../ui/Depths';
 import { Pool } from './Pool';
@@ -63,7 +63,8 @@ export class VfxManager {
     const burstBudget = Math.floor(budget * 0.4);
     const smokeBudget = Math.floor(budget * 0.2);
 
-    this.sparks = scene.add.particles(0, 0, AssetKeys.SPARK, {
+    this.sparks = scene.add.particles(0, 0, ATLAS, {
+      frame: AssetKeys.SPARK,
       lifespan: { min: 180, max: 420 },
       speed: { min: 90, max: 320 },
       angle: { min: 0, max: 360 },
@@ -76,7 +77,8 @@ export class VfxManager {
     });
     this.sparks.setDepth(Depths.PROJECTILES);
 
-    this.debris = scene.add.particles(0, 0, AssetKeys.DEBRIS, {
+    this.debris = scene.add.particles(0, 0, ATLAS, {
+      frame: AssetKeys.DEBRIS,
       lifespan: { min: 400, max: 900 },
       speed: { min: 60, max: 240 },
       angle: { min: 200, max: 340 },
@@ -89,7 +91,8 @@ export class VfxManager {
     });
     this.debris.setDepth(Depths.PROJECTILES);
 
-    this.smoke = scene.add.particles(0, 0, AssetKeys.SMOKE_PUFF, {
+    this.smoke = scene.add.particles(0, 0, ATLAS, {
+      frame: AssetKeys.SMOKE_PUFF,
       lifespan: { min: 500, max: 1100 },
       speed: { min: 10, max: 60 },
       angle: { min: 230, max: 310 },
@@ -101,7 +104,8 @@ export class VfxManager {
     this.smoke.setDepth(Depths.PICKUPS);
 
     // The engine bed: continuous oil smoke off the exhaust stacks.
-    this.exhaust = scene.add.particles(0, 0, AssetKeys.SMOKE_PUFF, {
+    this.exhaust = scene.add.particles(0, 0, ATLAS, {
+      frame: AssetKeys.SMOKE_PUFF,
       lifespan: { min: 900, max: 1800 },
       speed: { min: 12, max: 34 },
       angle: { min: 250, max: 290 },
@@ -114,7 +118,7 @@ export class VfxManager {
 
     this.flashes = new Pool<Flash>(tuning.vfx.muzzleFlashPoolSize, () => {
       const image = scene.add
-        .image(0, 0, AssetKeys.MUZZLE_FLASH)
+        .image(0, 0, ATLAS, AssetKeys.MUZZLE_FLASH)
         .setOrigin(0.1, 0.5)
         .setBlendMode(Phaser.BlendModes.ADD)
         .setDepth(Depths.PROJECTILES + 1)

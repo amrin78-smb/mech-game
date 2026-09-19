@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { AssetKeys } from '../AssetKeys';
+import { ATLAS, AssetKeys } from '../AssetKeys';
 import { tuning } from '../data';
 import type { EnemyDef } from '../types';
 import { Depths } from '../ui/Depths';
@@ -54,7 +54,7 @@ export class Enemy extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
 
-    this.sprite = scene.add.image(0, 0, AssetKeys.UI_PIXEL).setOrigin(0.5, 1);
+    this.sprite = scene.add.image(0, 0, ATLAS, AssetKeys.UI_PIXEL).setOrigin(0.5, 1);
     this.hpBarBg = scene.add.rectangle(0, 0, 1, HP_BAR_HEIGHT, HP_BAR_BG).setOrigin(0.5, 1);
     this.hpBarFill = scene.add.rectangle(0, 0, 1, HP_BAR_HEIGHT - 2, HP_BAR_FILL).setOrigin(0, 1);
     this.shieldBarFill = scene.add
@@ -152,7 +152,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.spawnTimer = def.spawns?.interval ?? 0;
 
     // Textures are baked at the def's scale, so the sprite is never scaled here.
-    this.sprite.setTexture(def.spriteKey);
+    this.sprite.setTexture(ATLAS, def.spriteKey);
     this.sprite.setPosition(0, 0);
     this.sprite.clearTint();
 

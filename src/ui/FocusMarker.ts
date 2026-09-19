@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { AssetKeys } from '../AssetKeys';
+import { ATLAS, AssetKeys } from '../AssetKeys';
 import type { Enemy } from '../entities/Enemy';
 import { Depths } from './Depths';
 
@@ -18,7 +18,7 @@ export class FocusMarker {
 
   constructor(scene: Phaser.Scene) {
     this.image = scene.add
-      .image(0, 0, AssetKeys.FOCUS_MARKER)
+      .image(0, 0, ATLAS, AssetKeys.FOCUS_MARKER)
       .setDepth(Depths.AIM_LINE)
       .setVisible(false);
   }

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { AssetKeys } from '../AssetKeys';
+import { ATLAS, AssetKeys } from '../AssetKeys';
 import type { DamageType } from '../types';
 import { Depths } from '../ui/Depths';
 
@@ -32,14 +32,14 @@ export class Projectile extends Phaser.GameObjects.Image {
   isManualShot = false;
 
   constructor(scene: Phaser.Scene) {
-    super(scene, 0, 0, AssetKeys.PROJECTILE_SHELL);
+    super(scene, 0, 0, ATLAS, AssetKeys.PROJECTILE_SHELL);
     this.setDepth(Depths.PROJECTILES);
     scene.add.existing(this);
     this.deactivate();
   }
 
   fire(x: number, y: number, rotation: number, spec: ProjectileSpec): void {
-    this.setTexture(spec.textureKey);
+    this.setTexture(ATLAS, spec.textureKey);
     this.setPosition(x, y);
     this.setRotation(rotation);
     this.velocityX = Math.cos(rotation) * spec.speed;
