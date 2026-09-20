@@ -21,10 +21,10 @@ const HP_BAR_GAP = 9;
 const HP_BAR_BG = 0x1a1512;
 const HP_BAR_FILL = 0xc23b2a;
 const SHIELD_BAR_FILL = 0x4a90a4;
-const BARRIER_FILL = 0x4a90a4;
-const BARRIER_EDGE = 0x9fd8e8;
+const BARRIER_FILL = 0x59c8e0;
+const BARRIER_EDGE = 0xd6f6ff;
 /** Alpha of the screen at full shield; it fades out as the shield is chewed. */
-const BARRIER_ALPHA = 0.36;
+const BARRIER_ALPHA = 0.44;
 
 export interface EnemyUpdateContext {
   /** World x of the mecha, what enemies advance towards. */
@@ -75,7 +75,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     // Half a disc, flat edge against the bearer, bulging toward the mecha.
     this.barrier = scene.add
       .arc(0, 0, 1, 90, 270, false, BARRIER_FILL, BARRIER_ALPHA)
-      .setStrokeStyle(2, BARRIER_EDGE, 0.8)
+      .setStrokeStyle(3, BARRIER_EDGE, 0.95)
       .setVisible(false);
 
     this.add([this.barrier, this.sprite, this.hpBarBg, this.hpBarFill, this.shieldBarFill]);
