@@ -21,6 +21,10 @@ const HP_BAR_GAP = 9;
 const HP_BAR_BG = 0x1a1512;
 const HP_BAR_FILL = 0xc23b2a;
 const SHIELD_BAR_FILL = 0x4a90a4;
+const BARRIER_FILL = 0x4a90a4;
+const BARRIER_EDGE = 0x9fd8e8;
+/** Alpha of the screen at full shield; it fades out as the shield is chewed. */
+const BARRIER_ALPHA = 0.36;
 
 export interface EnemyUpdateContext {
   /** World x of the mecha, what enemies advance towards. */
@@ -56,6 +60,7 @@ export class Enemy extends Phaser.GameObjects.Container {
   private readonly hpBarBg: Phaser.GameObjects.Rectangle;
   private readonly hpBarFill: Phaser.GameObjects.Rectangle;
   private readonly shieldBarFill: Phaser.GameObjects.Rectangle;
+  private readonly barrier: Phaser.GameObjects.Arc;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
@@ -67,7 +72,13 @@ export class Enemy extends Phaser.GameObjects.Container {
       .rectangle(0, 0, 1, HP_BAR_HEIGHT - 2, SHIELD_BAR_FILL)
       .setOrigin(0, 1);
 
-    this.add([this.sprite, this.hpBarBg, this.hpBarFill, this.shieldBarFill]);
+    // Half a disc, flat edge against the bearer, bulging toward the mecha.
+    this.barrier = scene.add
+      .arc(0, 0, 1, 90, 270, false, BARRIER_FILL, BARRIER_ALPHA)
+      .setStrokeStyle(2, BARRIER_EDGE, 0.8)
+      .setVisible(false);
+
+    this.add([this.barrier, this.sprite, this.hpBarBg, this.hpBarFill, this.shieldBarFill]);
     scene.add.existing(this);
     this.deactivate();
   }
@@ -96,6 +107,27 @@ export class Enemy extends Phaser.GameObjects.Container {
   /** Collision radius used by projectile impact checks. */
   get radius(): number {
     return Math.max(this.sprite.displayWidth, this.sprite.displayHeight) * 0.5;
+  }
+
+  /**
+   * Where incoming fire actually collides, which is the barrier while one is
+   * up and the body otherwise. Weapons read these two instead of x and radius
+   * so a screen stops shots aimed at whatever is sheltering behind it.
+   */
+  get barrierActive(): boolean {
+    return this.def !== null && this.def.barrier !== undefined && this.shield > 0;
+  }
+
+  get interceptX(): number {
+    const barrier = this.def?.barrier;
+    if (barrier === undefined || this.shield <= 0) return this.x;
+    return this.x - barrier.offsetX;
+  }
+
+  get interceptRadius(): number {
+    const barrier = this.def?.barrier;
+    if (barrier === undefined || this.shield <= 0) return this.radius;
+    return Math.max(this.radius, barrier.radius);
   }
 
   get bodyWidth(): number {
@@ -173,6 +205,7 @@ export class Enemy extends Phaser.GameObjects.Container {
       -this.sprite.displayHeight - HP_BAR_GAP - 1,
     );
     this.setHpBarVisible(false);
+    this.refreshBarrier();
 
     this.setPosition(x, y);
     this.setDepth(Depths.ENEMIES + laneIndex);
@@ -307,6 +340,27 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.hpBarFill.width = Math.max(0, inner * this.healthFraction);
     this.shieldBarFill.width = Math.max(0, inner * this.shieldFraction);
     this.shieldBarFill.setVisible(this.shield > 0);
+    this.refreshBarrier();
+  }
+
+  /**
+   * The screen thins as the shield is worn down, so the moment it stops
+   * protecting whatever is behind it is legible rather than a surprise.
+   */
+  private refreshBarrier(): void {
+    const barrier = this.def?.barrier;
+    if (barrier === undefined) {
+      this.barrier.setVisible(false);
+      return;
+    }
+
+    const up = this.shield > 0;
+    this.barrier.setVisible(up);
+    if (!up) return;
+
+    this.barrier.setRadius(barrier.radius);
+    this.barrier.setPosition(-barrier.offsetX, -this.sprite.displayHeight * 0.5);
+    this.barrier.setAlpha(BARRIER_ALPHA * (0.35 + 0.65 * this.shieldFraction));
   }
 
   /**
@@ -340,6 +394,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.inRange = false;
     this.flashRemaining = 0;
     this.sprite.clearTint();
+    this.barrier.setVisible(false);
     this.setActive(false);
     this.setVisible(false);
     this.setPosition(-1000, -1000);

@@ -6,7 +6,7 @@
 
 export type DamageType = 'kinetic' | 'chemical' | 'piercing' | 'explosive';
 export type ArmorClass = 'light' | 'armored' | 'shielded' | 'swarm';
-export type EnemyBehavior = 'melee' | 'ranged' | 'burrow' | 'spawner' | 'shielded';
+export type EnemyBehavior = 'melee' | 'ranged' | 'burrow' | 'spawner' | 'shielded' | 'barrier';
 export type WeaponSlot = 'main' | 'turret';
 export type ProjectileKind = 'ballistic' | 'lobbed' | 'hitscan';
 export type TargetPriority = 'focus' | 'ranged_in_range' | 'closest';
@@ -32,6 +32,15 @@ export interface EnemyDef {
   scale: number;
   flying?: boolean;
   behaviors: EnemyBehavior[];
+  /**
+   * The `barrier` behavior: a frontal screen that intercepts shots aimed at
+   * anything behind it while the shield pool holds. `offsetX` is how far in
+   * front of the enemy the screen sits, toward the mecha.
+   */
+  barrier?: {
+    radius: number;
+    offsetX: number;
+  };
   spawns?: {
     enemyId: string;
     count: number;

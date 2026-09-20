@@ -96,7 +96,7 @@
     "name": "Shield Bearer",
     "armorClass": "shielded",
     "hp": 120,
-    "shieldHp": 220,
+    "shieldHp": 160,
     "speed": 34,
     "damage": 18,
     "attackInterval": 2,
@@ -105,8 +105,13 @@
     "scale": 1.3,
     "behaviors": [
       "melee",
-      "shielded"
-    ]
+      "shielded",
+      "barrier"
+    ],
+    "barrier": {
+      "radius": 54,
+      "offsetX": 38
+    }
   },
   {
     "id": "boss_iron_matriarch",

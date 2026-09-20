@@ -14,6 +14,11 @@
  * weapons concerned: piercing is not modelled, so the Railgun scores as if it
  * hit one target per shot, and lobbed arcs fly straight.
  *
+ * Barriers are modelled, but the field here is one dimensional, so a shield
+ * bearer screens every enemy behind it rather than only its own lane. That
+ * overstates the screen, which again errs toward a harder rating than the game
+ * actually gives.
+ *
  * Usage:
  *   npm run sim
  *   npm run sim -- --weapon=railgun --cards=2 --mounts=2 --hull=3
@@ -361,7 +366,9 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
         }
       };
 
-      applyHit(shot.target);
+      // A shield bearer's screen eats shots aimed at anything behind it, so
+      // the shot lands on the bearer instead until its shield is gone.
+      applyHit(screenFor(shot.target, live) ?? shot.target);
 
       // Explosive and chemical rounds splash. Lanes are ignored, so this is a
       // slight overestimate of how many neighbours a blast catches.
@@ -472,6 +479,23 @@ function makeShot(
 }
 
 /** tuning.targeting.priorityOrder, minus the focus target the sim never sets. */
+/**
+ * The nearest living barrier bearer standing between the mecha and `target`,
+ * or null when the shot has a clear line.
+ */
+function screenFor(target: SimEnemy, live: SimEnemy[]): SimEnemy | null {
+  let screen: SimEnemy | null = null;
+
+  for (const enemy of live) {
+    if (enemy === target || !enemy.isAlive || enemy.shield <= 0) continue;
+    if (enemy.definition?.barrier === undefined) continue;
+    if (enemy.x >= target.x) continue;
+    if (screen === null || enemy.x > screen.x) screen = enemy;
+  }
+
+  return screen;
+}
+
 function selectTarget(live: SimEnemy[], engageMaxX: number): SimEnemy | null {
   let rangedInRange: SimEnemy | null = null;
   let closest: SimEnemy | null = null;

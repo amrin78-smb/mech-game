@@ -85,7 +85,8 @@ export class ProjectileSystem {
       if (!enemy.isAlive) continue;
 
       // Project the enemy onto the ray; behind the muzzle does not count.
-      const toX = enemy.x - x;
+      // interceptX is the barrier when one is up, so a screen eats the beam.
+      const toX = enemy.interceptX - x;
       const toY = enemy.centerY - y;
       const along = toX * dirX + toY * dirY;
       if (along < 0 || along > maxRange) continue;
@@ -93,7 +94,7 @@ export class ProjectileSystem {
       // Perpendicular distance from the ray to the enemy centre.
       const perpX = toX - dirX * along;
       const perpY = toY - dirY * along;
-      const reach = enemy.radius + shellRadius;
+      const reach = enemy.interceptRadius + shellRadius;
       if (perpX * perpX + perpY * perpY > reach * reach) continue;
 
       this.splashVictims.push(enemy);
@@ -105,8 +106,8 @@ export class ProjectileSystem {
 
     // Nearest first, so a non piercing shot stops at the right target.
     this.splashVictims.sort((a, b) => {
-      const da = (a.x - x) * dirX + (a.centerY - y) * dirY;
-      const db = (b.x - x) * dirX + (b.centerY - y) * dirY;
+      const da = (a.interceptX - x) * dirX + (a.centerY - y) * dirY;
+      const db = (b.interceptX - x) * dirX + (b.centerY - y) * dirY;
       return da - db;
     });
 
@@ -115,7 +116,7 @@ export class ProjectileSystem {
     let furthest = 0;
 
     for (const victim of victims) {
-      const along = (victim.x - x) * dirX + (victim.centerY - y) * dirY;
+      const along = (victim.interceptX - x) * dirX + (victim.centerY - y) * dirY;
       furthest = Math.max(furthest, along);
       this.applyTo(victim, spec.damage, spec.damageType, spec.isManualShot);
     }
@@ -209,9 +210,11 @@ export class ProjectileSystem {
   ): Enemy | null {
     for (const enemy of enemies) {
       if (!enemy.isAlive) continue;
-      const dx = enemy.x - projectile.x;
+      // A raised barrier is what the shell meets, which is how a shield bearer
+      // screens the enemies sheltering behind it.
+      const dx = enemy.interceptX - projectile.x;
       const dy = enemy.centerY - projectile.y;
-      const reach = enemy.radius + shellRadius;
+      const reach = enemy.interceptRadius + shellRadius;
       if (dx * dx + dy * dy <= reach * reach) return enemy;
     }
     return null;

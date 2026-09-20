@@ -21,8 +21,18 @@
     "flying": { "type": "boolean", "default": false },
     "behaviors": {
       "type": "array",
-      "items": { "enum": ["melee", "ranged", "burrow", "spawner", "shielded"] },
+      "items": { "enum": ["melee", "ranged", "burrow", "spawner", "shielded", "barrier"] },
       "uniqueItems": true
+    },
+    "barrier": {
+      "type": "object",
+      "description": "The barrier behavior: a frontal screen that intercepts shots aimed at anything behind it while the shield pool holds",
+      "required": ["radius", "offsetX"],
+      "additionalProperties": false,
+      "properties": {
+        "radius": { "type": "number", "exclusiveMinimum": 0, "description": "screen px" },
+        "offsetX": { "type": "number", "minimum": 0, "description": "px in front of the enemy, toward the mecha" }
+      }
     },
     "spawns": {
       "type": "object",
