@@ -223,16 +223,56 @@ export class WaveSpawner {
       this.levelHpMultiplier * (entry.hpMultiplier ?? 1),
       this.spawnX,
     );
+    this.spawnWeakPoints(boss, def);
     this.bossSpawned = true;
     this.onBossSpawned(boss);
   }
 
+  /**
+   * Destructible parts are ordinary pooled enemies anchored to their carrier,
+   * so everything downstream (targeting, collision, damage numbers, death)
+   * treats them like any other enemy.
+   */
+  private spawnWeakPoints(boss: Boss, carrier: ReturnType<typeof getEnemyDef>): void {
+    const config = carrier.weakPoints;
+    if (config === undefined) return;
+
+    const def = getEnemyDef(config.enemyId);
+    const parts: Enemy[] = [];
+
+    for (let i = 0; i < config.mounts.length; i += 1) {
+      const part = this.pool.obtain();
+      // Pool dry: the boss simply carries fewer parts rather than allocating.
+      if (part === null) break;
+      this.placeAndTrack(part, def, boss.lane, this.levelHpMultiplier, boss.x);
+      parts.push(part);
+    }
+
+    boss.setWeakPoints(parts);
+  }
+
   despawn(enemy: Enemy): void {
+    // Parts are carried, so they go with their carrier rather than hanging in
+    // the air where it used to be.
+    if (enemy === this.boss) this.despawnWeakPoints();
+
     enemy.deactivate();
     this.removeFromLive(enemy);
     // The boss is a singleton, not a pool member.
     if (enemy !== this.boss) {
       this.pool.release(enemy);
+    }
+  }
+
+  private despawnWeakPoints(): void {
+    const boss = this.boss;
+    if (boss === null) return;
+
+    for (const part of this.live.slice()) {
+      if (part === boss || !part.isAnchored) continue;
+      part.deactivate();
+      this.removeFromLive(part);
+      this.pool.release(part);
     }
   }
 

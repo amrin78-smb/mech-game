@@ -11,7 +11,7 @@
     "armorClass": { "enum": ["light", "armored", "shielded", "swarm"] },
     "hp": { "type": "number", "exclusiveMinimum": 0 },
     "shieldHp": { "type": "number", "minimum": 0, "description": "Separate pool, only meaningful with the shielded behavior" },
-    "speed": { "type": "number", "exclusiveMinimum": 0, "description": "px per second at 1x world scale" },
+    "speed": { "type": "number", "minimum": 0, "description": "px per second at 1x world scale; 0 for anchored parts, which are carried rather than walking" },
     "damage": { "type": "number", "minimum": 0 },
     "attackRange": { "type": "number", "minimum": 0, "description": "0 or absent means melee contact range" },
     "attackInterval": { "type": "number", "exclusiveMinimum": 0, "description": "seconds between attacks" },
@@ -21,8 +21,37 @@
     "flying": { "type": "boolean", "default": false },
     "behaviors": {
       "type": "array",
-      "items": { "enum": ["melee", "ranged", "burrow", "spawner", "shielded", "barrier", "burner"] },
+      "items": { "enum": ["melee", "ranged", "burrow", "spawner", "shielded", "barrier", "burner", "anchored"] },
       "uniqueItems": true
+    },
+    "weakPoints": {
+      "type": "object",
+      "description": "Destructible parts carried on this enemy's body, each a targetable enemy of its own",
+      "required": ["enemyId", "mounts", "bodyDamageFactor"],
+      "additionalProperties": false,
+      "properties": {
+        "enemyId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "mounts": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Offsets as fractions of the carrier's display size, so art swaps keep them on the hull",
+          "items": {
+            "type": "object",
+            "required": ["x", "y"],
+            "additionalProperties": false,
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" }
+            }
+          }
+        },
+        "bodyDamageFactor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Share of incoming damage the body takes while any part still lives"
+        }
+      }
     },
     "burnZone": {
       "type": "object",

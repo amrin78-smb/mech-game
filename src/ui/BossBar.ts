@@ -17,6 +17,12 @@ const BAR_BORDER = 0xc9a227;
 const FILL_PHASE_1 = 0xc23b2a;
 const FILL_PHASE_2 = 0xff7a3d;
 const TEXT_COLOR = '#e8dcc6';
+/** Weak point pips, so "why is this thing barely taking damage" is answerable. */
+const PIP_SIZE = 11;
+const PIP_GAP = 17;
+const PIP_INTACT = 0xffd166;
+const PIP_DESTROYED = 0x4a443c;
+const MAX_PIPS = 6;
 
 export class BossBar {
   private readonly frame: Phaser.GameObjects.Rectangle;
@@ -24,9 +30,13 @@ export class BossBar {
   private readonly name: Phaser.GameObjects.Text;
   private readonly phase: Phaser.GameObjects.Text;
   private readonly fillWidthMax: number;
+  private readonly barRight: number;
+
+  private readonly pips: Phaser.GameObjects.Rectangle[] = [];
 
   private lastFraction = -1;
   private lastPhase = -1;
+  private lastAlive = -1;
 
   constructor(scene: Phaser.Scene, width: number) {
     const barWidth = width * BAR_WIDTH_FRACTION;
@@ -65,6 +75,19 @@ export class BossBar {
       .setScrollFactor(0)
       .setDepth(Depths.HUD + 1);
 
+    // Built up front like everything else; only visibility changes in a fight.
+    for (let i = 0; i < MAX_PIPS; i += 1) {
+      this.pips.push(
+        scene.add
+          .rectangle(0, BAR_TOP + BAR_HEIGHT * 0.5, PIP_SIZE, PIP_SIZE, PIP_INTACT)
+          .setAngle(45)
+          .setScrollFactor(0)
+          .setDepth(Depths.HUD + 2)
+          .setVisible(false),
+      );
+    }
+
+    this.barRight = left + barWidth;
     this.fillWidthMax = barWidth - 4;
     this.setVisible(false);
   }
@@ -73,6 +96,17 @@ export class BossBar {
     this.name.setText(boss.definition?.name ?? 'BOSS');
     this.lastFraction = -1;
     this.lastPhase = -1;
+    this.lastAlive = -1;
+
+    const total = Math.min(boss.weakPointsTotal, MAX_PIPS);
+    for (let i = 0; i < this.pips.length; i += 1) {
+      const shown = i < total;
+      // Laid out to the right of the bar so they never sit over the name.
+      this.pips[i].setPosition(this.barRight + 18 + i * PIP_GAP, this.pips[i].y);
+      this.pips[i].setFillStyle(PIP_INTACT);
+      this.pips[i].setVisible(shown);
+    }
+
     this.setVisible(true);
   }
 
@@ -88,10 +122,20 @@ export class BossBar {
       this.fill.width = this.fillWidthMax * fraction;
     }
 
+    const alive = boss.weakPointsAlive;
+    if (alive !== this.lastAlive) {
+      this.lastAlive = alive;
+      const total = Math.min(boss.weakPointsTotal, MAX_PIPS);
+      for (let i = 0; i < total; i += 1) {
+        this.pips[i].setFillStyle(i < alive ? PIP_INTACT : PIP_DESTROYED);
+      }
+    }
+
     if (boss.phase !== this.lastPhase) {
       this.lastPhase = boss.phase;
       this.fill.fillColor = boss.phase >= 2 ? FILL_PHASE_2 : FILL_PHASE_1;
-      this.phase.setText(boss.phase >= 2 ? 'PHASE 2  ENRAGED' : '');
+      // A vented Leviathan climbs past phase 2, so say which step it is on.
+      this.phase.setText(boss.phase >= 2 ? `ENRAGED  ${boss.phase - 1}` : '');
     }
   }
 
@@ -100,5 +144,9 @@ export class BossBar {
     this.fill.setVisible(visible);
     this.name.setVisible(visible);
     this.phase.setVisible(visible);
+    if (visible) return;
+    for (const pip of this.pips) {
+      pip.setVisible(false);
+    }
   }
 }

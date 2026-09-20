@@ -9,6 +9,12 @@ import type { ArmorClass, DamageType, EnemyDef } from '../types';
 export interface DamageTarget {
   readonly definition: EnemyDef | null;
   readonly hasShield: boolean;
+  /**
+   * Optional share of a hit this target actually takes, applied after the
+   * matrix. Absent means 1; the Leviathan's body uses it to shrug off fire
+   * while its vents still live.
+   */
+  readonly damageTakenScale?: number;
   absorbWithShield(amount: number): number;
   applyDamage(amount: number): boolean;
 }
@@ -57,7 +63,9 @@ export class DamageSystem {
   applyToEnemy(enemy: DamageTarget, baseDamage: number, damageType: DamageType): DamageResult {
     const def = enemy.definition;
     const multiplier = def ? this.multiplierFor(damageType, def.armorClass) : 1;
-    const amount = baseDamage * multiplier;
+    // Applied after the matrix, so it scales a hit rather than replacing the
+    // rules. The Leviathan's body uses it to shrug off fire while its vents live.
+    const amount = baseDamage * multiplier * (enemy.damageTakenScale ?? 1);
 
     this.result.multiplier = multiplier;
     this.result.hitShield = false;

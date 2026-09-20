@@ -338,6 +338,11 @@
           "minimum": 0,
           "description": "seconds a damaged enemy stays tinted"
         },
+        "hitFlashCooldown": {
+          "type": "number",
+          "minimum": 0,
+          "description": "seconds after a flash before another can start, so a target under sustained fire keeps its silhouette"
+        },
         "hitFlashTint": {
           "type": "integer",
           "minimum": 0,

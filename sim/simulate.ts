@@ -122,6 +122,8 @@ class SimEnemy implements DamageTarget {
   spawnTimer: number;
   /** Active damage over time pools left by chemical rounds. */
   dots: Array<{ dps: number; remaining: number; type: WeaponDef['damageType'] }> = [];
+  /** Destructible parts riding on this enemy, empty for everything but a carrier. */
+  parts: SimEnemy[] = [];
 
   constructor(def: EnemyDef, x: number, hpMultiplier: number) {
     this.definition = def;
@@ -138,6 +140,13 @@ class SimEnemy implements DamageTarget {
 
   get hasShield(): boolean {
     return this.shield > 0;
+  }
+
+  /** A carrier shrugs off most of a hit while any of its parts still lives. */
+  get damageTakenScale(): number {
+    const factor = this.definition?.weakPoints?.bodyDamageFactor;
+    if (factor === undefined || this.parts.length === 0) return 1;
+    return this.parts.some((part) => part.isAlive) ? factor : 1;
   }
 
   absorbWithShield(amount: number): number {
@@ -178,6 +187,8 @@ export interface LevelReport {
   levelId: string;
   levelName: string;
   won: boolean;
+  /** Hit the time cap with enemies still standing: not a win, and not a clean loss. */
+  stalled: boolean;
   clearSeconds: number;
   damageTaken: number;
   hullRemaining: number;
@@ -227,6 +238,7 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
   }));
 
   let bossSpawned = level.boss === undefined;
+  let cleared = false;
   const live: SimEnemy[] = [];
   const shots: Shot[] = [];
 
@@ -249,8 +261,10 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
     1 / turret.fireRate,
   );
 
-  const spawn = (def: EnemyDef, hpMultiplier: number, x: number): void => {
-    live.push(new SimEnemy(def, x, hpMultiplier));
+  const spawn = (def: EnemyDef, hpMultiplier: number, x: number): SimEnemy => {
+    const enemy = new SimEnemy(def, x, hpMultiplier);
+    live.push(enemy);
+    return enemy;
   };
 
   while (time < MAX_SECONDS) {
@@ -270,14 +284,36 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
       }
     }
     if (!bossSpawned && level.boss !== undefined && time >= level.boss.time) {
-      spawn(getEnemyDef(level.boss.enemyId), levelHp * (level.boss.hpMultiplier ?? 1), spawnX);
+      const bossDef = getEnemyDef(level.boss.enemyId);
+      const boss = spawn(bossDef, levelHp * (level.boss.hpMultiplier ?? 1), spawnX);
       bossSpawned = true;
+
+      // Carried parts ride at the carrier's x, so the 1d field puts them in
+      // front of it and the closest first rule picks them up naturally.
+      const carried = bossDef.weakPoints;
+      if (carried !== undefined) {
+        const partDef = getEnemyDef(carried.enemyId);
+        for (let i = 0; i < carried.mounts.length; i += 1) {
+          boss.parts.push(spawn(partDef, levelHp, spawnX));
+        }
+      }
+    }
+
+    // Carried parts ride their carrier rather than walking, so they come into
+    // engagement range with it. Without this they sit at the spawn line where
+    // nothing can shoot them, and the carrier stays shielded for ever.
+    for (const enemy of live) {
+      if (enemy.parts.length === 0 || !enemy.isAlive) continue;
+      for (const part of enemy.parts) {
+        part.x = enemy.x;
+      }
     }
 
     // Enemy movement, attacks and broods ---------------------------------
     for (const enemy of live) {
       const def = enemy.definition;
       if (def === null || !enemy.isAlive) continue;
+      if (def.behaviors.includes('anchored')) continue;
 
       if (def.spawns !== undefined && enemy.spawnsRemaining > 0) {
         enemy.spawnTimer -= STEP;
@@ -463,17 +499,24 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
     }
 
     const timelineDone = waves.every((wave) => wave.spawned >= wave.entry.count) && bossSpawned;
-    if (timelineDone && live.length === 0) break;
+    if (timelineDone && live.length === 0) {
+      cleared = true;
+      break;
+    }
   }
 
   leaked = live.filter((enemy) => enemy.inRange).length;
-  const won = hull.hp > 0;
+  // Surviving the clock with the field still full is a stall, not a victory.
+  // Scoring it as a win hid a boss that simply could not be chewed through.
+  const stalled = !cleared && hull.hp > 0;
+  const won = hull.hp > 0 && cleared;
   const hullFraction = hullMax <= 0 ? 0 : hull.hp / hullMax;
 
   return {
     levelId: level.id,
     levelName: level.name,
     won,
+    stalled,
     clearSeconds: time,
     damageTaken,
     hullRemaining: hull.hp,
@@ -576,16 +619,18 @@ function main(): void {
   console.log('-'.repeat(header.length));
 
   let failures = 0;
+  let stalls = 0;
 
   for (const level of selected) {
     const report = simulateLevel(level, options, damage);
     if (!report.won) failures += 1;
+    if (report.stalled) stalls += 1;
 
     console.log(
       [
         report.levelId.padEnd(9),
         report.levelName.slice(0, 22).padEnd(22),
-        (report.won ? 'WIN' : 'LOSS').padEnd(7),
+        (report.won ? 'WIN' : report.stalled ? 'STALL' : 'LOSS').padEnd(7),
         `${report.clearSeconds.toFixed(1)}s`.padStart(7),
         Math.round(report.damageTaken).toString().padStart(8),
         `${Math.round(report.hullRemaining)}/${report.hullMax}`.padStart(11),
@@ -603,7 +648,8 @@ function main(): void {
 
   console.log(
     `\n${selected.length - failures} / ${selected.length} cleared` +
-      (failures > 0 ? `, ${failures} loss(es)` : ''),
+      (failures > 0 ? `, ${failures} loss(es)` : '') +
+      (stalls > 0 ? `, ${stalls} of those a stall at the ${MAX_SECONDS}s cap` : ''),
   );
 }
 

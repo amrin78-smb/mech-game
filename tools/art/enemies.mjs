@@ -65,6 +65,35 @@ function eye(ctx, cx, cy, r, color = 'rgba(255,120,70,0.85)') {
 }
 
 const DRAW = {
+  // A destructible vent bolted to the Leviathan: dark housing, hot grille.
+  // It has to read as a target at a glance while riding on a busy boss sprite.
+  leviathan_vent(ctx, w, h, ramp, rng) {
+    roundedPath(ctx, 1.5, 1.5, w - 3, h - 3, 3);
+    fillRamp(ctx, 0, h, ramp);
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+
+    // Glowing louvres across the face.
+    const slots = 4;
+    const pad = w * 0.18;
+    const slotW = (w - pad * 2) / slots;
+    for (let i = 0; i < slots; i += 1) {
+      const x = pad + i * slotW;
+      const glow = ctx.createLinearGradient(0, h * 0.24, 0, h * 0.76);
+      glow.addColorStop(0, 'rgba(255,190,80,0.95)');
+      glow.addColorStop(1, 'rgba(226,84,20,0.9)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(x + slotW * 0.16, h * 0.24, slotW * 0.62, h * 0.52);
+    }
+
+    // Bolted frame, so it looks attached rather than painted on.
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pad * 0.55, h * 0.18, w - pad * 1.1, h * 0.64);
+    streaks(ctx, 2, 2, w - 4, h, rng, { count: 3, alpha: 0.3 });
+  },
+
   rustcrawler(ctx, w, h, ramp, rng) {
     const treadH = Math.round(h * 0.3);
     const bodyH = h - treadH;

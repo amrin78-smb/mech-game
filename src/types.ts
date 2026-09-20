@@ -13,7 +13,8 @@ export type EnemyBehavior =
   | 'spawner'
   | 'shielded'
   | 'barrier'
-  | 'burner';
+  | 'burner'
+  | 'anchored';
 export type WeaponSlot = 'main' | 'turret';
 export type ProjectileKind = 'ballistic' | 'lobbed' | 'hitscan';
 export type TargetPriority = 'focus' | 'ranged_in_range' | 'closest';
@@ -69,6 +70,21 @@ export interface EnemyDef {
     enemyId: string;
     count: number;
     interval: number;
+  };
+  /**
+   * Destructible parts carried on this enemy's body, each a real targetable
+   * enemy of its own (GAME_DESIGN section 6, The Leviathan Engine).
+   *
+   * Mounts are fractions of the carrier's display size rather than px, so
+   * swapping the art for a different sized sprite keeps them on the hull.
+   * While any part lives the body only takes `bodyDamageFactor` of incoming
+   * damage, which is what makes shooting the parts the right play rather than
+   * an optional flourish.
+   */
+  weakPoints?: {
+    enemyId: string;
+    mounts: Array<{ x: number; y: number }>;
+    bodyDamageFactor: number;
   };
 }
 
@@ -300,6 +316,8 @@ export interface Tuning {
     scrapPickupRiseSpeed: number;
     scrapPickupLifetime: number;
     hitFlashDuration: number;
+  /** Gap enforced between flashes, so sustained fire cannot bleach a sprite. */
+  hitFlashCooldown: number;
     hitFlashTint: number;
     damageNumberRise: number;
     damageNumberLifetime: number;

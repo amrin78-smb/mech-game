@@ -13,8 +13,10 @@ import { Enemy, type EnemyUpdateContext } from './Enemy';
  *   shield_cycler  Iron Matriarch. Alternates shield up phases, which only
  *                  piercing meaningfully dents, with vulnerable vent phases.
  *                  Its drone broods come from the spawner behaviour in data.
- *   enrager        The Leviathan Engine. Steps up at each hp threshold, getting
- *                  faster and hitting harder as its weak points fail.
+ *   enrager        The Leviathan Engine. Steps up each time one of its
+ *                  destructible vents is destroyed, getting faster and hitting
+ *                  harder. With no vents mounted it falls back to hp
+ *                  thresholds, so the kind still works for a plain boss.
  */
 const DEFAULTS = tuning.boss.default;
 
@@ -33,6 +35,12 @@ export class Boss extends Enemy {
 
   /** enrager */
   private enrageStage = 0;
+
+  /**
+   * Destructible parts riding on the hull. The Boss owns placing them, so the
+   * link lives here rather than being threaded through the update context.
+   */
+  private weakPoints: Enemy[] = [];
 
   override get isBoss(): boolean {
     return true;
@@ -53,6 +61,53 @@ export class Boss extends Enemy {
 
   get kind(): BossPhaseConfig['kind'] {
     return this.config.kind;
+  }
+
+  /** Parts still standing, which the boss bar reports. */
+  get weakPointsAlive(): number {
+    let alive = 0;
+    for (const part of this.weakPoints) {
+      if (part.isAlive) alive += 1;
+    }
+    return alive;
+  }
+
+  get weakPointsTotal(): number {
+    return this.weakPoints.length;
+  }
+
+  /**
+   * The body shrugs off most of a hit while any part still lives, which is what
+   * makes shooting the vents the right play rather than an optional flourish.
+   */
+  override get damageTakenScale(): number {
+    const factor = this.def?.weakPoints?.bodyDamageFactor;
+    if (factor === undefined || this.weakPointsAlive === 0) return 1;
+    return factor;
+  }
+
+  /** Called by the spawner once it has pooled the parts for this boss. */
+  setWeakPoints(parts: Enemy[]): void {
+    this.weakPoints = parts;
+    this.placeWeakPoints();
+  }
+
+  /**
+   * Parts are carried, not driven: their position is the boss's, offset by a
+   * fraction of its display size so art swaps keep them on the hull.
+   */
+  private placeWeakPoints(): void {
+    const mounts = this.def?.weakPoints?.mounts;
+    if (mounts === undefined) return;
+
+    const width = this.bodyWidth;
+    const height = this.bodyHeight;
+
+    for (let i = 0; i < this.weakPoints.length && i < mounts.length; i += 1) {
+      const part = this.weakPoints[i];
+      if (!part.active) continue;
+      part.setPosition(this.x + mounts[i].x * width, this.y + mounts[i].y * height);
+    }
   }
 
   /** True exactly once per phase transition, so the scene can react and move on. */
@@ -87,6 +142,8 @@ export class Boss extends Enemy {
   }
 
   protected override updateBehavior(deltaSeconds: number, _ctx: EnemyUpdateContext): void {
+    this.placeWeakPoints();
+
     switch (this.config.kind) {
       case 'charger':
         this.updateCharger(deltaSeconds);
@@ -136,15 +193,22 @@ export class Boss extends Enemy {
     }
   }
 
-  /** Each threshold crossed is another weak point gone: faster and angrier. */
+  /** Each vent destroyed is a step up: faster and angrier. */
   private updateEnrager(): void {
+    if (this.weakPoints.length > 0) {
+      const destroyed = this.weakPoints.length - this.weakPointsAlive;
+      while (this.enrageStage < destroyed) {
+        this.enrageStage += 1;
+        this.enterPhase(this.enrageStage + 1);
+      }
+      return;
+    }
+
+    // No parts mounted: fall back to hp thresholds so the kind still works.
     const thresholds = this.config.enrageThresholds ?? [];
     const fraction = this.healthFraction;
 
-    while (
-      this.enrageStage < thresholds.length &&
-      fraction <= thresholds[this.enrageStage]
-    ) {
+    while (this.enrageStage < thresholds.length && fraction <= thresholds[this.enrageStage]) {
       this.enrageStage += 1;
       this.enterPhase(this.enrageStage + 1);
     }
@@ -173,6 +237,7 @@ export class Boss extends Enemy {
 
   override deactivate(): void {
     super.deactivate();
+    this.weakPoints = [];
     this.phaseIndex = 1;
     this.charging = false;
     this.venting = false;

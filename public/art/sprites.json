@@ -340,9 +340,29 @@
         "h": 28
       }
     },
-    "mecha_turret": {
+    "enemy_leviathan_vent": {
       "frame": {
         "x": 628,
+        "y": 154,
+        "w": 34,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 34,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 34,
+        "h": 28
+      }
+    },
+    "mecha_turret": {
+      "frame": {
+        "x": 664,
         "y": 154,
         "w": 54,
         "h": 20
@@ -362,7 +382,7 @@
     },
     "enemy_drone_swarm": {
       "frame": {
-        "x": 684,
+        "x": 720,
         "y": 154,
         "w": 21,
         "h": 18
@@ -382,7 +402,7 @@
     },
     "scrap_pickup": {
       "frame": {
-        "x": 707,
+        "x": 743,
         "y": 154,
         "w": 16,
         "h": 16
@@ -402,7 +422,7 @@
     },
     "projectile_flak": {
       "frame": {
-        "x": 725,
+        "x": 761,
         "y": 154,
         "w": 12,
         "h": 8
@@ -422,7 +442,7 @@
     },
     "spark": {
       "frame": {
-        "x": 739,
+        "x": 775,
         "y": 154,
         "w": 8,
         "h": 8
@@ -442,7 +462,7 @@
     },
     "projectile_shell": {
       "frame": {
-        "x": 749,
+        "x": 785,
         "y": 154,
         "w": 16,
         "h": 6
@@ -462,7 +482,7 @@
     },
     "debris": {
       "frame": {
-        "x": 767,
+        "x": 803,
         "y": 154,
         "w": 9,
         "h": 6
@@ -482,7 +502,7 @@
     },
     "ui_pixel": {
       "frame": {
-        "x": 778,
+        "x": 814,
         "y": 154,
         "w": 1,
         "h": 1

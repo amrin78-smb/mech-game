@@ -53,6 +53,7 @@ export class Enemy extends Phaser.GameObjects.Container {
 
   private laneIndex = 0;
   private flashRemaining = 0;
+  private flashCooldown = 0;
   private spawnTimer = 0;
   private spawnsRemaining = 0;
 
@@ -186,6 +187,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.attackTimer = 0;
     this.inRange = false;
     this.flashRemaining = 0;
+    this.flashCooldown = 0;
     this.spawnsRemaining = def.spawns?.count ?? 0;
     this.spawnTimer = def.spawns?.interval ?? 0;
 
@@ -214,11 +216,24 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.onSpawned();
   }
 
+  /**
+   * An `anchored` part is carried by something else: it never walks and never
+   * attacks, and its carrier places it each frame. The Leviathan's vents are
+   * ordinary enemies in every other respect, which is how they get targeting,
+   * collision, damage numbers and a death for free.
+   */
+  get isAnchored(): boolean {
+    return this.def !== null && this.def.behaviors.includes('anchored');
+  }
+
   override update(deltaSeconds: number, ctx: EnemyUpdateContext): void {
     const def = this.def;
     if (!this.active || def === null) return;
 
     this.updateFlash(deltaSeconds);
+
+    if (this.isAnchored) return;
+
     this.updateSpawner(deltaSeconds, ctx);
     this.updateBehavior(deltaSeconds, ctx);
 
@@ -283,6 +298,14 @@ export class Enemy extends Phaser.GameObjects.Container {
     const block = ctx.blockXFor(this.lane);
     if (block === null) return atMecha;
     return Math.max(atMecha, block + this.sprite.displayWidth * 0.5);
+  }
+
+  /**
+   * Share of incoming damage this enemy actually takes. DamageSystem reads it
+   * after the armor matrix, so it scales a hit rather than replacing the rules.
+   */
+  get damageTakenScale(): number {
+    return 1;
   }
 
   get hasShield(): boolean {
@@ -366,21 +389,27 @@ export class Enemy extends Phaser.GameObjects.Container {
   /**
    * White hot tint on hit, cleared by the timer in update.
    *
-   * Re-flashing while one is already running is skipped: a boss under three
-   * turrets takes hits faster than the flash expires, and holding the fill on
-   * turns it into a solid silhouette-less blob.
+   * Skipping a re-flash while one runs is not enough on its own. A piercing
+   * shot through a carrier and its parts, with three turrets also firing,
+   * lands hits faster than the flash expires, so the sprite was lit again the
+   * instant it cleared and the Leviathan turned into a white blob with no
+   * silhouette. The cooldown enforces a gap, capping how much of the time any
+   * target can be tinted however hard it is being shot.
    */
   flash(): void {
-    if (this.flashRemaining > 0) return;
+    if (this.flashRemaining > 0 || this.flashCooldown > 0) return;
     this.flashRemaining = tuning.vfx.hitFlashDuration;
     this.sprite.setTintFill(tuning.vfx.hitFlashTint);
   }
 
   private updateFlash(deltaSeconds: number): void {
+    if (this.flashCooldown > 0) this.flashCooldown -= deltaSeconds;
     if (this.flashRemaining <= 0) return;
+
     this.flashRemaining -= deltaSeconds;
     if (this.flashRemaining <= 0) {
       this.sprite.clearTint();
+      this.flashCooldown = tuning.vfx.hitFlashCooldown;
     }
   }
 
@@ -393,6 +422,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.spawnsRemaining = 0;
     this.inRange = false;
     this.flashRemaining = 0;
+    this.flashCooldown = 0;
     this.sprite.clearTint();
     this.barrier.setVisible(false);
     this.setActive(false);
