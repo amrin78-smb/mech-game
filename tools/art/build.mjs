@@ -36,13 +36,12 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
 const OUT_DIR = join(ROOT, 'public', 'art');
 
-/** Must match ENEMY_BASE_SIZE the gameplay was balanced against. */
-const ENEMY_BASE_SIZE = {
-  light: { width: 48, height: 32 },
-  armored: { width: 56, height: 46 },
-  shielded: { width: 52, height: 50 },
-  swarm: { width: 26, height: 22 },
-};
+/**
+ * Sprite size per armor class now lives in tuning.json, because the sim needs
+ * the same numbers to work out how wide a target is and a copy here would
+ * drift. Passed in from main rather than imported, to keep this file free of
+ * file reads.
+ */
 
 const BG_WIDTH = { sky: 256, ruins: 512, ground: 512 };
 const BG_HEIGHT = 720;
@@ -57,7 +56,7 @@ function render(width, height, draw) {
   return { canvas, width, height };
 }
 
-function buildSprites(enemies) {
+function buildSprites(enemies, enemyBaseSize) {
   const sprites = [];
   const add = (name, width, height, draw) =>
     sprites.push({ name, ...render(width, height, draw) });
@@ -79,7 +78,7 @@ function buildSprites(enemies) {
   add('ui_pixel', 1, 1, drawPixel);
 
   for (const def of enemies) {
-    const base = ENEMY_BASE_SIZE[def.armorClass];
+    const base = enemyBaseSize[def.armorClass];
     const width = Math.max(8, Math.round(base.width * def.scale));
     const height = Math.max(8, Math.round(base.height * def.scale));
     add(def.spriteKey, width, height, (ctx, w, h) => drawEnemy(ctx, def, w, h));
@@ -190,8 +189,11 @@ async function main() {
   const enemies = JSON.parse(
     readFileSync(join(ROOT, 'src', 'data', 'enemies.json'), 'utf8'),
   );
+  const tuning = JSON.parse(
+    readFileSync(join(ROOT, 'src', 'data', 'tuning.json'), 'utf8'),
+  );
 
-  const sprites = buildSprites(enemies);
+  const sprites = buildSprites(enemies, tuning.world.enemyBaseSize);
   const packed = pack(sprites);
   const frameCount = writeAtlas(packed);
   const bgCount = writeBackgrounds();

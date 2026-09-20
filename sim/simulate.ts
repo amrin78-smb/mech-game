@@ -14,6 +14,11 @@
  * weapons concerned: piercing is not modelled, so the Railgun scores as if it
  * hit one target per shot, and lobbed arcs fly straight.
  *
+ * Pellets and their cone are both modelled: rounds fan evenly across the
+ * spread, and one only lands if it is still inside the target's width at that
+ * range. That is what makes a scattergun devastating in close and wasteful far
+ * out, so the number reflects the weapon rather than flattering it.
+ *
  * Barriers are modelled, but the field here is one dimensional, so a shield
  * bearer screens every enemy behind it rather than only its own lane. That
  * overstates the screen, which again errs toward a harder rating than the game
@@ -375,7 +380,7 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
     if (target !== null) {
       while (mainCooldown >= mainInterval) {
         mainCooldown -= mainInterval;
-        shots.push(makeShot(target, main, main.baseDamage * dmgMult, mechaX, time));
+        pushRounds(shots, target, main, main.baseDamage * dmgMult, mechaX, time);
       }
     } else if (mainCooldown > mainInterval) {
       mainCooldown = mainInterval;
@@ -390,7 +395,7 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
       }
       while (turretCooldowns[i] >= turretInterval) {
         turretCooldowns[i] -= turretInterval;
-        shots.push(makeShot(target, turret, turret.baseDamage * turretDmgMult, mechaX, time));
+        pushRounds(shots, target, turret, turret.baseDamage * turretDmgMult, mechaX, time);
       }
     }
 
@@ -529,6 +534,45 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
     fireRateLevels,
     repairsBought,
   };
+}
+
+/** How wide a target is, from the same numbers the art generator sizes it with. */
+function targetWidth(target: SimEnemy): number {
+  const def = target.definition;
+  if (def === null) return 1;
+  return tuning.world.enemyBaseSize[def.armorClass].width * def.scale;
+}
+
+/**
+ * A trigger pull: one round for most weapons, a fan of them for a scattergun.
+ * Each pellet carries full damage, and only the ones still inside the target
+ * at that range land, which is the whole trade the weapon makes.
+ */
+function pushRounds(
+  shots: Shot[],
+  target: SimEnemy,
+  weapon: WeaponDef,
+  damageAmount: number,
+  fromX: number,
+  now: number,
+): void {
+  const pellets = weapon.projectile.pellets ?? 1;
+  if (pellets <= 1) {
+    shots.push(makeShot(target, weapon, damageAmount, fromX, now));
+    return;
+  }
+
+  const halfAngle = ((weapon.projectile.spreadDegrees ?? 0) * Math.PI) / 180;
+  const distance = Math.abs(target.x - fromX);
+  const reach = targetWidth(target) * 0.5;
+
+  for (let i = 0; i < pellets; i += 1) {
+    const t = (i / (pellets - 1)) * 2 - 1;
+    // Lateral miss distance of this pellet at the target's range.
+    const offset = Math.abs(Math.tan(t * halfAngle) * distance);
+    if (offset > reach) continue;
+    shots.push(makeShot(target, weapon, damageAmount, fromX, now));
+  }
 }
 
 function makeShot(

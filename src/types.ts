@@ -103,6 +103,14 @@ export interface WeaponDef {
     speed: number;
     aoeRadius?: number;
     pierce?: boolean;
+    /**
+     * Rounds released per shot. Each carries the full `baseDamage`, so a
+     * scattergun's damage is its pellet count times its listed damage at point
+     * blank and much less at range, where the cone has opened up.
+     */
+    pellets?: number;
+    /** Half angle of the cone in degrees; ignored with one pellet. */
+    spreadDegrees?: number;
     dot?: { dps: number; duration: number };
   };
   upgradeTrack: Array<{
@@ -210,6 +218,11 @@ export interface BossPhaseConfig {
   enrageDamageBonus?: number;
 }
 
+export interface EnemyBaseSize {
+  width: number;
+  height: number;
+}
+
 export interface Tuning {
   damageMatrix: Record<DamageType, ArmorMultipliers>;
   mecha: {
@@ -244,6 +257,13 @@ export interface Tuning {
     byId: Record<string, BossPhaseConfig>;
   };
   world: {
+    /**
+     * Placeholder sprite size per armor class, before an enemy's own `scale`.
+     * The art generator sizes its frames from this and the sim uses it to work
+     * out how wide a target is, so a scattergun cone can miss. One source, so
+     * the two cannot drift apart.
+     */
+    enemyBaseSize: Record<ArmorClass, EnemyBaseSize>;
     baseWidth: number;
     baseHeight: number;
     mechaXFraction: number;

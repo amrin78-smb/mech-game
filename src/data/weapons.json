@@ -6,12 +6,29 @@
     "damageType": "kinetic",
     "baseDamage": 22,
     "fireRate": 2.2,
-    "projectile": { "kind": "ballistic", "speed": 900 },
+    "projectile": {
+      "kind": "ballistic",
+      "speed": 900
+    },
     "upgradeTrack": [
-      { "costCores": 10, "damageBonus": 0.15 },
-      { "costCores": 20, "damageBonus": 0.15, "fireRateBonus": 0.1 },
-      { "costCores": 35, "damageBonus": 0.2 },
-      { "costCores": 55, "damageBonus": 0.2, "fireRateBonus": 0.15 }
+      {
+        "costCores": 10,
+        "damageBonus": 0.15
+      },
+      {
+        "costCores": 20,
+        "damageBonus": 0.15,
+        "fireRateBonus": 0.1
+      },
+      {
+        "costCores": 35,
+        "damageBonus": 0.2
+      },
+      {
+        "costCores": 55,
+        "damageBonus": 0.2,
+        "fireRateBonus": 0.15
+      }
     ]
   },
   {
@@ -21,11 +38,29 @@
     "damageType": "chemical",
     "baseDamage": 30,
     "fireRate": 0.8,
-    "projectile": { "kind": "lobbed", "speed": 520, "aoeRadius": 48, "dot": { "dps": 12, "duration": 3 } },
+    "projectile": {
+      "kind": "lobbed",
+      "speed": 520,
+      "aoeRadius": 48,
+      "dot": {
+        "dps": 12,
+        "duration": 3
+      }
+    },
     "upgradeTrack": [
-      { "costCores": 15, "damageBonus": 0.15 },
-      { "costCores": 30, "specialBonus": 4 },
-      { "costCores": 50, "damageBonus": 0.2, "specialBonus": 4 }
+      {
+        "costCores": 15,
+        "damageBonus": 0.15
+      },
+      {
+        "costCores": 30,
+        "specialBonus": 4
+      },
+      {
+        "costCores": 50,
+        "damageBonus": 0.2,
+        "specialBonus": 4
+      }
     ]
   },
   {
@@ -35,11 +70,24 @@
     "damageType": "piercing",
     "baseDamage": 90,
     "fireRate": 0.4,
-    "projectile": { "kind": "hitscan", "speed": 0, "pierce": true },
+    "projectile": {
+      "kind": "hitscan",
+      "speed": 0,
+      "pierce": true
+    },
     "upgradeTrack": [
-      { "costCores": 20, "damageBonus": 0.2 },
-      { "costCores": 40, "fireRateBonus": 0.15 },
-      { "costCores": 65, "damageBonus": 0.25 }
+      {
+        "costCores": 20,
+        "damageBonus": 0.2
+      },
+      {
+        "costCores": 40,
+        "fireRateBonus": 0.15
+      },
+      {
+        "costCores": 65,
+        "damageBonus": 0.25
+      }
     ]
   },
   {
@@ -49,11 +97,78 @@
     "damageType": "explosive",
     "baseDamage": 14,
     "fireRate": 1.6,
-    "projectile": { "kind": "ballistic", "speed": 700, "aoeRadius": 60 },
+    "projectile": {
+      "kind": "ballistic",
+      "speed": 700,
+      "aoeRadius": 60
+    },
     "upgradeTrack": [
-      { "costCores": 12, "damageBonus": 0.15 },
-      { "costCores": 24, "specialBonus": 10 },
-      { "costCores": 40, "damageBonus": 0.2 }
+      {
+        "costCores": 12,
+        "damageBonus": 0.15
+      },
+      {
+        "costCores": 24,
+        "specialBonus": 10
+      },
+      {
+        "costCores": 40,
+        "damageBonus": 0.2
+      }
+    ]
+  },
+  {
+    "id": "scattergun",
+    "name": "Scattergun",
+    "slot": "main",
+    "damageType": "kinetic",
+    "baseDamage": 11,
+    "fireRate": 1.1,
+    "projectile": {
+      "kind": "ballistic",
+      "speed": 760,
+      "pellets": 7,
+      "spreadDegrees": 7
+    },
+    "upgradeTrack": [
+      {
+        "costCores": 14,
+        "damageBonus": 0.18
+      },
+      {
+        "costCores": 30,
+        "fireRateBonus": 0.2
+      },
+      {
+        "costCores": 52,
+        "damageBonus": 0.25
+      }
+    ]
+  },
+  {
+    "id": "gatling_pod",
+    "name": "Gatling Pod",
+    "slot": "turret",
+    "damageType": "kinetic",
+    "baseDamage": 5,
+    "fireRate": 5.2,
+    "projectile": {
+      "kind": "ballistic",
+      "speed": 980
+    },
+    "upgradeTrack": [
+      {
+        "costCores": 12,
+        "fireRateBonus": 0.18
+      },
+      {
+        "costCores": 26,
+        "damageBonus": 0.2
+      },
+      {
+        "costCores": 44,
+        "fireRateBonus": 0.22
+      }
     ]
   }
 ]

@@ -1,4 +1,4 @@
-import { levels, pilots, tuning } from '../data/core';
+import { levels, pilots, tuning, weapons } from '../data/core';
 
 /**
  * Persistent progress in localStorage.
@@ -9,7 +9,7 @@ import { levels, pilots, tuning } from '../data/core';
  * falls back to a fresh one rather than crashing the game.
  */
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 const STORAGE_KEY = 'scrap-titan.save';
 
 /** Player settings, added in save version 2. */
@@ -47,6 +47,8 @@ export interface SaveData {
   /** Weapon id to Hangar card level; presence means unlocked. */
   weapons: Record<string, number>;
   equippedMain: string;
+  /** Weapon fitted to every turret mount. */
+  equippedTurret: string;
   /** Turret mounts fitted, at least 1. */
   turretMounts: number;
   hullLevel: number;
@@ -56,6 +58,21 @@ export interface SaveData {
   settings: SaveSettings;
   /** Furthest wave reached in endless mode. */
   bestEndlessWave: number;
+}
+
+/**
+ * The turret weapon a save starts on, and what an older save is migrated to:
+ * the first turret slot weapon listed as a starting weapon, else the first
+ * turret weapon there is. Authoring a new turret never changes this.
+ */
+function defaultTurretId(): string {
+  const turrets = weapons.filter((weapon) => weapon.slot === 'turret');
+  const starting = turrets.find((weapon) => tuning.meta.startingWeapons.includes(weapon.id));
+  const chosen = starting ?? turrets[0];
+  if (chosen === undefined) {
+    throw new Error('No weapon with slot "turret" in src/data/weapons.json');
+  }
+  return chosen.id;
 }
 
 /** A migration takes the previous shape and returns the next one. */
@@ -68,6 +85,9 @@ type Migration = (save: SaveData) => SaveData;
 const MIGRATIONS: Record<number, Migration> = {
   1: (save) => ({ ...save, version: 2, settings: defaultSettings() }),
   2: (save) => ({ ...save, version: 3, bestEndlessWave: 0 }),
+  // Turrets used to be the only turret weapon there was, so an existing save
+  // keeps flying the Flak Turret it has always had.
+  3: (save) => ({ ...save, version: 4, equippedTurret: defaultTurretId() }),
 };
 
 export function createFreshSave(): SaveData {
@@ -82,6 +102,7 @@ export function createFreshSave(): SaveData {
     levels: {},
     weapons,
     equippedMain: tuning.meta.startingWeapons[0],
+    equippedTurret: defaultTurretId(),
     turretMounts: 1,
     hullLevel: 0,
     pilots: {},
@@ -217,6 +238,16 @@ export class SaveManager {
   upgradeWeapon(weaponId: string): void {
     this.data.weapons[weaponId] = this.weaponLevel(weaponId) + 1;
     this.persist();
+  }
+
+  equipTurret(weaponId: string): void {
+    if (!this.ownsWeapon(weaponId)) return;
+    this.data.equippedTurret = weaponId;
+    this.persist();
+  }
+
+  get equippedTurret(): string {
+    return this.data.equippedTurret;
   }
 
   equipMain(weaponId: string): void {

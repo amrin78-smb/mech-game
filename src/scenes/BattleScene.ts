@@ -284,9 +284,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private turretWeaponId(): string {
-    const turret = weapons.find((weapon) => weapon.slot === 'turret');
-    if (!turret) throw new Error('No weapon with slot "turret" in src/data/weapons.json');
-    return turret.id;
+    return this.saves.equippedTurret;
   }
 
   override update(_time: number, delta: number): void {

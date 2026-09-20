@@ -21,6 +21,8 @@
         "speed": { "type": "number", "minimum": 0, "description": "px per second, ignored for hitscan" },
         "aoeRadius": { "type": "number", "minimum": 0 },
         "pierce": { "type": "boolean", "default": false },
+        "pellets": { "type": "integer", "minimum": 1, "description": "rounds released per shot, each carrying full damage" },
+        "spreadDegrees": { "type": "number", "minimum": 0, "description": "half angle of the cone; ignored with one pellet" },
         "dot": {
           "type": "object",
           "description": "Damage over time pool left on impact",

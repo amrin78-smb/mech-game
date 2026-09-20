@@ -213,10 +213,39 @@ export class WeaponSystem {
       return;
     }
 
-    if (!this.projectiles.fire(muzzle.x, muzzle.y, rotation, this.spec)) return;
+    if (!this.fireRounds(muzzle.x, muzzle.y, rotation)) return;
 
     this.mecha.kickCannon();
     this.onShotFired(muzzle.x, muzzle.y, rotation, isManual);
+  }
+
+  /**
+   * Releases the shot's rounds. One for most weapons; a scattergun throws a
+   * cone of them, each carrying full damage, so it is devastating up close and
+   * wasteful at range once the cone has opened past the target.
+   *
+   * Returns false only when nothing at all was fired, so the caller can skip
+   * its recoil and muzzle flash.
+   */
+  private fireRounds(x: number, y: number, rotation: number): boolean {
+    const pellets = this.weapon.projectile.pellets ?? 1;
+    if (pellets <= 1) {
+      return this.projectiles.fire(x, y, rotation, this.spec);
+    }
+
+    const halfAngle = Phaser.Math.DegToRad(this.weapon.projectile.spreadDegrees ?? 0);
+    let fired = false;
+
+    for (let i = 0; i < pellets; i += 1) {
+      // Even fan rather than random, so the pattern is the weapon's signature
+      // instead of a different gun every trigger pull.
+      const t = pellets === 1 ? 0 : (i / (pellets - 1)) * 2 - 1;
+      if (this.projectiles.fire(x, y, rotation + t * halfAngle, this.spec)) {
+        fired = true;
+      }
+    }
+
+    return fired;
   }
 
   reset(): void {

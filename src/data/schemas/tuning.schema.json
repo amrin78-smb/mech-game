@@ -201,6 +201,31 @@
       ],
       "additionalProperties": false,
       "properties": {
+        "enemyBaseSize": {
+          "type": "object",
+          "description": "Placeholder sprite size per armor class before the enemy's own scale; read by the art generator and by the sim's spread model",
+          "required": [
+            "light",
+            "armored",
+            "shielded",
+            "swarm"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "light": {
+              "$ref": "#/$defs/size"
+            },
+            "armored": {
+              "$ref": "#/$defs/size"
+            },
+            "shielded": {
+              "$ref": "#/$defs/size"
+            },
+            "swarm": {
+              "$ref": "#/$defs/size"
+            }
+          }
+        },
         "baseWidth": {
           "type": "number",
           "exclusiveMinimum": 0
@@ -788,6 +813,26 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "size": {
+      "type": "object",
+      "required": [
+        "width",
+        "height"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     }

@@ -72,7 +72,25 @@
     },
     "maxFrameSeconds": 0.05,
     "burrowSpawnXFraction": 0.62,
-    "flyingYOffset": 104
+    "flyingYOffset": 104,
+    "enemyBaseSize": {
+      "light": {
+        "width": 48,
+        "height": 32
+      },
+      "armored": {
+        "width": 56,
+        "height": 46
+      },
+      "shielded": {
+        "width": 52,
+        "height": 50
+      },
+      "swarm": {
+        "width": 26,
+        "height": 22
+      }
+    }
   },
   "inBattleUpgrades": {
     "damage": {
@@ -175,7 +193,9 @@
     ],
     "weaponUnlockCosts": {
       "acid_spitter": 45,
-      "railgun": 80
+      "railgun": 80,
+      "scattergun": 55,
+      "gatling_pod": 60
     },
     "turretMountCosts": [
       35,

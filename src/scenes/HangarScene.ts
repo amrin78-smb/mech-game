@@ -74,7 +74,7 @@ export class HangarScene extends Phaser.Scene {
       .setOrigin(1, 0);
 
     this.renderWeapons(width);
-    this.renderChassis(width);
+    this.renderTurretsAndChassis(width);
     this.renderPilots(width);
 
     createTextButton(this, width * 0.5, height - 40, 'BACK', () => {
@@ -99,7 +99,7 @@ export class HangarScene extends Phaser.Scene {
   private weaponCard(weapon: WeaponDef, x: number, y: number): void {
     const owned = this.saves.ownsWeapon(weapon.id);
     const level = this.saves.weaponLevel(weapon.id);
-    const equipped = this.saves.equippedMain === weapon.id;
+    const equipped = this.equippedIn(weapon.slot) === weapon.id;
     const maxed = level >= weapon.upgradeTrack.length;
 
     const lines = [
@@ -139,7 +139,7 @@ export class HangarScene extends Phaser.Scene {
         cost: 0,
         enabled: true,
         run: () => {
-          this.saves.equipMain(weapon.id);
+          this.equip(weapon);
           this.rebuild();
         },
       };
@@ -162,17 +162,42 @@ export class HangarScene extends Phaser.Scene {
     };
   }
 
-  // Chassis ----------------------------------------------------------------
+  /** Which weapon is fitted in a slot, so one card renderer serves both. */
+  private equippedIn(slot: WeaponDef['slot']): string {
+    return slot === 'turret' ? this.saves.equippedTurret : this.saves.equippedMain;
+  }
 
-  private renderChassis(width: number): void {
+  private equip(weapon: WeaponDef): void {
+    if (weapon.slot === 'turret') {
+      this.saves.equipTurret(weapon.id);
+      return;
+    }
+    this.saves.equipMain(weapon.id);
+  }
+
+  // Turrets and chassis ------------------------------------------------------
+
+  /**
+   * One row, because four sections do not fit the canvas vertically. Turret
+   * weapons sit next to the mounts they are fitted to, which is also where you
+   * want them when deciding what to spend on.
+   */
+  private renderTurretsAndChassis(width: number): void {
     const y = COLUMN_TOP + CARD_HEIGHT + 56;
-    this.sectionLabel(24, y - 24, 'CHASSIS');
-
-    const rowWidth = 2 * CARD_WIDTH + CARD_GAP;
+    const turrets = weapons.filter((weapon) => weapon.slot === 'turret');
+    const cards = turrets.length + 2;
+    const rowWidth = cards * CARD_WIDTH + (cards - 1) * CARD_GAP;
     const startX = (width - rowWidth) * 0.5;
 
-    this.card(startX, y, this.hullLines(), this.hullAction(), false);
-    this.card(startX + CARD_WIDTH + CARD_GAP, y, this.mountLines(), this.mountAction(), false);
+    this.sectionLabel(startX, y - 24, 'TURRET WEAPON');
+    turrets.forEach((weapon, index) => {
+      this.weaponCard(weapon, startX + index * (CARD_WIDTH + CARD_GAP), y);
+    });
+
+    const chassisX = startX + turrets.length * (CARD_WIDTH + CARD_GAP);
+    this.sectionLabel(chassisX, y - 24, 'CHASSIS');
+    this.card(chassisX, y, this.hullLines(), this.hullAction(), false);
+    this.card(chassisX + CARD_WIDTH + CARD_GAP, y, this.mountLines(), this.mountAction(), false);
   }
 
   private hullLines(): string[] {
@@ -206,7 +231,7 @@ export class HangarScene extends Phaser.Scene {
   private mountLines(): string[] {
     const fitted = this.saves.turretMounts;
     const max = tuning.mecha.turretMountOffsets.length;
-    const turret = weapons.find((weapon) => weapon.slot === 'turret');
+    const turret = weapons.find((weapon) => weapon.id === this.saves.equippedTurret);
     return [
       'Turret Mounts',
       `${fitted} / ${max} fitted`,
