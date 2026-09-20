@@ -95,6 +95,16 @@ Done when: a fresh save can progress from level 1 to 15 with meaningful upgrade 
 **Phase 4, polish and packaging.** Tutorial hints on level 1, settings (audio, shake toggle), pause. Performance pass: verify pooling, cap particle counts on mobile, texture atlas packing. Real art pass sprite swap. Capacitor Android wrap with touch review.
 Done when: stable 60fps on a mid range Android phone through level 15.
 
+**Phase 5, depth and content.** Phases 1 to 4 shipped the game; this phase is about making it deeper rather than bigger in surface area. Three tracks, in this order:
+
+1. *Finish the designed combat.* Several enemies do not yet play the way GAME_DESIGN section 6 describes them. Incinerator tanks fire flame arcs that leave ground burn zones damaging the hull over time. The Leviathan Engine gets its three destructible weak points as targetable sub entities, enraging as each falls. WaveSpawner learns about more than one boss per level, which also gives endless elites real phases and a boss bar instead of being boss statted grunts.
+2. *Zone 4 and new content.* A fourth zone: five levels, three enemies and a boss, plus further pilots and escorts. This is the data driven promise being cashed in, so it should be JSON authoring and balance work with close to no engine changes. If a zone 4 needs code, that is a bug in the data model, not a task.
+3. *Sim and tooling fidelity.* The sim's known gaps each make it lie in a specific direction: piercing is unmodelled, lobbed arcs fly straight, escorts and lanes are absent, and burn zones will be too. Close them, and add a seeded replay so a balance result can be reproduced exactly rather than re-rolled.
+
+Done when: zone 4 is playable and tuned, every enemy behaves as section 6 describes it, and the sim's output can be trusted without a mental correction factor.
+
+Endless mode was built after phase 4 and is out of the phase order above; it lives in `EndlessTimeline.ts` and is tuned entirely through `tuning.endless`.
+
 ## Out of scope
 
 Ads, IAP, offline idle earnings, multiplayer, cloud saves. Do not implement or scaffold these.
