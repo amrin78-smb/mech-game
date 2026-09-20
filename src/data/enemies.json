@@ -246,5 +246,93 @@
       ],
       "bodyDamageFactor": 0.25
     }
+  },
+  {
+    "id": "sump_hauler",
+    "name": "Sump Hauler",
+    "armorClass": "armored",
+    "hp": 460,
+    "speed": 20,
+    "damage": 34,
+    "attackInterval": 2.6,
+    "reward": 70,
+    "spriteKey": "enemy_sump_hauler",
+    "scale": 1.7,
+    "behaviors": [
+      "melee",
+      "spawner"
+    ],
+    "spawns": {
+      "enemyId": "drone_swarm",
+      "count": 5,
+      "interval": 6
+    }
+  },
+  {
+    "id": "brine_lancer",
+    "name": "Brine Lancer",
+    "armorClass": "shielded",
+    "hp": 190,
+    "shieldHp": 150,
+    "speed": 26,
+    "damage": 26,
+    "attackRange": 430,
+    "attackInterval": 2.4,
+    "reward": 58,
+    "spriteKey": "enemy_brine_lancer",
+    "scale": 1.35,
+    "behaviors": [
+      "ranged",
+      "shielded",
+      "barrier"
+    ],
+    "barrier": {
+      "radius": 46,
+      "offsetX": 34
+    }
+  },
+  {
+    "id": "sludge_diver",
+    "name": "Sludge Diver",
+    "armorClass": "light",
+    "hp": 70,
+    "speed": 96,
+    "damage": 20,
+    "attackInterval": 1.1,
+    "reward": 26,
+    "spriteKey": "enemy_sludge_diver",
+    "scale": 1.0,
+    "behaviors": [
+      "melee",
+      "burrow"
+    ]
+  },
+  {
+    "id": "boss_dredge",
+    "name": "The Dredge",
+    "armorClass": "shielded",
+    "hp": 5200,
+    "shieldHp": 1800,
+    "speed": 15,
+    "damage": 135,
+    "attackInterval": 3,
+    "reward": 1100,
+    "spriteKey": "boss_dredge",
+    "scale": 3.4,
+    "behaviors": [
+      "melee",
+      "shielded",
+      "barrier",
+      "spawner"
+    ],
+    "barrier": {
+      "radius": 92,
+      "offsetX": 70
+    },
+    "spawns": {
+      "enemyId": "sludge_diver",
+      "count": 6,
+      "interval": 8
+    }
   }
 ]

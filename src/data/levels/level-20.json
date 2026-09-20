@@ -1,0 +1,53 @@
+{
+  "id": "level-20",
+  "name": "The Dredge",
+  "zone": 4,
+  "background": "drowned_works",
+  "music": "bgm_zone4",
+  "scrollSpeed": 11,
+  "hpMultiplier": 3.9,
+  "economy": {
+    "startingScrap": 300,
+    "trickle": 3.8
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "sludge_diver",
+      "count": 5,
+      "interval": 1.0
+    },
+    {
+      "time": 20,
+      "enemyId": "brine_lancer",
+      "count": 2,
+      "interval": 5,
+      "lane": 1
+    },
+    {
+      "time": 38,
+      "enemyId": "sump_hauler",
+      "count": 1,
+      "interval": 1,
+      "lane": 0
+    },
+    {
+      "time": 56,
+      "enemyId": "sludge_diver",
+      "count": 6,
+      "interval": 0.9
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.45
+  },
+  "rewards": {
+    "firstClearCores": 75,
+    "coresPerStar": 12
+  },
+  "boss": {
+    "enemyId": "boss_dredge",
+    "time": 74,
+    "hpMultiplier": 0.6
+  }
+}

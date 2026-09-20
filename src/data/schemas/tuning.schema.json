@@ -649,6 +649,11 @@
           },
           "description": "owned on a fresh save"
         },
+        "zoneNames": {
+          "type": "object",
+          "description": "Zone number to the heading shown on the map; authoring a zone 4 adds a key here and nothing else",
+          "additionalProperties": { "type": "string" }
+        },
         "weaponUnlockCosts": {
           "type": "object",
           "additionalProperties": {

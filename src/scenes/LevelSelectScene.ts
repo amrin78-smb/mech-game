@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { levels } from '../data';
+import { levels, tuning } from '../data';
 import { ENDLESS_LEVEL_ID } from '../systems/EndlessTimeline';
 import { SaveManager } from '../systems/SaveManager';
 import type { LevelDef } from '../types';
@@ -15,12 +15,6 @@ import { SceneKeys } from './SceneKeys';
  * Zones come from the level data's `zone` field, so authoring a zone 4 in JSON
  * puts a fourth row here with no code change.
  */
-
-const ZONE_NAMES: Record<number, string> = {
-  1: 'ZONE 1  THE RUST FLATS',
-  2: 'ZONE 2  THE ASH CANYONS',
-  3: 'ZONE 3  THE FURNACE',
-};
 
 const NODE_WIDTH = 168;
 const NODE_HEIGHT = 74;
@@ -110,7 +104,7 @@ export class LevelSelectScene extends Phaser.Scene {
       const inZone = levels.filter((level) => level.zone === zone);
 
       this.add
-        .text(24, rowY, ZONE_NAMES[zone] ?? `ZONE ${zone}`, {
+        .text(24, rowY, tuning.meta.zoneNames[String(zone)] ?? `ZONE ${zone}`, {
           fontFamily: 'monospace',
           fontSize: '16px',
           color: '#9a8f7c',

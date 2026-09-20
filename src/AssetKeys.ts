@@ -71,7 +71,3 @@ export function cannonArtFor(weaponId: string): string {
   return CANNON_ART[weaponId] ?? 'mecha_cannon';
 }
 
-/** Themes PreloadScene generates placeholder parallax strips for, one per zone. */
-export const BACKGROUND_THEMES = ['rust_flats', 'ash_canyons', 'furnace'] as const;
-
-export type BackgroundTheme = (typeof BACKGROUND_THEMES)[number];

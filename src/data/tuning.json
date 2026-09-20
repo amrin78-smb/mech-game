@@ -175,6 +175,9 @@
         ],
         "enrageSpeedBonus": 0.4,
         "enrageDamageBonus": 0.25
+      },
+      "boss_dredge": {
+        "kind": "charger"
       }
     }
   },
@@ -210,6 +213,12 @@
         160
       ],
       "bonusPerLevel": 0.12
+    },
+    "zoneNames": {
+      "1": "ZONE 1  THE RUST FLATS",
+      "2": "ZONE 2  THE ASH CANYONS",
+      "3": "ZONE 3  THE FURNACE",
+      "4": "ZONE 4  THE DROWNED WORKS"
     }
   },
   "tutorial": {
@@ -296,12 +305,23 @@
           "elite_vanguard",
           "drone_swarm"
         ]
+      },
+      {
+        "fromWave": 41,
+        "enemies": [
+          "brine_lancer",
+          "sump_hauler",
+          "sludge_diver",
+          "elite_vanguard",
+          "incinerator_tank"
+        ]
       }
     ],
     "elites": [
       "boss_compactor",
       "boss_iron_matriarch",
-      "boss_leviathan_engine"
+      "boss_leviathan_engine",
+      "boss_dredge"
     ]
   }
 }

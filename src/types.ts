@@ -314,6 +314,8 @@ export interface Tuning {
   meta: {
     startingWeapons: string[];
     /** Cores to unlock, keyed by weapon id. */
+    /** Zone number to its heading on the map, so a new zone is data only. */
+    zoneNames: Record<string, string>;
     weaponUnlockCosts: Record<string, number>;
     /** Cores for mounts 2 and 3; mount 1 is free. */
     turretMountCosts: number[];

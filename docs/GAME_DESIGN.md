@@ -56,6 +56,8 @@ Zone 1, The Rust Flats: **rustcrawler** (light, melee grunt), **scavenger bike**
 
 Zone 2, The Ash Canyons: **gunner walker** (armored, ranged, sits at range and fires while trash screens it), **drone swarm** (swarm, flying, fast, spawned in clusters), **shield bearer** (shielded, projects a frontal shield that blocks shots for enemies behind it). Boss: **Iron Matriarch**, shielded, alternates shield up phases (piercing check) with vulnerable vent phases, spawns drone swarms.
 
+Zone 4, The Drowned Works: **sludge diver** (light, burrows and erupts close and fast, punishes a line held too far forward), **brine lancer** (shielded and ranged, screens itself while chipping the hull from a distance, so it has to be focused rather than outlasted), **sump hauler** (armored, the first non boss spawner, a brood that keeps arriving from inside the field). Boss: **The Dredge**, shielded behind its own frontal screen and emitting divers, charging once it is hurt, so the Compactor's charge reads differently here: the screen has to come down before the charge can be punished.
+
 Zone 3, The Furnace: **incinerator tank** (armored, ranged flame arcs that create ground burn zones damaging the hull over time), **burrower** (light, erupts at close range, punishes tunnel vision on the back field), **elite vanguard** (shielded and armored, slow, all stats high). Boss: **The Leviathan Engine**, a screen tall crawler with three destructible weak points (each a targetable sub entity), enrages as each is destroyed.
 
 ## 7. Waves, levels and stars
@@ -70,9 +72,11 @@ In battle: scrap from kills plus a small trickle; prices for in battle upgrades 
 
 Two at launch, active abilities on the battle HUD with cooldowns. **Vex** (offense): ability Overdrive, 8 seconds of +75% fire rate, 45 second cooldown; passive +5% cannon damage per pilot level. **Mara** (defense): ability Aegis Field, absorbs all damage for 5 seconds, 60 second cooldown; passive +4% hull per level.
 
-## 10. Content plan, 15 levels
+## 10. Content plan, 20 levels
 
 Zone 1 (levels 1 to 5): teach the auto battle flow, manual precision shots, focus targeting and scrap spending, armor matrix via plated hulks in level 3, bikes teach when a manual precision shot beats waiting for auto fire in level 4, level 5 boss Compactor. Zone 2 (6 to 10): gunner walkers teach focus targeting in 6, swarms sell the Flak Array in 7, shield bearers sell the Railgun in 8, combined arms in 9, level 10 boss Iron Matriarch. Zone 3 (11 to 15): burn zones and burrowers punish static play, elite vanguards check total upgrade investment, 14 is a horde gauntlet remix, 15 boss Leviathan Engine as the full exam.
+
+Zone 4 (16 to 20), The Drowned Works: a flooded refinery basin, cold and wet against zone 3's heat so the two never read as the same place. It is gated on upgrades rather than on new mechanics, and every enemy in it is a new combination of behaviors that already exist rather than a new engine feature. 16 introduces the diver alone so the eruption is learned before anything punishes turning around, 17 the lancer whose screen has to come down before what is behind it can be touched, 18 the hauler that keeps a brood arriving from inside the field, 19 all three at once as the zone's exam, 20 boss The Dredge.
 
 ## 11. Presentation
 

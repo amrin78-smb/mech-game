@@ -1,0 +1,67 @@
+{
+  "id": "level-19",
+  "name": "Black Tide",
+  "zone": 4,
+  "background": "drowned_works",
+  "music": "bgm_zone4",
+  "scrollSpeed": 11,
+  "hpMultiplier": 3.7,
+  "economy": {
+    "startingScrap": 280,
+    "trickle": 3.6
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "sludge_diver",
+      "count": 6,
+      "interval": 1.0
+    },
+    {
+      "time": 16,
+      "enemyId": "brine_lancer",
+      "count": 2,
+      "interval": 5,
+      "lane": 2
+    },
+    {
+      "time": 28,
+      "enemyId": "sump_hauler",
+      "count": 2,
+      "interval": 7
+    },
+    {
+      "time": 42,
+      "enemyId": "incinerator_tank",
+      "count": 2,
+      "interval": 6,
+      "lane": 0
+    },
+    {
+      "time": 56,
+      "enemyId": "sludge_diver",
+      "count": 8,
+      "interval": 0.8
+    },
+    {
+      "time": 70,
+      "enemyId": "brine_lancer",
+      "count": 3,
+      "interval": 4
+    },
+    {
+      "time": 84,
+      "enemyId": "sump_hauler",
+      "count": 2,
+      "interval": 6,
+      "hpMultiplier": 1.15
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.45
+  },
+  "rewards": {
+    "firstClearCores": 45,
+    "coresPerStar": 8
+  }
+}

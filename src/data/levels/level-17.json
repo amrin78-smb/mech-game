@@ -1,0 +1,67 @@
+{
+  "id": "level-17",
+  "name": "The Lancer Line",
+  "zone": 4,
+  "background": "drowned_works",
+  "music": "bgm_zone4",
+  "scrollSpeed": 11,
+  "hpMultiplier": 3.45,
+  "economy": {
+    "startingScrap": 250,
+    "trickle": 3.3
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "rustcrawler",
+      "count": 7,
+      "interval": 0.8
+    },
+    {
+      "time": 15,
+      "enemyId": "brine_lancer",
+      "count": 2,
+      "interval": 5,
+      "lane": 1
+    },
+    {
+      "time": 28,
+      "enemyId": "sludge_diver",
+      "count": 5,
+      "interval": 1.2
+    },
+    {
+      "time": 34,
+      "enemyId": "plated_hulk",
+      "count": 2,
+      "interval": 5,
+      "lane": 0
+    },
+    {
+      "time": 40,
+      "enemyId": "brine_lancer",
+      "count": 2,
+      "interval": 5,
+      "lane": 2
+    },
+    {
+      "time": 54,
+      "enemyId": "drone_swarm",
+      "count": 10,
+      "interval": 0.5
+    },
+    {
+      "time": 66,
+      "enemyId": "brine_lancer",
+      "count": 3,
+      "interval": 4.5
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.55
+  },
+  "rewards": {
+    "firstClearCores": 38,
+    "coresPerStar": 7
+  }
+}

@@ -45,6 +45,21 @@ export const THEMES = {
     crack: '#c9481c',
     rubble: '#5d3320',
   },
+  // Zone 4, a flooded refinery basin: cold and wet against the furnace's heat,
+  // so the two zones never read as the same place. Placeholder strips until
+  // this theme goes through the AI art pass like the first three.
+  drowned_works: {
+    skyTop: '#08161a',
+    skyMid: '#1d4448',
+    skyBottom: '#74a39a',
+    haze: 'rgba(140,185,175,0.45)',
+    far: '#24403f',
+    near: '#122220',
+    groundTop: '#2f4744',
+    groundBottom: '#0e1a1a',
+    crack: '#5fd6c2',
+    rubble: '#3f5c57',
+  },
 };
 
 const HORIZON = 0.5;

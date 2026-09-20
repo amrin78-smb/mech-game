@@ -1,0 +1,67 @@
+{
+  "id": "level-16",
+  "name": "Slipway",
+  "zone": 4,
+  "background": "drowned_works",
+  "music": "bgm_zone4",
+  "scrollSpeed": 11,
+  "hpMultiplier": 3.4,
+  "economy": {
+    "startingScrap": 240,
+    "trickle": 3.2
+  },
+  "waves": [
+    {
+      "time": 3,
+      "enemyId": "scavenger_bike",
+      "count": 6,
+      "interval": 0.8
+    },
+    {
+      "time": 14,
+      "enemyId": "sludge_diver",
+      "count": 3,
+      "interval": 1.6
+    },
+    {
+      "time": 26,
+      "enemyId": "plated_hulk",
+      "count": 2,
+      "interval": 4,
+      "lane": 1
+    },
+    {
+      "time": 38,
+      "enemyId": "sludge_diver",
+      "count": 5,
+      "interval": 1.2
+    },
+    {
+      "time": 44,
+      "enemyId": "scavenger_bike",
+      "count": 7,
+      "interval": 0.6
+    },
+    {
+      "time": 52,
+      "enemyId": "gunner_walker",
+      "count": 2,
+      "interval": 5,
+      "lane": 0
+    },
+    {
+      "time": 64,
+      "enemyId": "sludge_diver",
+      "count": 6,
+      "interval": 1.0,
+      "hpMultiplier": 1.1
+    }
+  ],
+  "stars": {
+    "hullThreshold": 0.55
+  },
+  "rewards": {
+    "firstClearCores": 35,
+    "coresPerStar": 7
+  }
+}
