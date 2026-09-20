@@ -6,7 +6,14 @@
 
 export type DamageType = 'kinetic' | 'chemical' | 'piercing' | 'explosive';
 export type ArmorClass = 'light' | 'armored' | 'shielded' | 'swarm';
-export type EnemyBehavior = 'melee' | 'ranged' | 'burrow' | 'spawner' | 'shielded' | 'barrier';
+export type EnemyBehavior =
+  | 'melee'
+  | 'ranged'
+  | 'burrow'
+  | 'spawner'
+  | 'shielded'
+  | 'barrier'
+  | 'burner';
 export type WeaponSlot = 'main' | 'turret';
 export type ProjectileKind = 'ballistic' | 'lobbed' | 'hitscan';
 export type TargetPriority = 'focus' | 'ranged_in_range' | 'closest';
@@ -39,6 +46,23 @@ export interface EnemyDef {
    */
   barrier?: {
     radius: number;
+    offsetX: number;
+  };
+  /**
+   * The `burner` behavior: an attack that reaches the hull leaves burning
+   * ground instead of biting once. The fire outlives its owner, so a slow
+   * answer to an incinerator keeps costing hull after the tank is dead.
+   */
+  burnZone?: {
+    damagePerSecond: number;
+    duration: number;
+    radius: number;
+    /** px either side of the aim point that repeat arcs scatter across. */
+    spreadX: number;
+    /**
+     * px in front of the mecha the arc lands. Zero would drop the fire behind
+     * the mecha sprite, where nothing can see it.
+     */
     offsetX: number;
   };
   spawns?: {

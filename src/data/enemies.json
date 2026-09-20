@@ -149,8 +149,16 @@
     "spriteKey": "enemy_incinerator_tank",
     "scale": 1.5,
     "behaviors": [
-      "ranged"
-    ]
+      "ranged",
+      "burner"
+    ],
+    "burnZone": {
+      "damagePerSecond": 9,
+      "duration": 4.5,
+      "radius": 58,
+      "spreadX": 70,
+      "offsetX": 105
+    }
   },
   {
     "id": "burrower",

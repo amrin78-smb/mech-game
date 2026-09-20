@@ -19,6 +19,10 @@
  * overstates the screen, which again errs toward a harder rating than the game
  * actually gives.
  *
+ * Burn zones are modelled as overlapping pools on the hull, exactly as the game
+ * stacks them, since a fire that outlives its owner changes how much a slow
+ * answer to an incinerator costs.
+ *
  * Usage:
  *   npm run sim
  *   npm run sim -- --weapon=railgun --cards=2 --mounts=2 --hull=3
@@ -231,6 +235,8 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
   let kills = 0;
   let leaked = 0;
   let damageTaken = 0;
+  /** Burning ground left by burner enemies; each pool outlives its owner. */
+  const burns: Array<{ dps: number; remaining: number }> = [];
   let time = 0;
 
   // Cooldowns start full so the first target is engaged immediately.
@@ -295,8 +301,25 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
       enemy.attackTimer += STEP;
       while (enemy.attackTimer >= def.attackInterval) {
         enemy.attackTimer -= def.attackInterval;
+
+        // A burner lights the ground instead of biting; the fire bills the
+        // hull below for as long as it lasts, and outlives the enemy.
+        if (def.burnZone !== undefined) {
+          burns.push({ dps: def.burnZone.damagePerSecond, remaining: def.burnZone.duration });
+          continue;
+        }
+
         damageTaken += damage.applyToMecha(hull, def.damage);
       }
+    }
+
+    // Burning ground, billed once per step like the game bills it per frame.
+    for (let i = burns.length - 1; i >= 0; i -= 1) {
+      const burn = burns[i];
+      const seconds = Math.min(STEP, burn.remaining);
+      damageTaken += damage.applyToMecha(hull, burn.dps * seconds);
+      burn.remaining -= STEP;
+      if (burn.remaining <= 0) burns.splice(i, 1);
     }
 
     if (hull.hp <= 0) break;

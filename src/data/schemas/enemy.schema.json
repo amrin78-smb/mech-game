@@ -21,8 +21,21 @@
     "flying": { "type": "boolean", "default": false },
     "behaviors": {
       "type": "array",
-      "items": { "enum": ["melee", "ranged", "burrow", "spawner", "shielded", "barrier"] },
+      "items": { "enum": ["melee", "ranged", "burrow", "spawner", "shielded", "barrier", "burner"] },
       "uniqueItems": true
+    },
+    "burnZone": {
+      "type": "object",
+      "description": "The burner behavior: an attack reaching the hull leaves burning ground rather than biting once",
+      "required": ["damagePerSecond", "duration", "radius", "spreadX", "offsetX"],
+      "additionalProperties": false,
+      "properties": {
+        "damagePerSecond": { "type": "number", "exclusiveMinimum": 0 },
+        "duration": { "type": "number", "exclusiveMinimum": 0, "description": "seconds the patch burns" },
+        "radius": { "type": "number", "exclusiveMinimum": 0, "description": "screen px" },
+        "spreadX": { "type": "number", "minimum": 0, "description": "px either side of the aim point that repeat arcs scatter across" },
+        "offsetX": { "type": "number", "minimum": 0, "description": "px in front of the mecha the arc lands" }
+      }
     },
     "barrier": {
       "type": "object",

@@ -9,6 +9,7 @@ import { AudioManager } from '../systems/AudioManager';
 import { DamageSystem, type DamageResult } from '../systems/DamageSystem';
 import { EconomySystem } from '../systems/EconomySystem';
 import { EscortSystem } from '../systems/EscortSystem';
+import { HazardSystem } from '../systems/HazardSystem';
 import { ProjectileSystem } from '../systems/ProjectileSystem';
 import { TargetingSystem } from '../systems/TargetingSystem';
 import { TurretSystem } from '../systems/TurretSystem';
@@ -71,6 +72,7 @@ export class BattleScene extends Phaser.Scene {
   private saves!: SaveManager;
   private pilotSystem!: PilotSystem;
   private escorts!: EscortSystem;
+  private hazards!: HazardSystem;
 
   private hud!: Hud;
   private aimLine!: AimLine;
@@ -138,6 +140,8 @@ export class BattleScene extends Phaser.Scene {
       onEnemyHit: (enemy, result) => this.onEnemyHit(enemy, result),
       onImpact: (x, y, heavy, hitSomething) => this.onImpact(x, y, heavy, hitSomething),
     });
+
+    this.hazards = new HazardSystem({ scene: this });
 
     this.escorts = new EscortSystem({
       scene: this,
@@ -302,6 +306,11 @@ export class BattleScene extends Phaser.Scene {
     this.turrets.update(deltaSeconds, enemies);
     this.escorts.update(deltaSeconds, enemies);
     this.projectiles.update(deltaSeconds, enemies);
+
+    // Burning ground bills the hull once a frame rather than per patch.
+    const burn = this.hazards.update(deltaSeconds);
+    if (burn > 0) this.damage.applyToMecha(this.mecha, burn);
+
     this.economy.update(deltaSeconds);
     this.pilotSystem.update(deltaSeconds);
 
@@ -371,6 +380,22 @@ export class BattleScene extends Phaser.Scene {
     if (blocker !== null && enemy.x <= blocker.blockX + enemy.bodyWidth) {
       this.escorts.damage(blocker, enemy.damagePerHit);
       this.audio.play('impact', 0.5);
+      return;
+    }
+
+    const burnZone = enemy.definition?.burnZone;
+    if (burnZone !== undefined) {
+      // A flame arc lands at the mecha's feet and burns; the hull is billed by
+      // the hazard system while it lasts, not here.
+      this.hazards.ignite(
+        this.mecha.x + burnZone.offsetX,
+        enemy.y,
+        burnZone.radius,
+        burnZone.damagePerSecond,
+        burnZone.duration,
+        burnZone.spreadX,
+      );
+      this.audio.play('impact', 0.45);
       return;
     }
 
@@ -482,6 +507,7 @@ export class BattleScene extends Phaser.Scene {
     this.weapon.reset();
     this.turrets.reset();
     this.escorts.reset();
+    this.hazards.reset();
     this.projectiles.reset();
     this.spawner.despawnAll();
     this.aimLine.hide();
