@@ -195,7 +195,7 @@ export class EscortSystem {
         rotation,
         spec,
         enemies,
-        tuning.world.baseWidth * 1.2,
+        tuning.world.baseWidth * tuning.world.hitscanRangeFactor,
       );
       this.onShotFired(escort.muzzleX, escort.muzzleY, rotation);
       return;

@@ -9,7 +9,7 @@ import type { ProjectileSystem } from './ProjectileSystem';
 import type { TargetingSystem } from './TargetingSystem';
 
 /** How far a hitscan beam carries. The engagement line is the screen edge. */
-const HITSCAN_RANGE = tuning.world.baseWidth * 1.2;
+const HITSCAN_RANGE = tuning.world.baseWidth * tuning.world.hitscanRangeFactor;
 
 /**
  * The main cannon, exactly as hard rule 9 describes it.

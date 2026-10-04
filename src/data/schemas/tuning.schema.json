@@ -226,6 +226,11 @@
             }
           }
         },
+        "hitscanRangeFactor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "How far a hitscan beam carries, as a multiple of baseWidth; read by the weapon systems and by the sim"
+        },
         "baseWidth": {
           "type": "number",
           "exclusiveMinimum": 0

@@ -264,6 +264,8 @@ export interface Tuning {
      * the two cannot drift apart.
      */
     enemyBaseSize: Record<ArmorClass, EnemyBaseSize>;
+    /** Hitscan reach as a multiple of baseWidth. */
+    hitscanRangeFactor: number;
     baseWidth: number;
     baseHeight: number;
     mechaXFraction: number;

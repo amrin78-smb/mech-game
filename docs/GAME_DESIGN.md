@@ -30,7 +30,7 @@ Weapons (main cannon is swappable in the Hangar, turrets are purchased mounts):
 |---|---|---|
 | Autocannon | kinetic | fast fire, shreds light targets, default starter |
 | Acid Spitter | chemical | slow arcing lob, melts armored targets, damage over time pool |
-| Railgun | piercing | slow, hitscan line, pierces all enemies in a row, breaks shields |
+| Railgun | piercing | slow, hitscan line, pierces every enemy in the lane, breaks shields |
 | Flak Array | explosive | area burst, clears swarms, poor single target |
 | Scattergun | kinetic | a fan of rounds per shot, brutal at contact range, wasteful once the cone opens |
 | Gatling Pod | kinetic | turret; fast and light where the Flak Array is slow and explosive, for single targets rather than crowds |

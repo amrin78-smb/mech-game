@@ -68,7 +68,7 @@
     "name": "Railgun",
     "slot": "main",
     "damageType": "piercing",
-    "baseDamage": 90,
+    "baseDamage": 50,
     "fireRate": 0.4,
     "projectile": {
       "kind": "hitscan",

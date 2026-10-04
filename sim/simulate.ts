@@ -10,37 +10,47 @@
  * shells with real travel time (so a shot at a dying target is wasted), the
  * armor matrix, shields, and the economy. Presentation is ignored.
  *
- * Known gaps, which make it conservative rather than optimistic for the
- * weapons concerned: piercing is not modelled, so the Railgun scores as if it
- * hit one target per shot, and lobbed arcs fly straight.
+ * The field has lanes, as the game does, so a blast only catches neighbours
+ * that are actually near it and a shield bearer only screens its own lane.
+ * Lane assignment, like the game's, is random when a wave does not name one,
+ * which is why the run is seeded: `--seed` reproduces a result exactly instead
+ * of re-rolling it.
  *
- * Pellets and their cone are both modelled: rounds fan evenly across the
- * spread, and one only lands if it is still inside the target's width at that
- * range. That is what makes a scattergun devastating in close and wasteful far
- * out, so the number reflects the weapon rather than flattering it.
+ * Modelled: spawn timing and lanes, closing speed, target priority, fire rate,
+ * shells with real travel time (so a shot at a dying target is wasted),
+ * piercing beams down a lane, pellet cones that open with range, the armor
+ * matrix, shields, frontal barriers, burn zones that outlive their owner,
+ * escorts bought mid battle, and the economy. Presentation is ignored.
  *
- * Barriers are modelled, but the field here is one dimensional, so a shield
- * bearer screens every enemy behind it rather than only its own lane. That
- * overstates the screen, which again errs toward a harder rating than the game
- * actually gives.
- *
- * Burn zones are modelled as overlapping pools on the hull, exactly as the game
- * stacks them, since a fire that outlives its owner changes how much a slow
- * answer to an incinerator costs.
+ * Remaining gap, and it is in the game rather than here: `lobbed` is a
+ * projectile kind in the data that nothing in the engine branches on, so the
+ * Acid Spitter's designed arc flies straight in play. The sim flies it
+ * straight too, which makes it accurate to the game and wrong against
+ * GAME_DESIGN section 4.
  *
  * Usage:
  *   npm run sim
  *   npm run sim -- --weapon=railgun --cards=2 --mounts=2 --hull=3
  *   npm run sim -- --level=level-10 --verbose
+ *   npm run sim -- --seed=1234        reproduce a run exactly
+ *   npm run sim -- --escorts=false    without mid battle escort buying
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { enemies, getEnemyDef, getWeaponDef, registerLevels, tuning } from '../src/data/core';
+import {
+  enemies,
+  escorts as escortDefs,
+  getEnemyDef,
+  getEscortDef,
+  getWeaponDef,
+  registerLevels,
+  tuning,
+} from '../src/data/core';
 import { DamageSystem, type DamageTarget } from '../src/systems/DamageSystem';
 import { evaluateStars } from '../src/systems/StarRating';
-import type { EnemyDef, LevelDef, WeaponDef } from '../src/types';
+import type { EnemyDef, EscortDef, LevelDef, WeaponDef } from '../src/types';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const LEVELS_DIR = join(HERE, '..', 'src', 'data', 'levels');
@@ -60,6 +70,10 @@ interface Options {
   verbose: boolean;
   /** Whether the simulated pilot spends scrap mid battle, as a real one would. */
   spend: boolean;
+  /** Whether that spending includes escorts. */
+  escorts: boolean;
+  /** Seeds lane rolls, so a run reproduces exactly. */
+  seed: number;
 }
 
 function parseArgs(argv: string[]): Options {
@@ -72,6 +86,8 @@ function parseArgs(argv: string[]): Options {
     levelId: null,
     verbose: false,
     spend: true,
+    escorts: true,
+    seed: 1,
   };
 
   for (const arg of argv) {
@@ -101,6 +117,12 @@ function parseArgs(argv: string[]): Options {
       case 'spend':
         options.spend = value !== 'none' && value !== 'false';
         break;
+      case 'escorts':
+        options.escorts = value !== 'none' && value !== 'false';
+        break;
+      case 'seed':
+        options.seed = Number(value);
+        break;
       default:
         break;
     }
@@ -115,12 +137,29 @@ function loadLevels(): LevelDef[] {
     .map((file) => JSON.parse(readFileSync(join(LEVELS_DIR, file), 'utf8')) as LevelDef);
 }
 
+/**
+ * Small deterministic RNG. The game rolls a lane whenever a wave does not name
+ * one, so without a seed two runs of the same level are not comparable.
+ */
+function makeRng(seed: number): () => number {
+  let state = seed >>> 0 || 1;
+  return () => {
+    state ^= state << 13;
+    state ^= state >>> 17;
+    state ^= state << 5;
+    state >>>= 0;
+    return state / 0x100000000;
+  };
+}
+
 /** The sim's stand-in for Enemy: the same contract DamageSystem needs. */
 class SimEnemy implements DamageTarget {
   definition: EnemyDef | null;
   hp: number;
   shield: number;
   x: number;
+  /** Index into tuning.mecha.lanesY, as in the game. */
+  lane: number;
   attackTimer = 0;
   inRange = false;
   spawnsRemaining: number;
@@ -130,11 +169,12 @@ class SimEnemy implements DamageTarget {
   /** Destructible parts riding on this enemy, empty for everything but a carrier. */
   parts: SimEnemy[] = [];
 
-  constructor(def: EnemyDef, x: number, hpMultiplier: number) {
+  constructor(def: EnemyDef, x: number, hpMultiplier: number, lane: number) {
     this.definition = def;
     this.hp = def.hp * hpMultiplier;
     this.shield = def.behaviors.includes('shielded') ? (def.shieldHp ?? 0) * hpMultiplier : 0;
     this.x = x;
+    this.lane = lane;
     this.spawnsRemaining = def.spawns?.count ?? 0;
     this.spawnTimer = def.spawns?.interval ?? 0;
   }
@@ -167,6 +207,28 @@ class SimEnemy implements DamageTarget {
       return true;
     }
     return false;
+  }
+}
+
+/**
+ * An escort bought mid battle. It does the two things that change a balance
+ * number: it holds its lane so enemies chew on it instead of the hull, and it
+ * adds a gun. Everything cosmetic about it is ignored.
+ */
+class SimEscort {
+  hp: number;
+  cooldown = 0;
+
+  constructor(
+    readonly def: EscortDef,
+    readonly lane: number,
+    readonly blockX: number,
+  ) {
+    this.hp = def.hp;
+  }
+
+  get isAlive(): boolean {
+    return this.hp > 0;
   }
 }
 
@@ -225,6 +287,11 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
   const spawnX = baseWidth * spawnXFraction;
   const engageMaxX = baseWidth;
 
+  const laneY = tuning.mecha.lanesY.map((fraction) => fraction * tuning.world.baseHeight);
+  const rng = makeRng(options.seed);
+  const rollLane = (): number => Math.min(laneY.length - 1, Math.floor(rng() * laneY.length));
+  const hitscanRange = baseWidth * tuning.world.hitscanRangeFactor;
+
   const main = getWeaponDef(options.weaponId);
   const turret = getWeaponDef(options.turretId);
   const mainBonus = cardBonuses(main, options.cards);
@@ -254,6 +321,11 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
   let damageTaken = 0;
   /** Burning ground left by burner enemies; each pool outlives its owner. */
   const burns: Array<{ dps: number; remaining: number }> = [];
+  const allies: SimEscort[] = [];
+  /** Per escort id, how many have been bought; the price climbs with each. */
+  const escortsBought = new Map<string, number>();
+  /** Escorts take lanes in turn, as EscortSystem hands them out. */
+  let nextEscortLane = 0;
   let time = 0;
 
   // Cooldowns start full so the first target is engaged immediately.
@@ -266,8 +338,18 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
     1 / turret.fireRate,
   );
 
-  const spawn = (def: EnemyDef, hpMultiplier: number, x: number): SimEnemy => {
-    const enemy = new SimEnemy(def, x, hpMultiplier);
+  /** The frontmost living escort in a lane, which is what stops enemies there. */
+  const blockerFor = (lane: number): SimEscort | null => {
+    let best: SimEscort | null = null;
+    for (const ally of allies) {
+      if (!ally.isAlive || ally.lane !== lane) continue;
+      if (best === null || ally.blockX > best.blockX) best = ally;
+    }
+    return best;
+  };
+
+  const spawn = (def: EnemyDef, hpMultiplier: number, x: number, lane: number): SimEnemy => {
+    const enemy = new SimEnemy(def, x, hpMultiplier, lane);
     live.push(enemy);
     return enemy;
   };
@@ -279,10 +361,15 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
     for (const wave of waves) {
       while (wave.spawned < wave.entry.count && time >= wave.nextSpawnTime) {
         const def = getEnemyDef(wave.entry.enemyId);
+        const lane =
+          wave.entry.lane !== undefined
+            ? Math.min(Math.max(wave.entry.lane, 0), laneY.length - 1)
+            : rollLane();
         spawn(
           def,
           wave.hpMultiplier,
           def.behaviors.includes('burrow') ? baseWidth * burrowSpawnXFraction : spawnX,
+          lane,
         );
         wave.spawned += 1;
         wave.nextSpawnTime += wave.entry.interval;
@@ -290,7 +377,9 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
     }
     if (!bossSpawned && level.boss !== undefined && time >= level.boss.time) {
       const bossDef = getEnemyDef(level.boss.enemyId);
-      const boss = spawn(bossDef, levelHp * (level.boss.hpMultiplier ?? 1), spawnX);
+      // Bosses walk the middle lane, as WaveSpawner places them.
+      const bossLane = Math.floor(laneY.length / 2);
+      const boss = spawn(bossDef, levelHp * (level.boss.hpMultiplier ?? 1), spawnX, bossLane);
       bossSpawned = true;
 
       // Carried parts ride at the carrier's x, so the 1d field puts them in
@@ -299,7 +388,7 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
       if (carried !== undefined) {
         const partDef = getEnemyDef(carried.enemyId);
         for (let i = 0; i < carried.mounts.length; i += 1) {
-          boss.parts.push(spawn(partDef, levelHp, spawnX));
+          boss.parts.push(spawn(partDef, levelHp, spawnX, bossLane));
         }
       }
     }
@@ -325,12 +414,20 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
         if (enemy.spawnTimer <= 0) {
           enemy.spawnTimer = def.spawns.interval;
           enemy.spawnsRemaining -= 1;
-          spawn(getEnemyDef(def.spawns.enemyId), levelHp, enemy.x);
+          spawn(getEnemyDef(def.spawns.enemyId), levelHp, enemy.x, rollLane());
         }
       }
 
       const range = def.attackRange ?? 0;
-      const stopX = range > 0 ? mechaX + range : mechaX + meleeStandoff;
+      const atMecha = range > 0 ? mechaX + range : mechaX + meleeStandoff;
+      // An escort is only a wall while it stands closer than where they were
+      // already heading, which is the rule Enemy.stopDistanceX applies.
+      const blocker = blockerFor(enemy.lane);
+      // An escort only blocks what would otherwise have come closer than it
+      // stands. A ranged enemy halts further out and shoots straight past,
+      // which is why escorts do not answer gunners, lancers or incinerators.
+      const blocked = blocker !== null && blocker.blockX >= atMecha;
+      const stopX = blocked ? (blocker as SimEscort).blockX : atMecha;
 
       if (enemy.x > stopX) {
         enemy.inRange = false;
@@ -342,6 +439,12 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
       enemy.attackTimer += STEP;
       while (enemy.attackTimer >= def.attackInterval) {
         enemy.attackTimer -= def.attackInterval;
+
+        // Whatever is holding this lane takes the hit instead of the hull.
+        if (blocked && blocker !== null && blocker.isAlive) {
+          blocker.hp -= def.damage;
+          continue;
+        }
 
         // A burner lights the ground instead of biting; the fire bills the
         // hull below for as long as it lasts, and outlives the enemy.
@@ -380,10 +483,35 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
     if (target !== null) {
       while (mainCooldown >= mainInterval) {
         mainCooldown -= mainInterval;
-        pushRounds(shots, target, main, main.baseDamage * dmgMult, mechaX, time);
+        pushRounds(shots, target, main, main.baseDamage * dmgMult, mechaX, time, live, hitscanRange);
       }
     } else if (mainCooldown > mainInterval) {
       mainCooldown = mainInterval;
+    }
+
+    // Escort guns. They share the mecha's target, as EscortSystem does.
+    for (const ally of allies) {
+      if (!ally.isAlive) continue;
+      const allyWeapon = getWeaponDef(ally.def.weaponId);
+      const interval = 1 / allyWeapon.fireRate;
+      ally.cooldown += STEP;
+      if (target === null) {
+        if (ally.cooldown > interval) ally.cooldown = interval;
+        continue;
+      }
+      while (ally.cooldown >= interval) {
+        ally.cooldown -= interval;
+        pushRounds(
+          shots,
+          target,
+          allyWeapon,
+          allyWeapon.baseDamage * (ally.def.damageScale ?? 1),
+          ally.blockX,
+          time,
+          live,
+          hitscanRange,
+        );
+      }
     }
 
     const turretInterval = 1 / (turret.fireRate * turretRofMult);
@@ -395,7 +523,16 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
       }
       while (turretCooldowns[i] >= turretInterval) {
         turretCooldowns[i] -= turretInterval;
-        pushRounds(shots, target, turret, turret.baseDamage * turretDmgMult, mechaX, time);
+        pushRounds(
+          shots,
+          target,
+          turret,
+          turret.baseDamage * turretDmgMult,
+          mechaX,
+          time,
+          live,
+          hitscanRange,
+        );
       }
     }
 
@@ -434,14 +571,17 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
       // the shot lands on the bearer instead until its shield is gone.
       applyHit(screenFor(shot.target, live) ?? shot.target);
 
-      // Explosive and chemical rounds splash. Lanes are ignored, so this is a
-      // slight overestimate of how many neighbours a blast catches.
+      // Explosive and chemical rounds splash, across lanes only as far as the
+      // radius actually reaches.
       const aoe = shot.weapon.projectile.aoeRadius ?? 0;
       if (aoe > 0) {
         const impactX = shot.target.x;
+        const impactY = laneY[shot.target.lane];
         for (const other of live) {
           if (other === shot.target || !other.isAlive) continue;
-          if (Math.abs(other.x - impactX) <= aoe) applyHit(other);
+          const dx = other.x - impactX;
+          const dy = laneY[other.lane] - impactY;
+          if (dx * dx + dy * dy <= aoe * aoe) applyHit(other);
         }
       }
     }
@@ -484,6 +624,23 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
         hull.hp = Math.min(hullMax, hull.hp + hullMax * config.repair.healFraction);
       }
 
+      // Escorts first when a lane is unheld and one is affordable: a real
+      // player buys them to take a wave off the hull, and the sim ignoring
+      // that made every level look harder than it plays.
+      if (options.escorts && allies.filter((ally) => ally.isAlive).length < laneY.length) {
+        for (const escortDef of escortDefs) {
+          const owned = escortsBought.get(escortDef.id) ?? 0;
+          const cost = Math.round(escortDef.cost * Math.pow(escortDef.costGrowth, owned));
+          if (scrap < cost) continue;
+          scrap -= cost;
+          escortsBought.set(escortDef.id, owned + 1);
+          const lane = nextEscortLane % laneY.length;
+          nextEscortLane += 1;
+          allies.push(new SimEscort(getEscortDef(escortDef.id), lane, mechaX + escortDef.standoffX));
+          break;
+        }
+      }
+
       const damageCost = Math.round(
         config.damage.baseCost * Math.pow(config.damage.costGrowth, damageLevels),
       );
@@ -501,6 +658,9 @@ function simulateLevel(level: LevelDef, options: Options, damage: DamageSystem):
 
     for (let i = live.length - 1; i >= 0; i -= 1) {
       if (!live[i].isAlive) live.splice(i, 1);
+    }
+    for (let i = allies.length - 1; i >= 0; i -= 1) {
+      if (!allies[i].isAlive) allies.splice(i, 1);
     }
 
     const timelineDone = waves.every((wave) => wave.spawned >= wave.entry.count) && bossSpawned;
@@ -555,7 +715,21 @@ function pushRounds(
   damageAmount: number,
   fromX: number,
   now: number,
+  live: SimEnemy[],
+  hitscanRange: number,
 ): void {
+  // A piercing beam does not stop at the first body: everything in that lane
+  // within reach takes the hit, which is the whole reason to own a Railgun.
+  if (weapon.projectile.pierce === true && weapon.projectile.kind === 'hitscan') {
+    const maxX = fromX + hitscanRange;
+    for (const enemy of live) {
+      if (!enemy.isAlive || enemy.lane !== target.lane) continue;
+      if (enemy.x < fromX || enemy.x > maxX) continue;
+      shots.push(makeShot(enemy, weapon, damageAmount, fromX, now));
+    }
+    return;
+  }
+
   const pellets = weapon.projectile.pellets ?? 1;
   if (pellets <= 1) {
     shots.push(makeShot(target, weapon, damageAmount, fromX, now));
@@ -598,6 +772,7 @@ function screenFor(target: SimEnemy, live: SimEnemy[]): SimEnemy | null {
 
   for (const enemy of live) {
     if (enemy === target || !enemy.isAlive || enemy.shield <= 0) continue;
+    if (enemy.lane !== target.lane) continue;
     if (enemy.definition?.barrier === undefined) continue;
     if (enemy.x >= target.x) continue;
     if (screen === null || enemy.x > screen.x) screen = enemy;
@@ -644,6 +819,7 @@ function main(): void {
     `Scrap Titan balance sim\n` +
       `  main ${options.weaponId} cards ${options.cards}, ` +
       `turret ${options.turretId} x${options.mounts}, hull level ${options.hullLevel}\n` +
+      `  escorts ${options.escorts ? 'bought' : 'off'}, seed ${options.seed}\n` +
       `  ${enemies.length} enemy defs, ${selected.length} level(s)\n`,
   );
 

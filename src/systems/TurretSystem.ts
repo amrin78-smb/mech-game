@@ -143,7 +143,7 @@ export class TurretSystem {
         rotation,
         this.spec,
         this.lastEnemies,
-        tuning.world.baseWidth * 1.2,
+        tuning.world.baseWidth * tuning.world.hitscanRangeFactor,
       );
       this.mecha.kickTurret(mount.index);
       this.onShotFired(muzzle.x, muzzle.y, rotation);
