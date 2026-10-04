@@ -19,7 +19,12 @@ npm run build      # production build to dist/
 npm run preview    # serve the production build
 npm run typecheck  # tsc --noEmit
 npm run sim        # headless balance simulation (Phase 3, see Balance section)
+npm run android:apk # build + sync + assembleDebug, APK in android/app/build/outputs/apk/debug
 ```
+
+The Android build needs JDK 21 and an Android SDK with platform 35, build tools
+35 and platform tools, with `JAVA_HOME`, `ANDROID_HOME` and `android/local.properties`
+pointing at them. `local.properties` is gitignored, so each machine writes its own.
 
 Always run `npm run typecheck` before declaring a task done.
 
