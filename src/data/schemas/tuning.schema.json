@@ -177,6 +177,19 @@
           "minimum": 0,
           "description": "degrees the hull rocks fore and aft while walking"
         },
+        "legArticulation": {
+          "type": "object",
+          "description": "Splits the legs sprite into a hip block and two legs so the walk cycle can swing them",
+          "required": ["hipFraction", "gapFraction", "overlapFraction", "swingDegrees", "liftPixels"],
+          "additionalProperties": false,
+          "properties": {
+            "hipFraction": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "height fraction where the hip block ends and the legs begin" },
+            "gapFraction": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "width fraction of the gap between the two legs" },
+            "overlapFraction": { "type": "number", "minimum": 0, "maximum": 1, "description": "height fraction the legs tuck up under the hips, so lifting one cannot open a seam" },
+            "swingDegrees": { "type": "number", "minimum": 0, "description": "how far each leg rotates about its hip" },
+            "liftPixels": { "type": "number", "minimum": 0, "description": "on screen px the swinging leg lifts" }
+          }
+        },
         "legsFaceLeft": {
           "type": "boolean",
           "description": "the generated legs art faces left, so it is flipped to match the torso"

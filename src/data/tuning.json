@@ -54,7 +54,14 @@
     "walkPeriod": 1.6,
     "walkBob": 4,
     "walkPitch": 1.1,
-    "legsFaceLeft": true
+    "legsFaceLeft": true,
+    "legArticulation": {
+      "hipFraction": 0.327,
+      "gapFraction": 0.517,
+      "overlapFraction": 0.08,
+      "swingDegrees": 6,
+      "liftPixels": 3.5
+    }
   },
   "world": {
     "baseWidth": 1280,

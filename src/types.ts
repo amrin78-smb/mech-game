@@ -238,6 +238,14 @@ export interface Tuning {
     walkPitch: number;
     /** The generated legs art faces left, so it is flipped to match the torso. */
     legsFaceLeft: boolean;
+    /** Splits the legs sprite so the walk cycle can swing each leg separately. */
+    legArticulation: {
+      hipFraction: number;
+      gapFraction: number;
+      overlapFraction: number;
+      swingDegrees: number;
+      liftPixels: number;
+    };
     bobAmplitude: number;
     bobPeriod: number;
     swayAmplitude: number;

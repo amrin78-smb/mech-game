@@ -32,6 +32,19 @@ const TURRET_ORIGIN_Y = 0.86;
 /** How far the legs and torso overlap, so the join does not show a seam. */
 const TORSO_OVERLAP = 14;
 
+/**
+ * One leg, cropped out of the legs sprite and hung from a container placed at
+ * its hip. The container is what rotates, so the leg swings from the hip
+ * rather than spinning about its own middle, and the image inside keeps the
+ * same origin as the hip block so the two crops line up exactly.
+ */
+interface StrideLeg {
+  readonly pivot: Phaser.GameObjects.Container;
+  readonly restY: number;
+  /** +1 or -1: which half of the stride this leg is on. */
+  readonly phase: number;
+}
+
 interface Mount {
   readonly image: Phaser.GameObjects.Image;
   readonly baseX: number;
@@ -46,6 +59,8 @@ export class Mecha extends Phaser.GameObjects.Container {
   private absorb = 0;
 
   private readonly legs: Phaser.GameObjects.Image;
+  /** The two legs, cut out of the same sprite, swung half a cycle apart. */
+  private readonly strideLegs: StrideLeg[] = [];
   private readonly torso: Phaser.GameObjects.Image;
   private readonly upper: Phaser.GameObjects.Container;
   private readonly cannon: Mount;
@@ -82,6 +97,7 @@ export class Mecha extends Phaser.GameObjects.Container {
     ).setOrigin(0.5, 1);
     // The generated legs art faces left; the torso and cannon face right.
     this.legs.setFlipX(tuning.mecha.legsFaceLeft);
+    this.buildStrideLegs(scene);
 
     this.upper = scene.add.container(0, -this.legs.displayHeight + TORSO_OVERLAP);
     this.torso = bindArt(
@@ -108,11 +124,64 @@ export class Mecha extends Phaser.GameObjects.Container {
     };
 
     this.upper.add([this.torso, cannonImage]);
-    this.add([this.legs, this.upper]);
+    // Legs behind the hip block, so the hips hide the tops as they swing.
+    this.add([...this.strideLegs.map((leg) => leg.pivot), this.legs, this.upper]);
     this.setDepth(Depths.MECHA);
     scene.add.existing(this);
 
     this.startIdleAnimation(scene);
+  }
+
+  /**
+   * The legs are one sprite, so a walk has to be cut out of it: the hip block
+   * stays with the body and the two legs below it become their own images,
+   * each pivoted at its own hip so it can swing.
+   *
+   * Every leg keeps the full sprite's geometry and is simply cropped to its
+   * own share of it, which is why they line up with the hips exactly. They are
+   * cropped from a little above the hip line so that lifting one cannot open a
+   * seam under the hips.
+   */
+  private buildStrideLegs(scene: Phaser.Scene): void {
+    const { hipFraction, gapFraction, overlapFraction } = tuning.mecha.legArticulation;
+    const frameWidth = this.legs.frame.realWidth;
+    const frameHeight = this.legs.frame.realHeight;
+    const displayWidth = this.legs.displayWidth;
+    const displayHeight = this.legs.displayHeight;
+
+    const hipY = Math.round(frameHeight * hipFraction);
+    const splitX = Math.round(frameWidth * gapFraction);
+    const legTop = Math.max(0, hipY - Math.round(frameHeight * overlapFraction));
+    const flipped = tuning.mecha.legsFaceLeft;
+
+    // The hip block is all that is left of the original image.
+    this.legs.setCrop(0, 0, frameWidth, hipY);
+
+    const cuts = [
+      { x: 0, width: splitX, phase: 1 },
+      { x: splitX, width: frameWidth - splitX, phase: -1 },
+    ];
+
+    for (const cut of cuts) {
+      const pivotU = (cut.x + cut.width * 0.5) / frameWidth;
+      // Flipping mirrors the sprite, so this leg's hip sits on the other side.
+      const pivotX = (flipped ? 0.5 - pivotU : pivotU - 0.5) * displayWidth;
+      const pivotY = (hipY / frameHeight - 1) * displayHeight;
+
+      const image = bindArt(
+        scene,
+        scene.add.image(0, 0, AssetKeys.MECHA_LEGS),
+        AssetKeys.MECHA_LEGS,
+      ).setOrigin(0.5, 1);
+      image.setFlipX(flipped);
+      image.setCrop(cut.x, legTop, cut.width, frameHeight - legTop);
+      // Offset back by the pivot, so container plus image lands exactly where
+      // the undivided sprite used to draw.
+      image.setPosition(-pivotX, -pivotY);
+
+      const pivot = scene.add.container(pivotX, pivotY, [image]);
+      this.strideLegs.push({ pivot, restY: pivot.y, phase: cut.phase });
+    }
   }
 
   /**
@@ -183,8 +252,20 @@ export class Mecha extends Phaser.GameObjects.Container {
 
     const beat = this.walkPhase * 2;
     const rise = Math.abs(Math.sin(beat * Math.PI));
-    // Feet stay planted; the hull is what rises and falls over them.
+    // Feet stay planted; the hull is what rises and falls over them, and the
+    // hip block rides with it rather than hanging in the air.
     this.upper.y = this.upperRestY - walkBob * rise;
+    this.legs.y = -walkBob * rise;
+
+    // One leg swings forward while the other drives back, and the swinging one
+    // lifts clear of the ground.
+    const { swingDegrees, liftPixels } = tuning.mecha.legArticulation;
+    const swing = Math.sin(this.walkPhase * Math.PI * 2);
+    for (const leg of this.strideLegs) {
+      const own = swing * leg.phase;
+      leg.pivot.angle = swingDegrees * own;
+      leg.pivot.y = leg.restY - Math.max(0, own) * liftPixels;
+    }
     this.torso.angle = this.torsoSwayAngle + Math.sin(this.walkPhase * Math.PI * 2) * walkPitch;
 
     const step = Math.floor(beat);
