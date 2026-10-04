@@ -13,4 +13,9 @@ ext {
     androidxJunitVersion = '1.2.1'
     androidxEspressoCoreVersion = '3.6.1'
     cordovaAndroidVersion = '10.1.1'
+    // Kotlin folded the jdk7/jdk8 stdlib artifacts into kotlin-stdlib at 1.8.
+    // A transitive dependency still asks for 1.6.21 of them, which duplicates
+    // every one of those classes and fails the build. Pinning all three to one
+    // version makes the jdk7/jdk8 jars the empty shims they are meant to be.
+    kotlinVersion = '1.8.22'
 }
