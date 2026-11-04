@@ -24,7 +24,7 @@ for id in "${IDS[@]}"; do
   "$BLENDER" --background --factory-startup --disable-autoexec \
     --python tools/model-check/check_model.py -- \
     --input "$blend" --asset-id "$id" --report "$OUT/$id.json" \
-    2>&1 | grep -E "^  (PASS|FAIL|WAIVED)|^====|^  [0-9]+ passed"
+    2>&1 | grep -E "^  (PASS|FAIL|WAIVED)|^ +waived |^====|^  [0-9]+ passed"
   status=${PIPESTATUS[0]}
   [ "$status" -gt "$WORST" ] && WORST=$status
 done

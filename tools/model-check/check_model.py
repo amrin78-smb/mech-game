@@ -114,19 +114,26 @@ def transform_state(obj):
 # ----------------------------------------------------------------- checking
 
 class Report:
-    def __init__(self, asset_id, waived):
+    """Collects every check. A failure the owner has waived by name stops gating an import
+    but is still reported, with the reason they gave and the measurement that provoked it,
+    so a waiver never quietly becomes a pass."""
+
+    def __init__(self, asset_id, waivers):
         self.asset_id = asset_id
-        self.waived = set(waived)
+        self.reasons = {w["check"]: w.get("reason", "") for w in waivers}
         self.checks = []
 
     def add(self, name, passed, detail):
-        waived = (not passed) and name in self.waived
-        self.checks.append({
+        waived = (not passed) and name in self.reasons
+        entry = {
             "check": name,
             "passed": bool(passed),
             "waived": waived,
             "detail": detail,
-        })
+        }
+        if waived:
+            entry["waiver_reason"] = self.reasons[name]
+        self.checks.append(entry)
 
     @property
     def failures(self):
@@ -231,8 +238,11 @@ def main(argv):
 
     bpy.ops.wm.open_mainfile(filepath=str(pathlib.Path(args.input).resolve()))
 
-    waived = (spec.get("waivers") or {}).get("checks", [])
-    report = Report(args.asset_id, waived)
+    waiver_block = spec.get("waivers") or {}
+    waivers = waiver_block.get("checks", [])
+    # Older entries were a bare list of names; both forms are accepted.
+    waivers = [w if isinstance(w, dict) else {"check": w} for w in waivers]
+    report = Report(args.asset_id, waivers)
 
     objects = list(bpy.data.objects)
     meshes = {o.name: o for o in objects if o.type == "MESH"}
@@ -326,6 +336,9 @@ def main(argv):
     for c in report.checks:
         mark = "PASS" if c["passed"] else ("WAIVED" if c["waived"] else "FAIL")
         print(f"  {mark:6} {c['check']}: {c['detail']}")
+        if c.get("waiver_reason"):
+            print(f"         waived {waiver_block.get('date', '')} by "
+                  f"{waiver_block.get('approved_by', 'owner')}: {c['waiver_reason']}")
     print(f"\n  {result['passed']} passed, {result['failed']} failed, {result['waived']} waived")
 
     if args.report:
