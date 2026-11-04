@@ -21,6 +21,7 @@ MonoBehaviour:
   economy:
     startingScrap: 250
     trickle: 3.2
+    rewardMultiplier: 1
   waves:
   - time: 3
     enemyId: burrower

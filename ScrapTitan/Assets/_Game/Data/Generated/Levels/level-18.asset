@@ -21,6 +21,7 @@ MonoBehaviour:
   economy:
     startingScrap: 260
     trickle: 3.4
+    rewardMultiplier: 1
   waves:
   - time: 3
     enemyId: sludge_diver

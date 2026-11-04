@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6869fe8e9fccf1ec48487f26f7397852, type: 3}
   m_Name: ScrapTitanDatabase
   m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.GameDatabase
-  importedFromRevision: c9df4f69140500ce86228cad166c18c192497335
-  importedAtUtc: 2026-11-04 15:25:16Z
+  importedFromRevision: 99a8dc61a5feb7ffc43c6d298c2ef7db05c7487f
+  importedAtUtc: 2026-11-04 16:00:17Z
   enemies:
   - {fileID: 11400000, guid: a73a67cbc8bc34e22b55cf8fe8f4d807, type: 2}
   - {fileID: 11400000, guid: 481e3d7c4f96d2eda9e47c9a02cae212, type: 2}

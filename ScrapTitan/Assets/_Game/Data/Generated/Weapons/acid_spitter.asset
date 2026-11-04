@@ -32,9 +32,12 @@ MonoBehaviour:
   - costCores: 15
     damageBonus: 0.15
     fireRateBonus: 0
+    specialBonus: 0
   - costCores: 30
     damageBonus: 0
     fireRateBonus: 0
+    specialBonus: 4
   - costCores: 50
     damageBonus: 0.2
     fireRateBonus: 0
+    specialBonus: 4

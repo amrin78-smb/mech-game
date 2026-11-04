@@ -21,6 +21,7 @@ MonoBehaviour:
   economy:
     startingScrap: 180
     trickle: 2.6
+    rewardMultiplier: 1
   waves:
   - time: 3
     enemyId: plated_hulk

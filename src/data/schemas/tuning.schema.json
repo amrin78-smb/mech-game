@@ -958,7 +958,7 @@
           "items": {
             "type": "number"
           },
-          "description": "Lane centres in depth. Lane 0 is the farthest from the camera, matching the Phaser build where lane 0 sat highest on screen."
+          "description": "Lane centres in depth. Lane 0 is the farthest from the camera, matching the Phaser build where lane 0 sat highest on screen. The spacing is the ground tile's own depth: a tile is 12 m deep, so lanes closer together than that overlap, and a higher terrace then buries the lane in front of it, legs and all."
         },
         "laneGroundY": {
           "type": "array",
@@ -966,7 +966,7 @@
           "items": {
             "type": "number"
           },
-          "description": "Ground height per lane, one entry per laneZ. At the briefed 12 degree camera, depth alone separates lanes by only sin(12) of their spacing, which for the ground brief's 6 m walkable band is about 0.6 m and far too little to read on a phone. Stepping the ground carries the rest: these values give about 1.7 m of apparent separation, which clears a 1.4 m Rustcrawler. The owner judges this from the running game."
+          "description": "Ground height per lane, one entry per laneZ. At the briefed 12 degree camera, 12 m of depth separates two lanes by 2.5 m on screen; a 1.1 m terrace step adds another 1.1, for about 3.6 m in all, which clears a 1.4 m Rustcrawler comfortably. The owner judges this from the running game."
         },
         "enemyBaseSize": {
           "type": "object",

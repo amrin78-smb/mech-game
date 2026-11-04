@@ -21,6 +21,7 @@ MonoBehaviour:
   economy:
     startingScrap: 130
     trickle: 2.1
+    rewardMultiplier: 1
   waves:
   - time: 3
     enemyId: drone_swarm

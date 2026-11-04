@@ -21,6 +21,7 @@ MonoBehaviour:
   economy:
     startingScrap: 170
     trickle: 2.5
+    rewardMultiplier: 1
   waves:
   - time: 3
     enemyId: rustcrawler

@@ -85,13 +85,34 @@ def titan_chassis(out_dir):
     ]), (5.5, 7.0, 9.0), ("centre", "centre", "min"), "Titan_Torso"))
 
     def leg(name, length, radius, location):
+        """A heavy armoured limb, not a pill.
+
+        The brief wants legs that are "very heavy, with big piston rams painted along the
+        thigh and shin, round armoured knee and ankle joints". A plain capsule read as a
+        smooth pin under a 5.5 m torso in the first frames, so the limb is now a bevelled
+        armour block with a round joint drum at each end and a piston ram down its front.
+        Everything stays inside the briefed box.
+        """
+        d = radius * 2.0
         return shapes.make_object(name, shapes.fit(shapes.combine(name, [
-            (shapes.capsule(radius, length, segments=12, cap_steps=3), (0, 0, 0)),
-            # Piston ram down the front of the limb, and a round armoured joint cap.
-            (shapes.cylinder(radius * 0.26, length * 0.62, bevel=0.05, segments=8),
-             (0, -radius * 0.74, 0)),
-            (shapes.torus(radius * 0.82, radius * 0.17, 12, 6), (0, 0, length * 0.5 - radius * 0.5)),
-        ]), (radius * 2, radius * 2, length), ("centre", "centre", "max"), name), location)
+            # The armour casing: a chunky bevelled block, slightly waisted by the drums.
+            (shapes.rounded_box((d * 0.92, d * 0.84, length * 0.88), bevel=radius * 0.3,
+                                segments=2), (0, 0, 0)),
+            # Round armoured joints at the hip and the knee, the full width of the limb.
+            # The hip drum spans the full briefed width, so it is what sets the limb's
+            # extent across the body rather than the casing inside it.
+            # Each drum is set in by its own radius, so the pair of them lands exactly on
+            # the briefed length rather than standing proud of it.
+            (shapes.cylinder(radius, d, bevel=radius * 0.22, segments=14, axis="x"),
+             (0, 0, length * 0.5 - radius)),
+            (shapes.cylinder(radius * 0.92, d * 0.88, bevel=radius * 0.2, segments=14, axis="x"),
+             (0, 0, -length * 0.5 + radius * 0.92)),
+            # The piston ram down the front of the limb, with its collar.
+            (shapes.cylinder(radius * 0.3, length * 0.58, bevel=0.04, segments=10),
+             (0, -radius * 0.72, 0)),
+            (shapes.cylinder(radius * 0.42, radius * 0.5, bevel=0.05, segments=10),
+             (0, -radius * 0.72, length * 0.2)),
+        ]), (d, d, length), ("centre", "centre", "max"), name), location)
 
     upper = leg("Titan_Leg_Upper", 3.4, 0.8, (2.2, 0.0, 0.0))
     lower = leg("Titan_Leg_Lower", 3.4, 0.75, (2.2, 0.0, -3.4))

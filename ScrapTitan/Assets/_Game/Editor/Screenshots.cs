@@ -119,6 +119,10 @@ namespace ScrapTitan.Editor
                 camGo.transform.rotation = Quaternion.Euler(12f, -90f, 0f);
                 camGo.transform.position = bounds.center
                                            - camGo.transform.forward * (bounds.size.magnitude + 20f);
+                // Keyed off the camera, so the lit side is the side being photographed. A
+                // fixed world direction left every portrait a silhouette.
+                lightGo.transform.rotation = camGo.transform.rotation * Quaternion.Euler(28f, -32f, 0f);
+                fillGo.transform.rotation = camGo.transform.rotation * Quaternion.Euler(-12f, 46f, 0f);
 
                 Capture(cam, Path.Combine(outDir, $"model_{assetId}.png"));
                 Debug.Log($"[Screenshots] model_{assetId}.png  size={bounds.size}");
