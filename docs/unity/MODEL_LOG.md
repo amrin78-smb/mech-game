@@ -217,3 +217,37 @@ gate as a delivery rather than trusting it.
 
 A real bug in the shape library came out of the same runs: `cylinder()` with a zero bevel
 collapsed two profile rows onto each other, making zero-area faces and doubled vertices.
+
+## 2026-11-04: what the first frames of the running game changed
+
+The models above all passed their briefs before anything was rendered. Then
+`scripts/unity-frames.sh` put them in the battle and photographed it, and two of them
+needed work that no measurement would ever have asked for.
+
+- **The legs were pills.** A capsule hit every number in brief 01 and read as a smooth pin
+  under a 5.5 m torso. The brief's own words are "very heavy, with big piston rams painted
+  along the thigh and shin, round armoured knee and ankle joints", and that is what the limb
+  is now: a bevelled armour casing, a full-width joint drum at each end, a piston ram down
+  the front. Still inside 1.6 x 1.6 x 3.4, and `fit()` refused two attempts on the way, once
+  at 1.47 m across against the briefed 1.60 and once with the drums standing 0.86 m proud of
+  the briefed length.
+- **The ground buried the Titan.** Not a model fault: the scene placed the lanes 3 m apart
+  while a ground tile is 12 m deep, so each terrace overlapped its neighbours and the higher
+  ones swallowed the lane in front. Lane spacing is now the tile's own depth.
+
+### Still open, and for the owner to judge
+
+**The briefed leg is thin.** 1.6 m across under a 5.5 m torso reads spindly even as an
+armoured limb. Kimi's delivery came in at 1.94 and 2.04 m, 21 and 27% over, and the owner
+waived both; seen in the game, that looks less like a miss and more like the model being
+right and the brief's figure being too slim. The same goes for two other waivers from batch
+1: the torso hanging 0.44 m below the hip axle is the armour skirts the brief asks for, and
+they have nowhere else to go, because the brief's box starts at the hip.
+
+Three choices, and it is the owner's call:
+
+1. Change brief 01's leg width and torso box, and regenerate. Everything stays passing.
+2. Record a waiver for the generated models the way one was recorded for Kimi's.
+3. Leave it. It is a stylised game and the Titan reads as a fortress on legs either way.
+
+Nothing is blocked on the answer: the briefs as written produce a Titan that plays.

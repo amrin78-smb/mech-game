@@ -320,9 +320,12 @@ namespace ScrapTitan.Battle
             {
                 // The barrel's longest axis, whichever way it is currently turned.
                 BarrelLength = Longest(ModelLibrary.WorldBounds(barrel.gameObject).size),
-                // Which way the barrel points, in its parent's space, so recoil slides it
-                // back along itself rather than along a guessed axis.
-                BarrelAxis = housing.InverseTransformDirection(barrel.forward),
+                // From the barrel's pivot to the middle of its geometry, which is along the
+                // barrel whatever rotation the import gave the object. Its own `forward` is
+                // not: for this model that is world up.
+                BarrelAxis = housing.InverseTransformDirection(
+                    (ModelLibrary.WorldBounds(barrel.gameObject).center - barrel.position)
+                    .normalized),
             };
         }
 

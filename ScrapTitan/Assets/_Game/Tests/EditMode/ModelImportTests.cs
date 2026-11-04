@@ -165,6 +165,32 @@ namespace ScrapTitan.Tests
         }
 
         [Test]
+        public void APartsOwnForwardIsNotTheDirectionItPoints()
+        {
+            // The trap this suite exists for. Each imported part carries a rotation of its
+            // own, and for these models a barrel's local +Z is world up, not along the
+            // barrel. Anything that needs a direction has to measure it from the geometry.
+            GameObject cannon = Object.Instantiate(Load("titan_cannon_autocannon"));
+            try
+            {
+                Transform barrel = Part(cannon, "Autocannon_Barrel");
+                Bounds bounds = BoundsOf(barrel);
+                Vector3 alongBarrel = (bounds.center - barrel.position).normalized;
+
+                Assert.That(Vector3.Dot(alongBarrel, barrel.forward), Is.LessThan(0.9f),
+                    "if a part's own forward ever does run along its geometry, the comment in "
+                    + "Titan.AimDirection and the measurement in BattleDirector can be "
+                    + "simplified; until then they must not be");
+                Assert.That(Mathf.Abs(alongBarrel.y), Is.LessThan(0.05f),
+                    "the barrel lies level in its own model space");
+            }
+            finally
+            {
+                Object.DestroyImmediate(cannon);
+            }
+        }
+
+        [Test]
         public void TheRustcrawlerIsTheSizeItsBriefGives()
         {
             GameObject crawler = Object.Instantiate(Load("enemy_rustcrawler"));

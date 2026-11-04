@@ -142,6 +142,10 @@ namespace ScrapTitan.Editor
                           + $"rot {cam.transform.eulerAngles:F1} ortho {cam.orthographicSize} "
                           + $"aspect {cam.aspect:F3} pixelRect {cam.pixelRect}");
 
+            Titan titan = director.PlayerTitan;
+            sb.AppendLine($"[Layout] muzzle {titan.Muzzle:F2} aim {titan.AimDirection:F3} "
+                          + $"barrelLength {titan.BarrelLength:F2} barrelAxis {titan.BarrelAxis:F3}");
+
             foreach (Transform t in director.transform.GetComponentsInChildren<Transform>(true))
             {
                 if (!t.TryGetComponent(out Renderer r)) continue;

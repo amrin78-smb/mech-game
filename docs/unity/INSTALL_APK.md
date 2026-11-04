@@ -62,3 +62,33 @@ not taking effect and it has to be fixed before anything is built on top of it.
 The Phase 0 APK shows a **LAUNCH #n** counter for exactly this reason. The number must go up
 each time, and the `graphics api` line says which path the phone actually took. On the Redmi
 that line should read `OpenGLES3`; on the Samsung, `Vulkan`.
+
+## What to look at in `demo-0.2.0` (Phase 1)
+
+This is the first build with gameplay. It opens straight into level-01, First Contact.
+
+**It plays itself.** Every weapon auto fires, so the level can be won without touching the
+screen. That is intended: the drag is an override, not the only control.
+
+1. **Drag anywhere on the lower half of the screen** and release. Auto fire pauses, an aim
+   point follows your finger above where it is touching, and releasing fires one precision
+   shot at 1.5x damage. Auto fire comes back 0.8 s later.
+2. **Tap a raider** to focus every weapon on it. Tap it again to let go. The readout says
+   FOCUS LOCKED while one is held.
+3. **Watch the three lanes.** They are separated in depth and the ground steps up behind,
+   which is the thing most worth your opinion: is a raider in the far lane clearly in a
+   different lane from one in the near lane, at arm's length, on each phone?
+4. **Let one through on purpose.** Stop shooting a lane and let a Rustcrawler reach the
+   Titan. The hull bar top left should start dropping.
+5. **Lose on purpose** if you have the patience, or **win** and use RETRY on the results
+   screen. The level takes about 82 s to clear.
+
+The bottom-right line still carries the Phase 0 readouts: the graphics API, the launch
+counter and the frame rate.
+
+- On the **Redmi A3** it must say `OpenGLES3`, and the launch counter must keep going up
+  across full closes. The frame rate is the number that matters for the Phase 1 target of 30.
+- On the **S25 Ultra** it should say `Vulkan`.
+
+**The Redmi relaunch test still applies and is still the one that matters.** Open it, swipe
+it away from recent apps, open it again, three times. A fresh install proves nothing.

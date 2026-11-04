@@ -88,9 +88,17 @@ namespace ScrapTitan.Battle
         public Transform Root => root;
 
         /// <summary>Where a shot leaves the barrel: its far end, along the aim.</summary>
-        public Vector3 Muzzle => cannonBarrel.position + cannonBarrel.forward * BarrelLength;
+        public Vector3 Muzzle => cannonBarrel.position + AimDirection * BarrelLength;
 
-        public Vector3 AimDirection => cannonHousing.forward;
+        /// <summary>
+        /// Which way the cannon points, in the world.
+        ///
+        /// Not the transform's own forward. Each imported part carries a rotation of its own,
+        /// and a barrel's local +Z turned out to be world up: the muzzle sat five metres
+        /// above the cannon and the fallback aim pointed at the sky. <see cref="BarrelAxis"/>
+        /// is measured from the barrel's own geometry instead.
+        /// </summary>
+        public Vector3 AimDirection => cannonHousing.TransformDirection(BarrelAxis);
 
         /// <summary>
         /// Barrel length along its own axis. Read from the mesh once rather than hard coded,
@@ -99,8 +107,10 @@ namespace ScrapTitan.Battle
         public float BarrelLength { get; set; } = 5f;
 
         /// <summary>
-        /// The barrel's own axis in its parent's space, so recoil slides it back along
-        /// itself. Set when the Titan is assembled, from the direction the barrel points.
+        /// The way the barrel points, in the cannon housing's own space. Measured when the
+        /// Titan is assembled, from the barrel pivot to the centre of the barrel's geometry,
+        /// so it holds for any model whatever rotation its import carries. Recoil slides the
+        /// barrel back along it and the muzzle sits at its far end.
         /// </summary>
         public Vector3 BarrelAxis { get; set; } = Vector3.forward;
 
