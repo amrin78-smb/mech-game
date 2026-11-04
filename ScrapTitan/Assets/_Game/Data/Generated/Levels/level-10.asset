@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fea6841bb3000018bb56f0f5e891a064, type: 3}
+  m_Name: level-10
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.LevelDef
+  id: level-10
+  displayName: Iron Matriarch
+  zone: 2
+  background: ash_canyons
+  music: bgm_boss
+  scrollSpeed: 9
+  economy:
+    startingScrap: 180
+    trickle: 2.5
+  waves:
+  - time: 3
+    enemyId: rustcrawler
+    count: 6
+    interval: 0.8
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 16
+    enemyId: drone_swarm
+    count: 8
+    interval: 0.35
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 30
+    enemyId: shield_bearer
+    count: 2
+    interval: 5
+    hasLane: 1
+    lane: 1
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 44
+    enemyId: gunner_walker
+    count: 2
+    interval: 4.5
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 56
+    enemyId: drone_swarm
+    count: 10
+    interval: 0.3
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  hasBoss: 1
+  boss:
+    enemyId: boss_iron_matriarch
+    time: 72
+    hpMultiplier: 0.821
+  hpMultiplier: 1.95
+  stars:
+    hullThreshold: 0.5
+  rewards:
+    firstClearCores: 40
+    coresPerStar: 8

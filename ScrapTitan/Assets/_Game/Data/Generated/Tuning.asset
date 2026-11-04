@@ -1,0 +1,279 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4af693b85bc3bc08fba52ebaee276e31, type: 3}
+  m_Name: Tuning
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.TuningDef
+  damageMatrix:
+    kinetic:
+      light: 1.5
+      armored: 0.5
+      shielded: 1
+      swarm: 1
+    chemical:
+      light: 1
+      armored: 1.75
+      shielded: 0.5
+      swarm: 0.75
+    piercing:
+      light: 0.75
+      armored: 1
+      shielded: 2
+      swarm: 0.5
+    explosive:
+      light: 1
+      armored: 0.5
+      shielded: 0.75
+      swarm: 2
+  mecha:
+    baseHullHp: 1000
+    lanesY:
+    - 0.55
+    - 0.68
+    - 0.82
+    turretMountCount: 3
+    bobAmplitude: 5
+    bobPeriod: 1.9
+    swayAmplitude: 1.6
+    swayPeriod: 4.3
+    turretMountOffsets:
+    - {x: -46, y: -104}
+    - {x: 46, y: -118}
+    - {x: 0, y: -134}
+    walkPeriod: 1.6
+    walkBob: 4
+    walkPitch: 1.1
+    legsFaceLeft: 1
+    legArticulation:
+      hipFraction: 0.327
+      gapFraction: 0.517
+      overlapFraction: 0.08
+      swingDegrees: 6
+      liftPixels: 3.5
+  world:
+    baseWidth: 1280
+    baseHeight: 720
+    mechaXFraction: 0.2
+    spawnXFraction: 1.08
+    despawnXFraction: -0.12
+    meleeStandoff: 92
+    projectileRadius: 7
+    projectileLifetime: 3
+    parallax:
+      sky: 0.12
+      ruins: 0.42
+      ground: 1
+    maxFrameSeconds: 0.05
+    burrowSpawnXFraction: 0.62
+    flyingYOffset: 104
+    hitscanRangeFactor: 1.2
+    enemyBaseSize:
+    - width: 48
+      height: 32
+    - width: 56
+      height: 46
+    - width: 52
+      height: 50
+    - width: 26
+      height: 22
+  inBattleUpgrades:
+    damage:
+      baseCost: 55
+      costGrowth: 1.6
+      bonusPerLevel: 0.09
+      healFraction: 0
+    fireRate:
+      baseCost: 55
+      costGrowth: 1.6
+      bonusPerLevel: 0.07
+      healFraction: 0
+    repair:
+      baseCost: 90
+      costGrowth: 1.7
+      bonusPerLevel: 0
+      healFraction: 0.25
+  vfx:
+    maxParticlesDesktop: 600
+    maxParticlesMobile: 250
+    shakeMaxIntensity: 0.012
+    damageNumberPoolSize: 60
+    scrapPickupRiseSpeed: 46
+    scrapPickupLifetime: 0.75
+    hitFlashDuration: 0.05
+    hitFlashCooldown: 0.14
+    hitFlashTint: 16768392
+    damageNumberRise: 70
+    damageNumberLifetime: 0.8
+    muzzleFlashDuration: 0.06
+    shakePerDamage: 0.00012
+    shakeDurationMs: 120
+    impactParticleCount: 7
+    deathParticleCount: 16
+    exhaustSmokeFrequency: 180
+    cannonRecoilPixels: 16
+    turretRecoilPixels: 7
+    recoilRecovery: 9
+    muzzleFlashPoolSize: 16
+  pools:
+    projectiles: 128
+    enemies: 96
+    scrapPickups: 48
+  targeting:
+    priorityOrder:
+    - focus
+    - ranged_in_range
+    - closest
+    manualShotDamageMultiplier: 1.5
+    autoFireResumeDelay: 0.8
+    manualDragThreshold: 22
+    touchDragOriginMinYFraction: 0.5
+    touchAimOffsetY: 90
+  boss:
+    defaults:
+      phase2HpFraction: 0.5
+      chargeSpeedMultiplier: 3.2
+      chargeDuration: 1.1
+      chargeCooldown: 3.2
+      entranceShakeIntensity: 0.009
+      slamShakeIntensity: 0.007
+    byId:
+    - enemyId: boss_compactor
+      kind: 0
+      shieldUpDuration: 0
+      ventDuration: 0
+      enrageThresholds: []
+      enrageSpeedBonus: 0
+      enrageDamageBonus: 0
+    - enemyId: boss_iron_matriarch
+      kind: 1
+      shieldUpDuration: 9
+      ventDuration: 6
+      enrageThresholds: []
+      enrageSpeedBonus: 0
+      enrageDamageBonus: 0
+    - enemyId: boss_leviathan_engine
+      kind: 2
+      shieldUpDuration: 0
+      ventDuration: 0
+      enrageThresholds:
+      - 0.66
+      - 0.33
+      enrageSpeedBonus: 0.4
+      enrageDamageBonus: 0.25
+    - enemyId: boss_dredge
+      kind: 0
+      shieldUpDuration: 0
+      ventDuration: 0
+      enrageThresholds: []
+      enrageSpeedBonus: 0
+      enrageDamageBonus: 0
+  audio:
+    masterVolume: 0.75
+    sfxVolume: 0.7
+    musicVolume: 0.3
+  combat:
+    shieldNonPiercingFactor: 0.5
+  meta:
+    startingWeapons:
+    - autocannon
+    - flak_turret
+    weaponUnlockCosts:
+    - id: acid_spitter
+      costCores: 45
+    - id: railgun
+      costCores: 80
+    - id: scattergun
+      costCores: 55
+    - id: gatling_pod
+      costCores: 60
+    turretMountCosts: 230000005a000000
+    hullUpgrade:
+      costs: 1400000028000000460000006e000000a0000000
+      bonusPerLevel: 0.12
+    zoneNames:
+    - zone: 1
+      displayName: ZONE 1  THE RUST FLATS
+    - zone: 2
+      displayName: ZONE 2  THE ASH CANYONS
+    - zone: 3
+      displayName: ZONE 3  THE FURNACE
+    - zone: 4
+      displayName: ZONE 4  THE DROWNED WORKS
+  tutorial:
+    levelId: level-01
+    steps:
+    - at: 1.5
+      duration: 6
+      text: Your guns fire on their own. Watch them work.
+    - at: 9
+      duration: 6
+      text: Drag anywhere and release for a precision shot.
+    - at: 20
+      duration: 6
+      text: Tap an enemy to focus every weapon on it.
+    - at: 32
+      duration: 7
+      text: Spend scrap bottom left on damage, fire rate or repairs.
+    - at: 46
+      duration: 6
+      text: Anything that reaches the mecha chews on the hull.
+  endless:
+    firstWaveAt: 4
+    waveInterval: 7
+    waveCount: 150
+    hpGrowth: 0.055
+    countGrowth: 0.06
+    maxCount: 18
+    eliteEvery: 10
+    coresPerNewWave: 2
+    unlockAfterLevel: level-05
+    tiers:
+    - fromWave: 1
+      enemies:
+      - rustcrawler
+      - scavenger_bike
+    - fromWave: 5
+      enemies:
+      - rustcrawler
+      - scavenger_bike
+      - plated_hulk
+    - fromWave: 11
+      enemies:
+      - scavenger_bike
+      - plated_hulk
+      - gunner_walker
+      - drone_swarm
+    - fromWave: 19
+      enemies:
+      - plated_hulk
+      - gunner_walker
+      - drone_swarm
+      - shield_bearer
+      - burrower
+    - fromWave: 29
+      enemies:
+      - shield_bearer
+      - incinerator_tank
+      - burrower
+      - elite_vanguard
+      - drone_swarm
+    - fromWave: 41
+      enemies:
+      - brine_lancer
+      - sump_hauler
+      - sludge_diver
+      - elite_vanguard
+      - incinerator_tank
+    elites:
+    - boss_compactor
+    - boss_iron_matriarch
+    - boss_leviathan_engine
+    - boss_dredge

@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fea6841bb3000018bb56f0f5e891a064, type: 3}
+  m_Name: level-16
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.LevelDef
+  id: level-16
+  displayName: Slipway
+  zone: 4
+  background: drowned_works
+  music: bgm_zone4
+  scrollSpeed: 11
+  economy:
+    startingScrap: 240
+    trickle: 3.2
+  waves:
+  - time: 3
+    enemyId: scavenger_bike
+    count: 6
+    interval: 0.8
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 14
+    enemyId: sludge_diver
+    count: 3
+    interval: 1.6
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 26
+    enemyId: plated_hulk
+    count: 2
+    interval: 4
+    hasLane: 1
+    lane: 1
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 38
+    enemyId: sludge_diver
+    count: 5
+    interval: 1.2
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 44
+    enemyId: scavenger_bike
+    count: 7
+    interval: 0.6
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 52
+    enemyId: gunner_walker
+    count: 2
+    interval: 5
+    hasLane: 1
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 64
+    enemyId: sludge_diver
+    count: 6
+    interval: 1
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 1
+    hpMultiplier: 1.1
+  hasBoss: 0
+  boss:
+    enemyId: 
+    time: 0
+    hpMultiplier: 0
+  hpMultiplier: 3.4
+  stars:
+    hullThreshold: 0.55
+  rewards:
+    firstClearCores: 35
+    coresPerStar: 7

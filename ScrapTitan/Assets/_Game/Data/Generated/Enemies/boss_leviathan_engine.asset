@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6826e40bcc6beaa6a825be5b99f9f32b, type: 3}
+  m_Name: boss_leviathan_engine
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.EnemyDef
+  id: boss_leviathan_engine
+  displayName: The Leviathan Engine
+  assetKey: boss_leviathan_engine
+  armorClass: 1
+  hp: 4000
+  speed: 14
+  damage: 120
+  attackInterval: 3.2
+  reward: 800
+  scale: 3.2
+  flying: 0
+  attackRange: 0
+  shieldHp: 0
+  behaviors: 0000000005000000
+  hasBarrier: 0
+  barrier:
+    radius: 0
+    offsetX: 0
+  hasSpawns: 1
+  spawns:
+    enemyId: burrower
+    count: 2
+    interval: 9
+  hasBurnZone: 0
+  burnZone:
+    damagePerSecond: 0
+    duration: 0
+    radius: 0
+    spreadX: 0
+    offsetX: 0
+  hasWeakPoints: 1
+  weakPoints:
+    enemyId: leviathan_vent
+    mounts:
+    - x: -0.24
+      y: -0.3
+    - x: 0
+      y: -0.44
+    - x: 0.24
+      y: -0.26
+    bodyDamageFactor: 0.25

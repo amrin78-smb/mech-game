@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6826e40bcc6beaa6a825be5b99f9f32b, type: 3}
+  m_Name: incinerator_tank
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.EnemyDef
+  id: incinerator_tank
+  displayName: Incinerator Tank
+  assetKey: enemy_incinerator_tank
+  armorClass: 1
+  hp: 320
+  speed: 28
+  damage: 22
+  attackInterval: 2.2
+  reward: 40
+  scale: 1.5
+  flying: 0
+  attackRange: 380
+  shieldHp: 0
+  behaviors: 0100000006000000
+  hasBarrier: 0
+  barrier:
+    radius: 0
+    offsetX: 0
+  hasSpawns: 0
+  spawns:
+    enemyId: 
+    count: 0
+    interval: 0
+  hasBurnZone: 1
+  burnZone:
+    damagePerSecond: 9
+    duration: 4.5
+    radius: 58
+    spreadX: 70
+    offsetX: 105
+  hasWeakPoints: 0
+  weakPoints:
+    enemyId: 
+    mounts: []
+    bodyDamageFactor: 0

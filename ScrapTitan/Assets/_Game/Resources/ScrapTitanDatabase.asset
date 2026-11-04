@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6869fe8e9fccf1ec48487f26f7397852, type: 3}
+  m_Name: ScrapTitanDatabase
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.GameDatabase
+  importedFromRevision: 6759cdbf48963fc52562e975650f3aca4816a002
+  importedAtUtc: 2026-11-04 09:13:22Z
+  enemies:
+  - {fileID: 11400000, guid: a73a67cbc8bc34e22b55cf8fe8f4d807, type: 2}
+  - {fileID: 11400000, guid: 481e3d7c4f96d2eda9e47c9a02cae212, type: 2}
+  - {fileID: 11400000, guid: b3bc19aaa5a5bb1e8ae445e1471c833d, type: 2}
+  - {fileID: 11400000, guid: 9c22e040dac75dba580d9850fe109a67, type: 2}
+  - {fileID: 11400000, guid: 1ba9c8ff09950faac9163401b49c7f75, type: 2}
+  - {fileID: 11400000, guid: d7077fa38e642775aa28ad40707a1241, type: 2}
+  - {fileID: 11400000, guid: 720160c59c0ad294abad59a77e7d942a, type: 2}
+  - {fileID: 11400000, guid: ce3e3a21c465d18969c237c28c0c6db6, type: 2}
+  - {fileID: 11400000, guid: 2bf8bb84b441310fb9309fa3e9c2f1f8, type: 2}
+  - {fileID: 11400000, guid: 02a85227b1f64346ab85ec6c9370a8fa, type: 2}
+  - {fileID: 11400000, guid: 6819569b6129582eca6411a07e1f23e3, type: 2}
+  - {fileID: 11400000, guid: 2e1009468b802d05db1f263803ec1839, type: 2}
+  - {fileID: 11400000, guid: 55cea358fe0c720e3aba8f6df6da98cb, type: 2}
+  - {fileID: 11400000, guid: 1b64e7096737fa48392c275d1ccdbb64, type: 2}
+  - {fileID: 11400000, guid: cc28d467b44dfe426a018e6f6f531812, type: 2}
+  - {fileID: 11400000, guid: 49dfba7270bdc46b3be06c4475003a5e, type: 2}
+  - {fileID: 11400000, guid: b32c2ebf83478e0cb95158f8ed034458, type: 2}
+  weapons:
+  - {fileID: 11400000, guid: 69bd257400ac907d7a2e749b9cbbf0e9, type: 2}
+  - {fileID: 11400000, guid: 71712d56e8729ca298f6a6511b8a34e6, type: 2}
+  - {fileID: 11400000, guid: 1d9f98917d2e17f5ba0ec78f584cae86, type: 2}
+  - {fileID: 11400000, guid: 7ff4a321894465a0189c3951b3f95631, type: 2}
+  - {fileID: 11400000, guid: f790d40be83d15da3ae93e945babbf3e, type: 2}
+  - {fileID: 11400000, guid: d1319b36ca66dfea78913ebba7ef534f, type: 2}
+  pilots:
+  - {fileID: 11400000, guid: 95333f6f4b99cf2218b6901362df56b1, type: 2}
+  - {fileID: 11400000, guid: cf9e0862c57d7703fb7b090111cf9c64, type: 2}
+  escorts:
+  - {fileID: 11400000, guid: db1c61c8a1a1bf1658cf43cfcb989c83, type: 2}
+  - {fileID: 11400000, guid: dd04dbc6f3d9d667fb6ebaeaa1b343ec, type: 2}
+  levels:
+  - {fileID: 11400000, guid: 0244c39232fb553f4a1edc279e7e5b53, type: 2}
+  - {fileID: 11400000, guid: 2da9e3526a7312004b7752bd03b6ddd9, type: 2}
+  - {fileID: 11400000, guid: 3830a5b0b2da8e3b9bbd7a50eede3b31, type: 2}
+  - {fileID: 11400000, guid: 727a3cfd09e415d7bbf164f669fe279f, type: 2}
+  - {fileID: 11400000, guid: 8b05a2a46a1b5c23cb42f897f86fbe1b, type: 2}
+  - {fileID: 11400000, guid: b05a215bb380de006aa2776a4a53c394, type: 2}
+  - {fileID: 11400000, guid: ce978a4777a5e6edaa8b892a6034914c, type: 2}
+  - {fileID: 11400000, guid: 7d519c5824d7866c98610d452a3550a7, type: 2}
+  - {fileID: 11400000, guid: 114a3381db29ac385be9ce153a4ae1a0, type: 2}
+  - {fileID: 11400000, guid: 2fed4668c5f7ae8269c2a3ce3def387e, type: 2}
+  - {fileID: 11400000, guid: be1ecee4ed73ae76ab6e6f059709c07e, type: 2}
+  - {fileID: 11400000, guid: 81df813db0f909fbeb27745d48d90a3e, type: 2}
+  - {fileID: 11400000, guid: ecb58521aff8a6735ae1a543ffafb0f2, type: 2}
+  - {fileID: 11400000, guid: b9c3566edefa2bd4eb3a36d676282b04, type: 2}
+  - {fileID: 11400000, guid: d47174c208ed08a2ba1c05bc0cd91219, type: 2}
+  - {fileID: 11400000, guid: a4b8152f2eab1aeccaaa184a1a002781, type: 2}
+  - {fileID: 11400000, guid: fae622f098cb522d39cf8b51ed23aa1a, type: 2}
+  - {fileID: 11400000, guid: 30f0f928f85430beb8848ca32002abf4, type: 2}
+  - {fileID: 11400000, guid: 8b5e56533a8777b7a9da1d4cd12ef779, type: 2}
+  - {fileID: 11400000, guid: 55f4d3f8dc89331bd9e5ddb3a0d50fd3, type: 2}
+  tuning: {fileID: 11400000, guid: dc55ec05afc50b91aaab3311588809cb, type: 2}

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97b72e3542bc51a8bb94d93342c3cc31, type: 3}
+  m_Name: gatling_pod
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.WeaponDef
+  id: gatling_pod
+  displayName: Gatling Pod
+  slot: 1
+  damageType: 0
+  baseDamage: 5
+  fireRate: 5.2
+  projectile:
+    kind: 0
+    speed: 980
+    aoeRadius: 0
+    pellets: 0
+    spreadDegrees: 0
+    hasDot: 0
+    dotDps: 0
+    dotDuration: 0
+  upgradeTrack:
+  - costCores: 12
+    damageBonus: 0
+    fireRateBonus: 0.18
+  - costCores: 26
+    damageBonus: 0.2
+    fireRateBonus: 0
+  - costCores: 44
+    damageBonus: 0
+    fireRateBonus: 0.22

@@ -12,3 +12,40 @@ tools/art/preview.png
 
 # raw AI art is large and regenerable; processed sprites are committed
 assets/raw/
+
+# --- Unity (ScrapTitan) ---
+# Everything Unity regenerates from Assets/, Packages/ and ProjectSettings/.
+ScrapTitan/[Ll]ibrary/
+ScrapTitan/[Tt]emp/
+ScrapTitan/[Oo]bj/
+ScrapTitan/[Bb]uilds/
+Builds/
+*_BurstDebugInformation_DoNotShip/
+*.provenance.json
+ScrapTitan/[Ll]ogs/
+ScrapTitan/[Uu]ser[Ss]ettings/
+ScrapTitan/[Mm]emoryCaptures/
+ScrapTitan/[Rr]ecordings/
+# Scratch space for the Android IL2CPP and Gradle build.
+ScrapTitan/.utmp/
+ScrapTitan/.gradle/
+ScrapTitan/.consulo/
+ScrapTitan/.idea/
+ScrapTitan/.vsconfig
+ScrapTitan/*.csproj
+ScrapTitan/*.sln
+ScrapTitan/*.unityproxy
+
+# Crash handler output and Unity's own leftovers
+sysinfo.txt
+*.stackdump
+
+# Build and test output
+Logs/
+test-results.xml
+ScrapTitan/test-results.xml
+
+# Signing keys and their passwords never enter the repo.
+*.keystore
+*.jks
+keystore.env

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97b72e3542bc51a8bb94d93342c3cc31, type: 3}
+  m_Name: railgun
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.WeaponDef
+  id: railgun
+  displayName: Railgun
+  slot: 0
+  damageType: 2
+  baseDamage: 50
+  fireRate: 0.4
+  projectile:
+    kind: 1
+    speed: 0
+    aoeRadius: 0
+    pellets: 0
+    spreadDegrees: 0
+    hasDot: 0
+    dotDps: 0
+    dotDuration: 0
+  upgradeTrack:
+  - costCores: 20
+    damageBonus: 0.2
+    fireRateBonus: 0
+  - costCores: 40
+    damageBonus: 0
+    fireRateBonus: 0.15
+  - costCores: 65
+    damageBonus: 0.25
+    fireRateBonus: 0

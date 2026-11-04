@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fea6841bb3000018bb56f0f5e891a064, type: 3}
+  m_Name: level-04
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.LevelDef
+  id: level-04
+  displayName: Fast Company
+  zone: 1
+  background: rust_flats
+  music: bgm_zone1
+  scrollSpeed: 16
+  economy:
+    startingScrap: 110
+    trickle: 1.8
+  waves:
+  - time: 3
+    enemyId: scavenger_bike
+    count: 3
+    interval: 1.6
+    hasLane: 1
+    lane: 1
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 14
+    enemyId: rustcrawler
+    count: 5
+    interval: 0.9
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 26
+    enemyId: scavenger_bike
+    count: 5
+    interval: 0.8
+    hasLane: 1
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 34
+    enemyId: scavenger_bike
+    count: 5
+    interval: 0.8
+    hasLane: 1
+    lane: 2
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 46
+    enemyId: plated_hulk
+    count: 2
+    interval: 5
+    hasLane: 1
+    lane: 1
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 50
+    enemyId: scavenger_bike
+    count: 6
+    interval: 0.6
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 0
+    hpMultiplier: 1
+  - time: 66
+    enemyId: scavenger_bike
+    count: 8
+    interval: 0.45
+    hasLane: 0
+    lane: 0
+    hasHpMultiplier: 1
+    hpMultiplier: 1.2
+  hasBoss: 0
+  boss:
+    enemyId: 
+    time: 0
+    hpMultiplier: 0
+  hpMultiplier: 1.25
+  stars:
+    hullThreshold: 0.6
+  rewards:
+    firstClearCores: 18
+    coresPerStar: 4

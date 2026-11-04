@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6826e40bcc6beaa6a825be5b99f9f32b, type: 3}
+  m_Name: boss_compactor
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.EnemyDef
+  id: boss_compactor
+  displayName: The Compactor
+  assetKey: boss_compactor
+  armorClass: 1
+  hp: 2400
+  speed: 18
+  damage: 80
+  attackInterval: 3
+  reward: 300
+  scale: 2.6
+  flying: 0
+  attackRange: 0
+  shieldHp: 0
+  behaviors: 00000000
+  hasBarrier: 0
+  barrier:
+    radius: 0
+    offsetX: 0
+  hasSpawns: 0
+  spawns:
+    enemyId: 
+    count: 0
+    interval: 0
+  hasBurnZone: 0
+  burnZone:
+    damagePerSecond: 0
+    duration: 0
+    radius: 0
+    spreadX: 0
+    offsetX: 0
+  hasWeakPoints: 0
+  weakPoints:
+    enemyId: 
+    mounts: []
+    bodyDamageFactor: 0

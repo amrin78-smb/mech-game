@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97b72e3542bc51a8bb94d93342c3cc31, type: 3}
+  m_Name: acid_spitter
+  m_EditorClassIdentifier: ScrapTitan.Runtime::ScrapTitan.Data.WeaponDef
+  id: acid_spitter
+  displayName: Acid Spitter
+  slot: 0
+  damageType: 1
+  baseDamage: 30
+  fireRate: 0.8
+  projectile:
+    kind: 2
+    speed: 520
+    aoeRadius: 48
+    pellets: 0
+    spreadDegrees: 0
+    hasDot: 1
+    dotDps: 12
+    dotDuration: 3
+  upgradeTrack:
+  - costCores: 15
+    damageBonus: 0.15
+    fireRateBonus: 0
+  - costCores: 30
+    damageBonus: 0
+    fireRateBonus: 0
+  - costCores: 50
+    damageBonus: 0.2
+    fireRateBonus: 0
