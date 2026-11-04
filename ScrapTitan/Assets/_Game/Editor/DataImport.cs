@@ -439,6 +439,61 @@ namespace ScrapTitan.Editor
                     .ToArray(),
             };
 
+            JObject w3 = (JObject)t["world3d"];
+            JObject cam = (JObject)w3["camera"];
+            JObject grd = (JObject)w3["ground"];
+            JObject rec = (JObject)w3["recoil"];
+            JObject sizes3d = (JObject)w3["enemyBaseSize"];
+            def.world3d = new World3dTuning
+            {
+                pixelsPerMetre = Num(w3, "pixelsPerMetre"),
+                viewWidthMetres = Num(w3, "viewWidthMetres"),
+                viewHeightMetres = Num(w3, "viewHeightMetres"),
+                titanX = Num(w3, "titanX"),
+                spawnX = Num(w3, "spawnX"),
+                despawnX = Num(w3, "despawnX"),
+                engageMaxX = Num(w3, "engageMaxX"),
+                burrowSpawnX = Num(w3, "burrowSpawnX"),
+                meleeStandoff = Num(w3, "meleeStandoff"),
+                projectileRadius = Num(w3, "projectileRadius"),
+                flyingHeight = Num(w3, "flyingHeight"),
+                laneZ = w3["laneZ"].Select(v => (float)v).ToArray(),
+                laneGroundY = w3["laneGroundY"].Select(v => (float)v).ToArray(),
+                // Ordered to match the ArmorClass enum so BaseSizeFor can index straight in.
+                enemyBaseSize = Enum.GetNames(typeof(ArmorClass))
+                    .Select(n => (JObject)sizes3d[n.ToLowerInvariant()])
+                    .Select(x => new EnemySize3d
+                    {
+                        length = Num(x, "length"),
+                        width = Num(x, "width"),
+                        height = Num(x, "height"),
+                    })
+                    .ToArray(),
+                camera = new CameraTuning
+                {
+                    pitchDegrees = Num(cam, "pitchDegrees"),
+                    orthographicSize = Num(cam, "orthographicSize"),
+                    distance = Num(cam, "distance"),
+                    targetX = Num(cam, "targetX"),
+                    targetY = Num(cam, "targetY"),
+                },
+                ground = new GroundTuning
+                {
+                    tileLength = Num(grd, "tileLength"),
+                    tileDepth = Num(grd, "tileDepth"),
+                    tileCount = (int)grd["tileCount"],
+                },
+                recoil = new RecoilTuning
+                {
+                    cannon = Num(rec, "cannon"),
+                    turret = Num(rec, "turret"),
+                },
+                scrapPickupRise = Num(w3, "scrapPickupRise"),
+                damageNumberRise = Num(w3, "damageNumberRise"),
+                dragThresholdScreenFraction = Num(w3, "dragThresholdScreenFraction"),
+                touchAimOffsetScreenFraction = Num(w3, "touchAimOffsetScreenFraction"),
+            };
+
             JObject up = (JObject)t["inBattleUpgrades"];
             def.inBattleUpgrades = new InBattleUpgradeTuning
             {

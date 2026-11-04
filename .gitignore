@@ -54,6 +54,10 @@ keystore.env
 # source of truth; what gets committed is the prepared asset inside ScrapTitan/Assets.
 unity_assets/INCOMING/
 
-# Generated placeholder sources. The script in tools/placeholders is what is kept; the
-# .fbx copies the Unity project imports live under ScrapTitan/Assets and are committed.
-unity_assets/PLACEHOLDERS/
+# Generated model sources. tools/modelgen is what is kept; the .fbx and .png the Unity
+# project imports live under ScrapTitan/Assets/_Game/Art/Generated and are committed.
+unity_assets/GENERATED/
+
+# Blender writes these next to the generator scripts.
+__pycache__/
+*.pyc

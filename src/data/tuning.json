@@ -331,5 +331,70 @@
       "boss_leviathan_engine",
       "boss_dredge"
     ]
+  },
+  "world3d": {
+    "pixelsPerMetre": 20.0,
+    "viewWidthMetres": 64.0,
+    "viewHeightMetres": 36.0,
+    "titanX": 0.0,
+    "spawnX": 56.32,
+    "despawnX": -20.48,
+    "engageMaxX": 51.2,
+    "burrowSpawnX": 26.88,
+    "meleeStandoff": 4.6,
+    "projectileRadius": 0.35,
+    "flyingHeight": 5.2,
+    "laneZ": [
+      3.0,
+      0.0,
+      -3.0
+    ],
+    "laneGroundY": [
+      2.2,
+      1.1,
+      0.0
+    ],
+    "enemyBaseSize": {
+      "light": {
+        "length": 3.2,
+        "width": 1.8,
+        "height": 1.4
+      },
+      "armored": {
+        "length": 3.733,
+        "width": 2.1,
+        "height": 2.012
+      },
+      "shielded": {
+        "length": 3.467,
+        "width": 1.95,
+        "height": 2.188
+      },
+      "swarm": {
+        "length": 1.733,
+        "width": 0.975,
+        "height": 0.962
+      }
+    },
+    "camera": {
+      "pitchDegrees": 12.0,
+      "orthographicSize": 18.0,
+      "distance": 60.0,
+      "targetX": 19.2,
+      "targetY": 12.0
+    },
+    "ground": {
+      "tileLength": 20.0,
+      "tileDepth": 12.0,
+      "tileCount": 6
+    },
+    "recoil": {
+      "cannon": 0.8,
+      "turret": 0.35
+    },
+    "scrapPickupRise": 2.3,
+    "damageNumberRise": 3.5,
+    "dragThresholdScreenFraction": 0.03056,
+    "touchAimOffsetScreenFraction": 0.125
   }
 }

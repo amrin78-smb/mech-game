@@ -17,7 +17,8 @@
     "combat",
     "meta",
     "tutorial",
-    "endless"
+    "endless",
+    "world3d"
   ],
   "additionalProperties": false,
   "definitions": {
@@ -180,14 +181,43 @@
         "legArticulation": {
           "type": "object",
           "description": "Splits the legs sprite into a hip block and two legs so the walk cycle can swing them",
-          "required": ["hipFraction", "gapFraction", "overlapFraction", "swingDegrees", "liftPixels"],
+          "required": [
+            "hipFraction",
+            "gapFraction",
+            "overlapFraction",
+            "swingDegrees",
+            "liftPixels"
+          ],
           "additionalProperties": false,
           "properties": {
-            "hipFraction": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "height fraction where the hip block ends and the legs begin" },
-            "gapFraction": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "width fraction of the gap between the two legs" },
-            "overlapFraction": { "type": "number", "minimum": 0, "maximum": 1, "description": "height fraction the legs tuck up under the hips, so lifting one cannot open a seam" },
-            "swingDegrees": { "type": "number", "minimum": 0, "description": "how far each leg rotates about its hip" },
-            "liftPixels": { "type": "number", "minimum": 0, "description": "on screen px the swinging leg lifts" }
+            "hipFraction": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "description": "height fraction where the hip block ends and the legs begin"
+            },
+            "gapFraction": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "description": "width fraction of the gap between the two legs"
+            },
+            "overlapFraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "height fraction the legs tuck up under the hips, so lifting one cannot open a seam"
+            },
+            "swingDegrees": {
+              "type": "number",
+              "minimum": 0,
+              "description": "how far each leg rotates about its hip"
+            },
+            "liftPixels": {
+              "type": "number",
+              "minimum": 0,
+              "description": "on screen px the swinging leg lifts"
+            }
           }
         },
         "legsFaceLeft": {
@@ -670,7 +700,9 @@
         "zoneNames": {
           "type": "object",
           "description": "Zone number to the heading shown on the map; authoring a zone 4 adds a key here and nothing else",
-          "additionalProperties": { "type": "string" }
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "weaponUnlockCosts": {
           "type": "object",
@@ -836,6 +868,324 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "world3d": {
+      "type": "object",
+      "description": "The same world as `world`, in metres, for the Unity build. `world` is still in the 1280x720 screen pixels the Phaser build used; every length and speed here is that number divided by pixelsPerMetre. The scale is uniform, which is what protects the balance: a clear time depends on distance over speed, and both divide by the same number, so the clear times the Phaser sim reports carry across unchanged.",
+      "additionalProperties": false,
+      "required": [
+        "pixelsPerMetre",
+        "viewWidthMetres",
+        "viewHeightMetres",
+        "titanX",
+        "spawnX",
+        "despawnX",
+        "engageMaxX",
+        "burrowSpawnX",
+        "meleeStandoff",
+        "projectileRadius",
+        "flyingHeight",
+        "laneZ",
+        "laneGroundY",
+        "enemyBaseSize",
+        "camera",
+        "ground",
+        "recoil",
+        "scrapPickupRise",
+        "damageNumberRise",
+        "dragThresholdScreenFraction",
+        "touchAimOffsetScreenFraction"
+      ],
+      "properties": {
+        "pixelsPerMetre": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Screen pixels per metre in the Phaser build, which is how every number here was derived. The Phaser Titan stood 266 px tall and its brief makes it 14.2 m to the torso roof, which is 18.7 px per metre; 20 is that rounded, which puts the briefed Titan at 284 px against Phaser's 266 and makes the visible world a round 64 by 36 metres."
+        },
+        "viewWidthMetres": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Visible width at 16:9. Phone screens in landscape are all wider than 16:9, so they show more than this and never less, which keeps the spawn line off screen."
+        },
+        "viewHeightMetres": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Visible height. The camera's orthographicSize is half of it."
+        },
+        "titanX": {
+          "type": "number",
+          "description": "The Titan stands at the world origin, so every other X reads as a distance from it."
+        },
+        "spawnX": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Where enemies enter, off the right edge."
+        },
+        "despawnX": {
+          "type": "number",
+          "description": "Past the left edge, where anything that got through is recycled."
+        },
+        "engageMaxX": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "The engagement line. Targeting ignores anything beyond it so the cannon cannot snipe an enemy before the player can see it."
+        },
+        "burrowSpawnX": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Where the `burrow` behaviour erupts, mid field instead of at the spawn line."
+        },
+        "meleeStandoff": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Gap a melee enemy stops at, measured from titanX before its own half length."
+        },
+        "projectileRadius": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Hit radius of a shell."
+        },
+        "flyingHeight": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "How far above its lane a flyer rides."
+        },
+        "laneZ": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          },
+          "description": "Lane centres in depth. Lane 0 is the farthest from the camera, matching the Phaser build where lane 0 sat highest on screen."
+        },
+        "laneGroundY": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          },
+          "description": "Ground height per lane, one entry per laneZ. At the briefed 12 degree camera, depth alone separates lanes by only sin(12) of their spacing, which for the ground brief's 6 m walkable band is about 0.6 m and far too little to read on a phone. Stepping the ground carries the rest: these values give about 1.7 m of apparent separation, which clears a 1.4 m Rustcrawler. The owner judges this from the running game."
+        },
+        "enemyBaseSize": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "light",
+            "armored",
+            "shielded",
+            "swarm"
+          ],
+          "properties": {
+            "light": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "length",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "length": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Along the lane, which is the screen horizontal."
+                },
+                "width": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Across the lane, which is the screen depth."
+                },
+                "height": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Standing height."
+                }
+              }
+            },
+            "armored": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "length",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "length": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Along the lane, which is the screen horizontal."
+                },
+                "width": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Across the lane, which is the screen depth."
+                },
+                "height": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Standing height."
+                }
+              }
+            },
+            "shielded": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "length",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "length": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Along the lane, which is the screen horizontal."
+                },
+                "width": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Across the lane, which is the screen depth."
+                },
+                "height": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Standing height."
+                }
+              }
+            },
+            "swarm": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "length",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "length": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Along the lane, which is the screen horizontal."
+                },
+                "width": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Across the lane, which is the screen depth."
+                },
+                "height": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Standing height."
+                }
+              }
+            }
+          },
+          "description": "Size per armour class, used for the placeholder shape and the hit radius. The light class comes from the Rustcrawler's brief, which makes it 3.2 m long; the others keep the size they had relative to light in the Phaser build. The briefs and the Phaser art disagree by about 25% on how big an enemy is next to the Titan, and the briefs are the approved source."
+        },
+        "camera": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pitchDegrees",
+            "orthographicSize",
+            "distance",
+            "targetX",
+            "targetY"
+          ],
+          "properties": {
+            "pitchDegrees": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Degrees below horizontal. Every model brief authors its art for this angle, so it is not a free parameter."
+            },
+            "orthographicSize": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Half the visible height. Orthographic, not perspective: the plan puts everything at one camera distance so the models need no detail levels, and it keeps a far lane the same size as a near one."
+            },
+            "distance": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "How far back the camera sits. Orthographic, so this sets clipping, not framing."
+            },
+            "targetX": {
+              "type": "number",
+              "description": "World X the camera centres on."
+            },
+            "targetY": {
+              "type": "number",
+              "description": "World Y the camera centres on."
+            }
+          }
+        },
+        "ground": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tileLength",
+            "tileDepth",
+            "tileCount"
+          ],
+          "properties": {
+            "tileLength": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Length of one ground tile along X, from brief 28."
+            },
+            "tileDepth": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Depth of one ground tile, from brief 28."
+            },
+            "tileCount": {
+              "type": "integer",
+              "minimum": 2,
+              "description": "Tiles per lane in the scrolling ring. tileLength times this must span spawnX to despawnX."
+            }
+          }
+        },
+        "recoil": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cannon",
+            "turret"
+          ],
+          "properties": {
+            "cannon": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "How far the main cannon's barrel slides back on a shot."
+            },
+            "turret": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "The same for a turret."
+            }
+          }
+        },
+        "scrapPickupRise": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "How fast a scrap drop rises as it fades."
+        },
+        "damageNumberRise": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "How fast a damage number rises."
+        },
+        "dragThresholdScreenFraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "How far a pointer must travel to become a manual aim, as a fraction of screen height rather than pixels, so it means the same on a 720p and a 1440p phone."
+        },
+        "touchAimOffsetScreenFraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "How far above the finger the aim point sits, as a fraction of screen height, so a thumb never covers what is being shot at."
         }
       }
     }

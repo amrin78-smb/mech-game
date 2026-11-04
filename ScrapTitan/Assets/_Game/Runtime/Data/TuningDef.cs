@@ -123,6 +123,132 @@ namespace ScrapTitan.Data
     }
 
     [Serializable]
+    public struct EnemySize3d
+    {
+        [Tooltip("Along the lane, which is the screen horizontal.")]
+        public float length;
+
+        [Tooltip("Across the lane, which is the screen depth.")]
+        public float width;
+
+        public float height;
+    }
+
+    [Serializable]
+    public struct CameraTuning
+    {
+        [Tooltip("Degrees below horizontal. Every model brief authors its art for this angle, "
+                 + "so it is not a free parameter.")]
+        public float pitchDegrees;
+
+        [Tooltip("Half the visible height.")]
+        public float orthographicSize;
+
+        [Tooltip("How far back the camera sits. Orthographic, so this sets clipping, not framing.")]
+        public float distance;
+
+        public float targetX;
+        public float targetY;
+
+        /// <summary>
+        /// Where the camera goes to look at (targetX, targetY) from <see cref="distance"/>
+        /// away at <see cref="pitchDegrees"/>. Pitched down, so it sits above and behind.
+        /// </summary>
+        public Vector3 Position()
+        {
+            float pitch = pitchDegrees * Mathf.Deg2Rad;
+            return new Vector3(
+                targetX,
+                targetY + distance * Mathf.Sin(pitch),
+                -distance * Mathf.Cos(pitch));
+        }
+
+        public Quaternion Rotation() => Quaternion.Euler(pitchDegrees, 0f, 0f);
+    }
+
+    [Serializable]
+    public struct GroundTuning
+    {
+        public float tileLength;
+        public float tileDepth;
+        public int tileCount;
+    }
+
+    [Serializable]
+    public struct RecoilTuning
+    {
+        public float cannon;
+        public float turret;
+    }
+
+    /// <summary>
+    /// The same world as <see cref="WorldTuning"/>, in metres. Every length and speed is the
+    /// pixel figure divided by <see cref="pixelsPerMetre"/>, and the scale is uniform, which
+    /// is what protects the balance: a clear time is distance over speed and both divide by
+    /// the same number, so the Phaser sim's clear times carry across unchanged.
+    /// </summary>
+    [Serializable]
+    public struct World3dTuning
+    {
+        public float pixelsPerMetre;
+        public float viewWidthMetres;
+        public float viewHeightMetres;
+        public float titanX;
+        public float spawnX;
+        public float despawnX;
+
+        [Tooltip("Targeting ignores anything beyond this, so the cannon cannot snipe an enemy "
+                 + "before the player can see it.")]
+        public float engageMaxX;
+
+        public float burrowSpawnX;
+        public float meleeStandoff;
+        public float projectileRadius;
+        public float flyingHeight;
+
+        [Tooltip("Lane centres in depth. Lane 0 is farthest from the camera.")]
+        public float[] laneZ;
+
+        [Tooltip("Ground height per lane, one entry per laneZ. At 12 degrees, depth alone "
+                 + "separates lanes too little to read on a phone; stepping the ground carries "
+                 + "the rest.")]
+        public float[] laneGroundY;
+
+        [Tooltip("Indexed by ArmorClass.")]
+        public EnemySize3d[] enemyBaseSize;
+
+        public CameraTuning camera;
+        public GroundTuning ground;
+        public RecoilTuning recoil;
+        public float scrapPickupRise;
+        public float damageNumberRise;
+        public float dragThresholdScreenFraction;
+        public float touchAimOffsetScreenFraction;
+
+        public int LaneCount => laneZ == null ? 0 : laneZ.Length;
+
+        public EnemySize3d BaseSizeFor(ArmorClass armor) => enemyBaseSize[(int)armor];
+
+        /// <summary>Lane centre in world space, on the ground.</summary>
+        public Vector3 LaneOrigin(int lane)
+        {
+            int i = Mathf.Clamp(lane, 0, LaneCount - 1);
+            return new Vector3(0f, laneGroundY[i], laneZ[i]);
+        }
+
+        public float GroundYFor(int lane) => laneGroundY[Mathf.Clamp(lane, 0, LaneCount - 1)];
+
+        public float ZFor(int lane) => laneZ[Mathf.Clamp(lane, 0, LaneCount - 1)];
+
+        /// <summary>
+        /// How far a melee enemy of this armour class stops from the Titan. Its own half
+        /// length is added, exactly as the Phaser build did with half the sprite width.
+        /// </summary>
+        public float MeleeStopX(ArmorClass armor) =>
+            titanX + meleeStandoff + BaseSizeFor(armor).length * 0.5f;
+    }
+
+    [Serializable]
     public struct UpgradeCost
     {
         public float baseCost;
@@ -325,6 +451,10 @@ namespace ScrapTitan.Data
         public DamageMatrix damageMatrix;
         public MechaTuning mecha;
         public WorldTuning world;
+
+        [Tooltip("The world in metres, which is what the Unity build runs on. `world` above is "
+                 + "kept as the pixel figures it was derived from.")]
+        public World3dTuning world3d;
         public InBattleUpgradeTuning inBattleUpgrades;
         public VfxTuning vfx;
         public PoolTuning pools;
