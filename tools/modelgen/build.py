@@ -2,7 +2,7 @@
 
     blender --background --factory-startup --disable-autoexec \
         --python tools/modelgen/build.py -- --out unity_assets/GENERATED \
-        --copy-fbx-to ScrapTitan/Assets/_Game/Art/Generated
+        --copy-fbx-to ScrapTitan/Assets/_Game/Resources/Models
 
 One recipe per asset, following its brief's DESIGN section for the shape and its EXACT
 DIMENSIONS AND PIVOTS section for every number. Shapes come from shapes.py (rounded boxes,

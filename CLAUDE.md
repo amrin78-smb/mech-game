@@ -24,16 +24,24 @@ and it is not extended.
 - Project at `ScrapTitan/`, inside this repository
 - Content stays in `src/data/*.json`, imported into ScriptableObjects. The JSON is still the
   source of truth; the assets under `ScrapTitan/Assets/_Game/Data/Generated` are derived
-- Models come from Kimi 3D Make, one brief per model in `docs/unity/KIMI_MODEL_PROMPTS/`
+- Models are generated in code by `tools/modelgen/`, from the briefs in
+  `docs/unity/KIMI_MODEL_PROMPTS/`. Kimi 3D Make delivered the first two batches and remains
+  an option per model; both routes go through the same checker before import
 
 ## Commands
 
 ```
 scripts/unity-guard.sh                   # is it safe to start a Unity run?
-scripts/unity-setup.sh                   # import src/data, rebuild the Phase 0 scene, apply Android settings
+scripts/unity-setup.sh                   # import src/data, rebuild the battle scene, apply Android settings
 scripts/unity-test.sh                    # EditMode tests, report in Logs/editmode-results.xml
 scripts/unity-build-apk.sh <version>     # build the APK into ScrapTitan/Builds/Android
 scripts/release-apk.sh <version> <apk>   # publish it as a GitHub pre-release and verify the SHA-256
+
+blender --background --factory-startup --disable-autoexec \
+  --python tools/modelgen/build.py -- --out unity_assets/GENERATED \
+  --copy-fbx-to ScrapTitan/Assets/_Game/Resources/Models   # rebuild the models
+OUT=Logs/model-check-generated tools/model-check/check-all.sh unity_assets/GENERATED
+tools/model-check/check-all.sh <dir>     # check a Kimi delivery against its briefs
 ```
 
 Always run `scripts/unity-test.sh` before declaring a task done.
@@ -93,13 +101,32 @@ run it out of memory. `scripts/unity-guard.sh` checks for another Unity process 
 memory, and every script calls it. If the system kills a run for low memory, **ask the owner
 before restarting it.**
 
-## Models from Kimi
+## Models
 
-- Check every delivery against its brief in `docs/unity/KIMI_MODEL_PROMPTS/` before importing
-  it, with the checker adapted from Roar Rally's `BLENDER_PIPELINE/SCRIPTS/prepare_prop.py`.
+The briefs in `docs/unity/KIMI_MODEL_PROMPTS/` are the specification, whoever builds the
+model. There are two routes, and the same rules apply to both.
+
+- **Generated (`tools/modelgen/`)** is the default. `shapes.py` has the curved shape library
+  (rounded boxes, lathed profiles, cylinders, capsules, tori), `textures.py` paints the base
+  colour map in numpy, `atlas.py` gives each part its own rectangle of that map, and
+  `build.py` holds one recipe per asset. `fit()` places a part exactly on its briefed box and
+  **refuses to stretch it more than 5% to get there**, so a shape that is wrong fails loudly
+  instead of being squashed into passing.
+- **Kimi 3D Make** delivered the first batches and stays an option, above all for the
+  sculptural models: the four bosses and anything organic, where boxes-and-drums code reads
+  as crates.
+
+Both go through `tools/model-check/` against `standards.json` before anything imports them.
+
 - **Never loosen a limit to make a model pass.** Only the owner can accept a failed check,
-  and it is recorded as a named waiver.
-- Judge a model from frames of the running game, not from Kimi's renders.
+  and it is recorded as a named waiver in `standards.json`.
+- A waiver belongs to **one file**, named by `for_file_sha256`. A revision, or a generated
+  model standing in under the same asset id, is checked with every limit gating again.
+- Judge a model from frames of the running game, never from a render or from the measurements
+  alone.
+- Read a failure before believing it. Four times now the checker has accused a model that was
+  right and the standard that was wrong: the Titan's standing height, its emissive teal, the
+  Gatling pod's 2.6 m "including barrels", and that same figure measured across the pedestal.
 
 ## Originality
 

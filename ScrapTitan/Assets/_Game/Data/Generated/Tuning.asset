@@ -84,6 +84,56 @@ MonoBehaviour:
       height: 50
     - width: 26
       height: 22
+  world3d:
+    pixelsPerMetre: 20
+    viewWidthMetres: 64
+    viewHeightMetres: 36
+    titanX: 0
+    spawnX: 56.32
+    despawnX: -20.48
+    engageMaxX: 51.2
+    burrowSpawnX: 26.88
+    meleeStandoff: 4.6
+    projectileRadius: 0.35
+    flyingHeight: 5.2
+    laneZ:
+    - 3
+    - 0
+    - -3
+    laneGroundY:
+    - 2.2
+    - 1.1
+    - 0
+    enemyBaseSize:
+    - length: 3.2
+      width: 1.8
+      height: 1.4
+    - length: 3.733
+      width: 2.1
+      height: 2.012
+    - length: 3.467
+      width: 1.95
+      height: 2.188
+    - length: 1.733
+      width: 0.975
+      height: 0.962
+    camera:
+      pitchDegrees: 12
+      orthographicSize: 18
+      distance: 60
+      targetX: 19.2
+      targetY: 12
+    ground:
+      tileLength: 20
+      tileDepth: 12
+      tileCount: 6
+    recoil:
+      cannon: 0.8
+      turret: 0.35
+    scrapPickupRise: 2.3
+    damageNumberRise: 3.5
+    dragThresholdScreenFraction: 0.03056
+    touchAimOffsetScreenFraction: 0.125
   inBattleUpgrades:
     damage:
       baseCost: 55

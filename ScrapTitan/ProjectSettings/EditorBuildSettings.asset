@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_Game/Scenes/Phase0Hello.unity
-    guid: b8f4169e01dd855e1a235b5a4380ec83
+    path: Assets/_Game/Scenes/Battle.unity
+    guid: b8e9b4f3ea2d3e522a0a7a3a48eae2a7
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -24,6 +24,7 @@ MonoBehaviour:
     aoeRadius: 60
     pellets: 0
     spreadDegrees: 0
+    pierce: 0
     hasDot: 0
     dotDps: 0
     dotDuration: 0

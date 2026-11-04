@@ -200,6 +200,7 @@ namespace ScrapTitan.Editor
                     aoeRadius = Num(p, "aoeRadius", 0f),
                     pellets = Int(p, "pellets", 0),
                     spreadDegrees = Num(p, "spreadDegrees", 0f),
+                    pierce = Bool(p, "pierce", false),
                     hasDot = p["dot"] is JObject,
                 };
                 if (p["dot"] is JObject dot)

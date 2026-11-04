@@ -18,6 +18,9 @@ namespace ScrapTitan.Data
 
         public float spreadDegrees;
 
+        [Tooltip("The round carries on through what it hits, which is what the Railgun is for.")]
+        public bool pierce;
+
         public bool hasDot;
         public float dotDps;
         public float dotDuration;

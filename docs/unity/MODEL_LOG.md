@@ -151,3 +151,69 @@ Both are cases where the first run reported a failure and the model turned out t
 
 This is the third and fourth time a first run accused a correct model, after batch 1's
 standing height and its emissive teal. A failure is read before it is believed.
+
+## 2026-11-04: the models move in-house — `tools/modelgen/`
+
+The owner asked whether the models could be built here instead, and chose that route. The
+technique is the one that worked in littleburgerworld on this machine
+(`Assets/_LittleBurgerWorld/Scripts/Core/MeshFactory.cs`): rounded boxes, lathed profiles,
+capsules and tori. It is ported into Blender rather than C# so the output is a .blend and a
+.fbx that goes through the same checker as a delivery, against the same `standards.json`.
+
+**The five Phase 1 assets pass their briefs with 0 failures and 0 waivers.** Kimi's seven
+needed 13.
+
+| Asset | Parts, triangles against cap |
+|---|---|
+| `titan_chassis` | torso 984/3500, thigh 348/900, shin 348/900, foot 432/500 |
+| `titan_cannon_autocannon` | housing 340/900, barrel 412/600 |
+| `enemy_rustcrawler` | body 636/700, leg 40/80 |
+| `pickup_scrap` | 104, 60 and 36, each against 120 |
+| `env_rust_flats_ground` | tile 578/1200 |
+
+### What the paint measures
+
+| | generated | Kimi batch 1 | the brief asks for |
+|---|---|---|---|
+| Titan brass | 45.3% | 7.4% | "clean brass and gunmetal" |
+| Titan gunmetal | 35.8% | 21.9% | as above |
+| Titan oil black | 8.8% | 66.6% | one of six palette colours |
+| Titan teal | 3.4% | 0.2% | "teal accents and lights" |
+| Titan hazard yellow | 3.7% | 0.3% | "hazard-yellow stripes on the feet and hip skirts" |
+| Titan rust | 0.8% | 3.3% | the raiders' colour, not the Titan's |
+| Rustcrawler rust | 54.8% | not delivered | "patched rust plates" |
+| Rustcrawler signal red | 3.4% | not delivered | "signal red accents" |
+
+The hazard stripes batch 1 was missing are now on the feet, because the brief is the script's
+input rather than a description to interpret. A first pass measured 36% rust on the Titan,
+which is the raiders' colour and would have broken friend-from-foe at a glance; it was caught
+by the palette check and corrected.
+
+### What is not settled
+
+The look itself, which is judged from frames of the running game at the Phase 1 playtest. The
+Kimi autocannon and the generated autocannon are the same brief built two ways, and both are
+in the repository, so that comparison can be made directly rather than argued about.
+
+Where the generated route is expected to run out: the four bosses and anything organic. Code
+that assembles boxes, drums and plates suits the weapons, the vehicles, the pickups and the
+environment — about 29 of the 35 briefs. The Compactor, the Iron Matriarch, the Leviathan
+Engine and The Dredge are sculptural, and that is where a generator or Kimi still earns its
+place.
+
+### Five of my own mistakes the checker caught
+
+Worth recording, because they are the argument for running our own output through the same
+gate as a delivery rather than trusting it.
+
+1. Rustcrawler claws reaching past the briefed 3.2 m body length, which includes them.
+2. Two scrap lumps whose extent I varied to tell them apart, where the brief says all three
+   are about 0.8 m in every direction. They vary by an inner nub instead.
+3. A cannon collar on the torso that had to protrude past the front face to be seen, breaking
+   the briefed 7.0 m length. Dropped: the cannon's own housing fills that space.
+4. A one-sided ground surface, where the briefs forbid thin panels and the checker requires a
+   closed mesh. It now has a skirt and a cap.
+5. Two muzzle brakes meeting at exactly x = 0, whose weld left an edge shared by three faces.
+
+A real bug in the shape library came out of the same runs: `cylinder()` with a zero bevel
+collapsed two profile rows onto each other, making zero-area faces and doubled vertices.

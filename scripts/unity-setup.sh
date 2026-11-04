@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 source scripts/unity-guard.sh
 unity_guard_check
 
-METHOD="${1:-ScrapTitan.Editor.Phase0Setup.RunAll}"
+METHOD="${1:-ScrapTitan.Editor.Setup.RunAll}"
 EDITOR="$(scripts/unity-editor-path.sh)"
 mkdir -p Logs
 
