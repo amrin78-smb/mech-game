@@ -80,7 +80,11 @@ if [ "$REMOTE_SIZE" != "$LOCAL_SIZE" ]; then
   exit 1
 fi
 
-RELEASE_ID="$(gh release view "$TAG" --repo "$REPO" --json databaseId -q .databaseId)"
+# `gh release view --json databaseId` is not in every gh version, and a draft release cannot
+# be fetched by tag through the REST API, so the id comes from the list instead.
+RELEASE_ID="$(gh api "repos/$REPO/releases" --paginate \
+  --jq ".[] | select(.tag_name==\"$TAG\") | .id" | head -1)"
+[ -n "$RELEASE_ID" ] || { echo "Could not find a release for $TAG" >&2; exit 1; }
 PUBLISHED=no
 for attempt in 1 2 3; do
   if gh api --method PATCH "repos/$REPO/releases/$RELEASE_ID" \
