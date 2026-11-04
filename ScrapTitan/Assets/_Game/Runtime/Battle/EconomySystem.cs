@@ -12,6 +12,7 @@ namespace ScrapTitan.Battle
     public sealed class EconomySystem
     {
         private readonly float trickle;
+        private readonly float rewardMultiplier;
         private float scrap;
         private float earned;
         private float spent;
@@ -20,6 +21,7 @@ namespace ScrapTitan.Battle
         {
             scrap = level.economy.startingScrap;
             trickle = level.economy.trickle;
+            rewardMultiplier = level.economy.RewardMultiplierOrOne;
         }
 
         /// <summary>Whole scrap the HUD shows. The float underneath keeps the trickle smooth.</summary>
@@ -36,9 +38,10 @@ namespace ScrapTitan.Battle
 
         public float AwardKill(float reward)
         {
-            scrap += reward;
-            earned += reward;
-            return reward;
+            float payout = reward * rewardMultiplier;
+            scrap += payout;
+            earned += payout;
+            return payout;
         }
 
         public bool CanAfford(float cost) => scrap >= cost;

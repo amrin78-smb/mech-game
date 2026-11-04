@@ -88,7 +88,7 @@ namespace ScrapTitan.Tests
         {
             EditorBuildSettingsScene[] enabled = EditorBuildSettings.scenes.Where(s => s.enabled).ToArray();
             Assert.That(enabled, Has.Length.EqualTo(1), "Phase 0 ships one scene");
-            Assert.That(enabled[0].path, Is.EqualTo(Phase0Scene.ScenePath));
+            Assert.That(enabled[0].path, Is.EqualTo(BattleScene.ScenePath));
         }
     }
 }

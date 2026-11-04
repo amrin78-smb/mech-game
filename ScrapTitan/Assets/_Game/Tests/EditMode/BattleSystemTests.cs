@@ -182,15 +182,20 @@ namespace ScrapTitan.Tests
             EnemyDef gunner = GameDatabase.Instance.Enemy("gunner_walker");
             Assume.That(gunner.attackRange, Is.GreaterThan(0f));
 
-            var shooter = SpawnedEnemy("gunner_walker", w.titanX + gunner.attackRange + 0.01f);
+            // attackRange is in the Phaser build's pixels like the rest of src/data, so the
+            // spawn point has to be converted the same way Enemy converts it.
+            float rangeMetres = gunner.attackRange / w.pixelsPerMetre;
+            var shooter = SpawnedEnemy("gunner_walker", w.titanX + rangeMetres + 2f);
             var context = new EnemyContext
             {
                 titanX = w.titanX,
                 meleeStandoff = w.meleeStandoff,
                 onAttack = _ => { },
             };
-            // One step is enough to bring it to its own stop line and start shooting.
-            shooter.Update(1f, context);
+            // Walk it in until it halts at its own range and opens fire.
+            for (int i = 0; i < 600; i++) shooter.Update(1f / 60f, context);
+            Assume.That(shooter.Position.x, Is.EqualTo(w.titanX + rangeMetres).Within(0.01f),
+                "it should have halted at its own attack range");
             Assume.That(shooter.IsRangedInRange, Is.True, "it should have halted and opened fire");
 
             var crawler = SpawnedEnemy("rustcrawler", 8f);
@@ -305,6 +310,34 @@ namespace ScrapTitan.Tests
             economy.Update(10f);
             Assert.That(economy.Balance,
                 Is.EqualTo(level.economy.startingScrap + Mathf.FloorToInt(level.economy.trickle * 10f)));
+        }
+
+        [Test]
+        public void TheClearTimeForLevelOneMatchesThePhaserSim()
+        {
+            // The Phaser build's `npm run sim` clears level-01 in 80.5 s with 33 kills and no
+            // hull damage. Rendering the Unity battle to completion gives 81.9 s, 33 kills
+            // and no hull damage, which is the check that matters on the metre conversion:
+            // every length and speed was divided by the same 20, so distance over speed, and
+            // therefore the clear time, is unchanged. This test guards the arithmetic that
+            // rests on; the clear time itself is measured by scripts/unity-frames.sh.
+            World3dTuning w = Tuning.world3d;
+            EnemyDef crawler = GameDatabase.Instance.Enemy("rustcrawler");
+
+            float metresPerSecond = crawler.speed / w.pixelsPerMetre;
+            float travel = w.spawnX - w.MeleeStopX(crawler.armorClass);
+            float walkSeconds = travel / metresPerSecond;
+
+            // The same journey in the Phaser build's own units.
+            float pixelTravel = (Tuning.world.spawnXFraction - Tuning.world.mechaXFraction)
+                                * Tuning.world.baseWidth
+                                - Tuning.world.meleeStandoff
+                                - Tuning.world.BaseSizeFor(crawler.armorClass).width * 0.5f;
+            float pixelSeconds = pixelTravel / crawler.speed;
+
+            Assert.That(walkSeconds, Is.EqualTo(pixelSeconds).Within(0.75f),
+                "a Rustcrawler must take the same time to cross the field in metres as it did "
+                + "in pixels, or every clear time the Phaser sim reports is worthless here");
         }
 
         [Test]

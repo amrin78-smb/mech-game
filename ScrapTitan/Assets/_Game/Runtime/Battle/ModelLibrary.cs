@@ -45,11 +45,23 @@ namespace ScrapTitan.Battle
             return instance;
         }
 
-        /// <summary>A named descendant, or null. Part names come straight from the briefs.</summary>
+        /// <summary>
+        /// A named part, or null. Part names come straight from the briefs.
+        ///
+        /// An asset with a single object arrives with that object on the instance root, named
+        /// after the file rather than after the part, so the mesh's own name is checked as
+        /// well. The brief's name survives on the mesh either way, which is why that is a
+        /// lookup and not a guess.
+        /// </summary>
         public static Transform Part(GameObject instance, string partName)
         {
-            foreach (Transform t in instance.GetComponentsInChildren<Transform>(true))
+            Transform[] all = instance.GetComponentsInChildren<Transform>(true);
+            foreach (Transform t in all)
                 if (t.name == partName) return t;
+            foreach (Transform t in all)
+                if (t.TryGetComponent(out MeshFilter mesh)
+                    && mesh.sharedMesh != null
+                    && mesh.sharedMesh.name == partName) return t;
             return null;
         }
 

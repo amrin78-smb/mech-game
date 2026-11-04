@@ -30,6 +30,17 @@ namespace ScrapTitan.Battle
         private float autoPauseRemaining;
         private ShotSpec spec;
 
+        /// <summary>
+        /// Where the shot is actually sent, in three dimensions.
+        ///
+        /// The barrel only ever reads as aiming in the screen plane, because a side-on
+        /// silhouette pointing into the screen is unreadable, but the lanes are separated in
+        /// depth, so a shell fired along the barrel's own facing can only ever hit the lane
+        /// the Titan stands in. The first frames rendered of the battle showed exactly that:
+        /// five kills in seventy seconds and the hull lost, with every kill in lane 1.
+        /// </summary>
+        private Vector3 aimTarget;
+
         public Action<Vector3, Vector3, bool> onShotFired;
 
         public WeaponSystem(Titan titan, TargetingSystem targeting, ProjectileSystem projectiles,
@@ -63,10 +74,14 @@ namespace ScrapTitan.Battle
         public void BeginManualAim(Vector3 at)
         {
             IsManualAiming = true;
-            ManualAimPoint = at;
+            UpdateManualAim(at);
         }
 
-        public void UpdateManualAim(Vector3 at) => ManualAimPoint = at;
+        public void UpdateManualAim(Vector3 at)
+        {
+            ManualAimPoint = at;
+            aimTarget = at;
+        }
 
         /// <summary>Releasing the drag is the shot. Auto fire stays paused for the resume delay.</summary>
         public void ReleaseManualAim()
@@ -115,7 +130,10 @@ namespace ScrapTitan.Battle
                 return;
             }
 
-            titan.AimAt(LeadTarget(target, muzzle, spec.speed));
+            aimTarget = LeadTarget(target, muzzle, spec.speed);
+            // Titan.AimAt reads only the horizontal and the height, so the barrel stays in
+            // the screen plane while the shot below goes to the target's real position.
+            titan.AimAt(aimTarget);
 
             if (autoPauseRemaining > 0f) return;
 
@@ -129,7 +147,10 @@ namespace ScrapTitan.Battle
         private void FireShot(float damage, bool isManual)
         {
             Vector3 muzzle = titan.Muzzle;
-            Vector3 direction = titan.AimDirection;
+            Vector3 toTarget = aimTarget - muzzle;
+            Vector3 direction = toTarget.sqrMagnitude > 1e-4f
+                ? toTarget.normalized
+                : titan.AimDirection;
 
             spec.damage = damage;
             spec.isManualShot = isManual;

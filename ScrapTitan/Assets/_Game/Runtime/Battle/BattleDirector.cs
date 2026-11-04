@@ -67,7 +67,15 @@ namespace ScrapTitan.Battle
         public BattleResult Result => result;
         public bool BattleOver => battleOver;
 
-        private void Awake()
+        private void Awake() => Build();
+
+        /// <summary>
+        /// Builds the whole battle from the data. Public and separate from Awake so the
+        /// editor can stand a battle up outside play mode and render frames of it: the model
+        /// rules say a model is judged from frames of the running game, and this is what
+        /// produces them without an APK and a phone in hand.
+        /// </summary>
+        public void Build()
         {
             database = GameDatabase.Instance;
             tuning = database.tuning;
@@ -77,6 +85,7 @@ namespace ScrapTitan.Battle
             BuildCamera();
             BuildLighting();
             BuildGround();
+            BuildBackground();
             BuildTitan();
             BuildSystems();
 
@@ -140,78 +149,197 @@ namespace ScrapTitan.Battle
                         "env_rust_flats_ground", root.transform, $"Ground_L{lane}_{i}");
                     instance.transform.position = new Vector3(
                         startX + i * tile, world.GroundYFor(lane), world.ZFor(lane));
+                    // Brief 28 puts the broken cliff lip on the model's front, which the
+                    // import faces +Z, away from the camera. Turn it round so it shows.
+                    instance.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
                     groundTiles.Add(instance.transform);
                 }
             }
         }
 
         /// <summary>
-        /// The Titan, hung together at the pivots its briefs give. The parts arrive from the
-        /// FBX already at their sockets, so the chain is built from the positions that landed
-        /// rather than from the briefs' numbers typed in again.
+        /// The two background layers the plan asks Phase 1 for: a nearer band of ruins and a
+        /// far ridge line, each scrolling at its own rate from tuning.world.parallax, so the
+        /// world reads as moving past the Titan rather than the Titan as sliding along it.
+        ///
+        /// Grey-box on purpose. Brief 29 holds the real Rust Flats ruins and that is Phase 2
+        /// work; what matters now is that the depth cue is there for the owner to judge.
+        /// </summary>
+        private void BuildBackground()
+        {
+            GameObject root = new GameObject("Background");
+            root.transform.SetParent(transform, false);
+
+            // Behind the farthest lane, so nothing in the fight can ever be hidden by them.
+            float behind = world.ZFor(0) + world.ground.tileDepth;
+            backdropSpan = (world.spawnX - world.despawnX) * 2f;
+            BuildBackdropLayer(root.transform, "Ruins", behind + 12f, tuning.world.parallax.ruins,
+                               new Color(0.30f, 0.22f, 0.19f), 5f, 12f, 3f, 9f, 731);
+            BuildBackdropLayer(root.transform, "Ridge", behind + 46f, tuning.world.parallax.sky,
+                               new Color(0.44f, 0.35f, 0.30f), 10f, 20f, 10f, 26f, 977);
+        }
+
+        private readonly List<Transform> backdrop = new();
+        private readonly List<float> backdropSpeed = new();
+        private float backdropSpan;
+
+        private void BuildBackdropLayer(Transform parent, string name, float z, float parallax,
+                                        Color colour, float minHeight, float maxHeight,
+                                        float minWidth, float maxWidth, int seed)
+        {
+            GameObject layer = new GameObject(name);
+            layer.transform.SetParent(parent, false);
+            Material material = FlatMaterial(name, colour);
+            var random = new System.Random(seed);
+
+            float x = world.despawnX;
+            float until = world.despawnX + backdropSpan;
+            while (x < until)
+            {
+                float width = Mathf.Lerp(minWidth, maxWidth, (float)random.NextDouble());
+                float height = Mathf.Lerp(minHeight, maxHeight, (float)random.NextDouble());
+                GameObject block = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                block.name = $"{name}_{backdrop.Count}";
+                DestroyNow(block.GetComponent<Collider>());
+                block.transform.SetParent(layer.transform, false);
+                block.transform.position = new Vector3(x + width * 0.5f, height * 0.5f, z);
+                block.transform.localScale = new Vector3(width, height, 2f);
+                Renderer renderer = block.GetComponent<Renderer>();
+                renderer.sharedMaterial = material;
+                renderer.shadowCastingMode = ShadowCastingMode.Off;
+                backdrop.Add(block.transform);
+                backdropSpeed.Add(parallax);
+                x += width + Mathf.Lerp(1f, 6f, (float)random.NextDouble());
+            }
+        }
+
+        /// <summary>
+        /// The battle is also stood up outside play mode, to render frames of it, and Destroy
+        /// does nothing there.
+        /// </summary>
+        private static void DestroyNow(Object victim)
+        {
+            if (Application.isPlaying) Destroy(victim);
+            else DestroyImmediate(victim);
+        }
+
+        private static readonly Dictionary<string, Material> flatMaterials = new();
+
+        private static Material FlatMaterial(string name, Color colour)
+        {
+            if (flatMaterials.TryGetValue(name, out Material cached) && cached != null)
+                return cached;
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            var material = new Material(shader) { name = name };
+            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", colour);
+            if (material.HasProperty("_Smoothness")) material.SetFloat("_Smoothness", 0.08f);
+            flatMaterials[name] = material;
+            return material;
+        }
+
+        /// <summary>
+        /// The Titan, hung together at the pivots its briefs give.
+        ///
+        /// Three things here are measured rather than assumed, because each was wrong first
+        /// time and the frames in Logs/frames are what showed it:
+        /// the second leg is cloned from the flat parts before anything is chained, or the
+        /// clone carries a copy of whatever is already hanging beneath it; the mirror and the
+        /// cannon mount are both expressed in the chassis root's frame, because each imported
+        /// part carries a rotation of its own and measuring through one of them turns the
+        /// axes; and the whole Titan is then lifted so its soles rest on the lane, rather
+        /// than its hips being put at ground level and the legs buried.
         /// </summary>
         private void BuildTitan()
         {
             var library = new ModelLibrary();
             GameObject root = new GameObject("Titan");
             root.transform.SetParent(transform, false);
-            root.transform.position = new Vector3(
-                world.titanX, world.GroundYFor(world.LaneCount / 2), world.ZFor(world.LaneCount / 2));
-            // The models face +Z as exported; the battle runs along X with the enemy on the
-            // right, so the chassis turns to face it. This is the one place that mapping
-            // lives, and PlaceholderImportTests pins it.
-            root.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+            int lane = world.LaneCount / 2;
+            root.transform.position = new Vector3(world.titanX, world.GroundYFor(lane),
+                                                  world.ZFor(lane));
+            // Measured from the import (Logs/model-layout.txt, pinned by ModelImportTests):
+            // a model arrives with its width on X, its height on Y, and the front its brief
+            // puts on -Y facing +Z. The battle runs along X with the raiders on the right.
+            root.transform.rotation = Quaternion.Euler(0f, ModelFront.ToPlusX, 0f);
 
             GameObject chassis = library.Instantiate("titan_chassis", root.transform);
+            Transform frame = chassis.transform;
             Transform torso = ModelLibrary.Part(chassis, "Titan_Torso");
-            Transform thigh = ModelLibrary.Part(chassis, "Titan_Leg_Upper");
-            Transform shin = ModelLibrary.Part(chassis, "Titan_Leg_Lower");
-            Transform foot = ModelLibrary.Part(chassis, "Titan_Foot");
 
-            // Two legs from the one delivered chain, mirrored across the body in depth, which
-            // is the axis the briefs put the hips on.
             var legs = new Titan.LegChain[2];
-            for (int i = 0; i < 2; i++)
+            Transform[] flat =
             {
-                Transform t = i == 0 ? thigh : Object.Instantiate(thigh, thigh.parent);
-                Transform s = i == 0 ? shin : Object.Instantiate(shin, shin.parent);
-                Transform f = i == 0 ? foot : Object.Instantiate(foot, foot.parent);
-                if (i == 1)
-                {
-                    t.name = "Titan_Leg_Upper_B";
-                    s.name = "Titan_Leg_Lower_B";
-                    f.name = "Titan_Foot_B";
-                    MirrorInDepth(t, torso);
-                    MirrorInDepth(s, torso);
-                    MirrorInDepth(f, torso);
-                }
-                ModelLibrary.Chain(s, f);
-                ModelLibrary.Chain(t, s);
-                ModelLibrary.Chain(torso, t);
-                legs[i] = new Titan.LegChain { thigh = t, shin = s, foot = f, phase = i == 0 ? 1f : -1f };
+                ModelLibrary.Part(chassis, "Titan_Leg_Upper"),
+                ModelLibrary.Part(chassis, "Titan_Leg_Lower"),
+                ModelLibrary.Part(chassis, "Titan_Foot"),
+            };
+            Transform[] mirrored =
+            {
+                Object.Instantiate(flat[0], flat[0].parent),
+                Object.Instantiate(flat[1], flat[1].parent),
+                Object.Instantiate(flat[2], flat[2].parent),
+            };
+            for (int i = 0; i < mirrored.Length; i++)
+            {
+                mirrored[i].name = flat[i].name + "_B";
+                MirrorAcrossBody(mirrored[i], frame);
             }
 
-            GameObject cannon = library.Instantiate("titan_cannon_autocannon", torso);
+            for (int i = 0; i < 2; i++)
+            {
+                Transform[] leg = i == 0 ? flat : mirrored;
+                ModelLibrary.Chain(leg[1], leg[2]);
+                ModelLibrary.Chain(leg[0], leg[1]);
+                ModelLibrary.Chain(torso, leg[0]);
+                legs[i] = new Titan.LegChain
+                {
+                    thigh = leg[0], shin = leg[1], foot = leg[2], phase = i == 0 ? 1f : -1f,
+                };
+            }
+
+            // A mount in the chassis's own frame, so the cannon is not turned by whatever
+            // rotation the torso's import carries. Brief 01 puts the main cannon's collar
+            // 4.2 m above the hip axle and 3.2 m forward.
+            Transform mount = new GameObject("CannonMount").transform;
+            mount.SetParent(torso, false);
+            mount.SetPositionAndRotation(frame.TransformPoint(new Vector3(0f, 4.2f, 3.2f)),
+                                         frame.rotation);
+
+            GameObject cannon = library.Instantiate("titan_cannon_autocannon", mount);
             Transform housing = ModelLibrary.Part(cannon, "Autocannon_Housing");
             Transform barrel = ModelLibrary.Part(cannon, "Autocannon_Barrel");
             ModelLibrary.Chain(housing, barrel);
-            // The cannon mount from the chassis brief, in the chassis's own axes.
-            cannon.transform.localPosition = new Vector3(0f, 4.2f, 3.2f);
+
+            // Stand it on the ground: the chassis is modelled from the hip, so its soles are
+            // 7.7 m below the root until it is lifted.
+            float lowest = ModelLibrary.WorldBounds(chassis).min.y;
+            root.transform.position += Vector3.up * (world.GroundYFor(lane) - lowest);
 
             float hull = tuning.mecha.baseHullHp;
             titan = new Titan(root.transform, torso, housing, barrel, legs, tuning, hull)
             {
-                BarrelLength = ModelLibrary.WorldBounds(barrel.gameObject).size.x,
+                // The barrel's longest axis, whichever way it is currently turned.
+                BarrelLength = Longest(ModelLibrary.WorldBounds(barrel.gameObject).size),
+                // Which way the barrel points, in its parent's space, so recoil slides it
+                // back along itself rather than along a guessed axis.
+                BarrelAxis = housing.InverseTransformDirection(barrel.forward),
             };
         }
 
-        /// <summary>Mirrors a part to the other side of the body, across the depth axis.</summary>
-        private static void MirrorInDepth(Transform part, Transform body)
+        /// <summary>
+        /// Mirrors a part to the other side of the body. A model's width is on its local X,
+        /// which is where brief 01 puts the hips at 2.20 m, so that is the axis to negate.
+        /// Once the Titan is turned to face +X this reads on screen as depth.
+        /// </summary>
+        private static void MirrorAcrossBody(Transform part, Transform frame)
         {
-            Vector3 local = body.InverseTransformPoint(part.position);
+            Vector3 local = frame.InverseTransformPoint(part.position);
             local.x = -local.x;
-            part.position = body.TransformPoint(local);
+            part.position = frame.TransformPoint(local);
         }
+
+        private static float Longest(Vector3 size) =>
+            Mathf.Max(size.x, Mathf.Max(size.y, size.z));
 
         private void BuildSystems()
         {
@@ -252,7 +380,37 @@ namespace ScrapTitan.Battle
             spawner.onEscaped = _ => escaped++;
 
             weapon = new WeaponSystem(titan, targeting, projectiles, database.Weapon(weaponId), tuning);
-            input = new BattleInput(view, tuning, world.ZFor(world.LaneCount / 2));
+            input = new BattleInput(view, tuning, world.ZFor(world.LaneCount / 2), ResolveAim);
+        }
+
+        /// <summary>
+        /// What a screen point means as something to shoot at.
+        ///
+        /// The nearest enemy the camera ray passes through, so a drag aimed at a raider in
+        /// any lane hits that raider. With nothing under the ray it falls back to a point on
+        /// the Titan's own lane, which is what a drag at empty ground should do.
+        /// </summary>
+        private Vector3 ResolveAim(Vector2 screen)
+        {
+            Ray ray = input.RayThrough(screen);
+            Enemy best = null;
+            float bestAlong = float.PositiveInfinity;
+
+            for (int i = 0; i < spawner.Live.Count; i++)
+            {
+                Enemy enemy = spawner.Live[i];
+                if (!enemy.IsAlive) continue;
+                Vector3 toCentre = enemy.Centre - ray.origin;
+                float along = Vector3.Dot(toCentre, ray.direction);
+                if (along <= 0f) continue;
+                float offAxis = (toCentre - ray.direction * along).magnitude;
+                // A little slack, because a finger is not a cursor.
+                if (offAxis > enemy.Radius + 1.2f || along >= bestAlong) continue;
+                bestAlong = along;
+                best = enemy;
+            }
+
+            return best != null ? best.Centre : input.WorldPoint(screen);
         }
 
         /// <summary>
@@ -282,7 +440,8 @@ namespace ScrapTitan.Battle
             GameObject root = new GameObject($"Enemy_{index}");
             root.transform.SetParent(parent, false);
             GameObject model = library.Instantiate(assetId, root.transform);
-            model.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+            // Raiders close on the Titan, so their front turns to -X.
+            model.transform.localRotation = Quaternion.Euler(0f, ModelFront.ToMinusX, 0f);
 
             // The brief delivers one leg to be instanced at all six hip sockets. Its own
             // origin is the hip, so a copy placed at each socket swings correctly.
@@ -311,7 +470,9 @@ namespace ScrapTitan.Battle
         {
             GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             go.name = $"Shell_{index}";
-            Object.Destroy(go.GetComponent<Collider>());
+            // The battle is also stood up outside play mode, to render frames of it, and
+            // Destroy does nothing there.
+            DestroyNow(go.GetComponent<Collider>());
             go.transform.SetParent(parent, false);
             go.transform.localScale = Vector3.one * world.projectileRadius * 2f;
             Renderer renderer = go.GetComponent<Renderer>();
@@ -338,9 +499,13 @@ namespace ScrapTitan.Battle
         private void Update()
         {
             // Hard rule 6: everything uses delta time, and a stall cannot teleport anything.
-            float dt = Mathf.Min(Time.deltaTime, tuning.world.maxFrameSeconds);
+            Tick(Mathf.Min(Time.deltaTime, tuning.world.maxFrameSeconds), readInput: true);
+        }
 
-            Vector3? tap = input.Update(weapon, battleOver);
+        /// <summary>One step of the battle. `readInput` is false when the editor drives it.</summary>
+        public void Tick(float dt, bool readInput = true)
+        {
+            Vector3? tap = readInput ? input.Update(weapon, battleOver) : null;
             if (tap.HasValue && !battleOver)
                 targeting.SetFocus(targeting.PickAt(spawner.Live, tap.Value, 1.5f));
 
@@ -365,6 +530,13 @@ namespace ScrapTitan.Battle
         private void ScrollGround(float dt)
         {
             float shift = scrollSpeed * dt;
+            for (int i = 0; i < backdrop.Count; i++)
+            {
+                Vector3 p = backdrop[i].position;
+                p.x -= shift * backdropSpeed[i];
+                if (p.x < world.despawnX) p.x += backdropSpan;
+                backdrop[i].position = p;
+            }
             for (int i = 0; i < groundTiles.Count; i++)
             {
                 Transform tile = groundTiles[i];

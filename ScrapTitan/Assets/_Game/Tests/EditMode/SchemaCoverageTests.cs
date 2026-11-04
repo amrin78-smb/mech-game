@@ -58,13 +58,24 @@ namespace ScrapTitan.Tests
         /// </summary>
         private static readonly Dictionary<string, string> Renames = new(StringComparer.Ordinal)
         {
-            { "name", "displayName" },
-            { "spriteKey", "assetKey" },
-            // weapon.projectile.dot becomes hasDot, dotDps and dotDuration.
-            { "dot", "hasDot" },
-            { "dps", "dotDps" },
-            { "duration", "dotDuration" },
+            { "*:name", "displayName" },
+            { "*:spriteKey", "assetKey" },
+            // weapon.projectile.dot becomes hasDot, dotDps and dotDuration. Keyed by schema,
+            // because enemy.burnZone and pilot.ability have a `duration` of their own and a
+            // global rename accused both of being missing.
+            { "weapon.schema.json:dot", "hasDot" },
+            { "weapon.schema.json:dps", "dotDps" },
+            { "weapon.schema.json:duration", "dotDuration" },
+            // `default` is a C# keyword, so tuning.boss.default imports as `defaults`.
+            { "tuning.schema.json:default", "defaults" },
         };
+
+        private static string Rename(string schemaFile, string name)
+        {
+            if (Renames.TryGetValue($"{schemaFile}:{name}", out string scoped)) return scoped;
+            if (Renames.TryGetValue($"*:{name}", out string any)) return any;
+            return name;
+        }
 
         private static IEnumerable<string> SchemaPropertyNames(JToken node)
         {
@@ -134,7 +145,7 @@ namespace ScrapTitan.Tests
                 foreach (string name in SchemaPropertyNames(schema).Distinct())
                 {
                     if (DataKeys.Contains(name)) continue;
-                    string wanted = Renames.TryGetValue(name, out string mapped) ? mapped : name;
+                    string wanted = Rename(schemaFile, name);
                     if (fields.Contains(wanted)) continue;
                     // Case differences are not a dropped field.
                     if (fields.Any(f => string.Equals(f, wanted, StringComparison.OrdinalIgnoreCase)))

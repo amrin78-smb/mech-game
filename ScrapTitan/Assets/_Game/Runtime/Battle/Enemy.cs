@@ -26,6 +26,12 @@ namespace ScrapTitan.Battle
         private readonly float legSwingPeriod;
 
         /// <summary>
+        /// Each leg's rest rotation from the import. Assigning localRotation outright would
+        /// wipe it and lay the legs flat, the same way it did to the Titan.
+        /// </summary>
+        private readonly Quaternion[] legRest;
+
+        /// <summary>
         /// EnemyDef mirrors src/data exactly, and src/data is still in the Phaser build's
         /// 1280x720 pixels, so speed and attackRange are divided by this to get metres. The
         /// conversion lives here rather than in the import because the import's job is to
@@ -57,6 +63,8 @@ namespace ScrapTitan.Battle
             this.view = view;
             this.legs = legs ?? Array.Empty<Transform>();
             this.legSwingPeriod = legSwingPeriod;
+            legRest = new Quaternion[this.legs.Length];
+            for (int i = 0; i < this.legs.Length; i++) legRest[i] = this.legs[i].localRotation;
             this.pixelsPerMetre = pixelsPerMetre <= 0f ? 1f : pixelsPerMetre;
             Hide();
         }
@@ -169,7 +177,8 @@ namespace ScrapTitan.Battle
             {
                 float phase = walkPhase + (i % 2 == 0 ? 0f : 0.5f) + i * 0.08f;
                 float swing = Mathf.Sin(phase * Mathf.PI * 2f) * 24f;
-                legs[i].localRotation = Quaternion.Euler(0f, 0f, swing);
+                // Hips sit on the model's width axis, so a leg swings fore and aft about X.
+                legs[i].localRotation = legRest[i] * Quaternion.Euler(swing, 0f, 0f);
             }
         }
 

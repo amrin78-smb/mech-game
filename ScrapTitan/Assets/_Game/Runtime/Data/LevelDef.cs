@@ -47,6 +47,13 @@ namespace ScrapTitan.Data
 
         [Tooltip("Scrap per second.")]
         public float trickle;
+
+        [Tooltip("Scales every enemy's reward in this level. Absent in the data means 1, "
+                 + "which is what RewardMultiplierOrOne returns.")]
+        public float rewardMultiplier;
+
+        /// <summary>The multiplier, or 1 when the level does not set one.</summary>
+        public float RewardMultiplierOrOne => rewardMultiplier <= 0f ? 1f : rewardMultiplier;
     }
 
     /// <summary>What earns the level's stars.</summary>

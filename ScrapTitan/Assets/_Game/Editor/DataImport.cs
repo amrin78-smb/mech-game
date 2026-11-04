@@ -215,6 +215,7 @@ namespace ScrapTitan.Editor
                     .Select(step => new WeaponUpgradeStep
                     {
                         costCores = Int(step, "costCores"),
+                        specialBonus = Num(step, "specialBonus", 0f),
                         damageBonus = Num(step, "damageBonus", 0f),
                         fireRateBonus = Num(step, "fireRateBonus", 0f),
                     })
@@ -321,6 +322,7 @@ namespace ScrapTitan.Editor
                 {
                     startingScrap = Int(economy, "startingScrap"),
                     trickle = Num(economy, "trickle"),
+                    rewardMultiplier = Num(economy, "rewardMultiplier", 1f),
                 };
 
                 def.stars = new StarSpec { hullThreshold = Num((JObject)l["stars"], "hullThreshold") };

@@ -372,7 +372,7 @@ def export(asset_id, out_root):
         use_selection=False,
         apply_unit_scale=True,
         global_scale=1.0,
-        apply_scale_options="FBX_SCALE_NONE",
+        apply_scale_options="FBX_SCALE_ALL",
         axis_forward="-Z",
         axis_up="Y",
         object_types={"MESH"},

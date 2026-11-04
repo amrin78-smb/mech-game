@@ -20,16 +20,32 @@ namespace ScrapTitan.Battle
         private readonly TuningDef tuning;
         private readonly float aimPlaneZ;
 
+        /// <summary>
+        /// Turns a screen point into something to shoot at. Supplied by the battle, because
+        /// resolving it well needs the enemy list: the lanes sit at different depths, so one
+        /// depth plane would let a drag only ever aim at one of the three.
+        /// </summary>
+        private readonly System.Func<Vector2, Vector3> resolveAim;
+
         private bool pointerDown;
         private bool dragOriginAllowed;
         private Vector2 dragStart;
 
-        public BattleInput(Camera camera, TuningDef tuning, float aimPlaneZ)
+        public BattleInput(Camera camera, TuningDef tuning, float aimPlaneZ,
+                           System.Func<Vector2, Vector3> resolveAim = null)
         {
             this.camera = camera;
             this.tuning = tuning;
             this.aimPlaneZ = aimPlaneZ;
+            this.resolveAim = resolveAim;
         }
+
+        /// <summary>A screen point as something to aim at, resolved by the battle if it can.</summary>
+        private Vector3 AimPoint(Vector2 screen) =>
+            resolveAim != null ? resolveAim(screen) : WorldPoint(screen);
+
+        /// <summary>The camera ray through a screen point, for the battle to resolve.</summary>
+        public Ray RayThrough(Vector2 screen) => camera.ScreenPointToRay(screen);
 
         /// <summary>True while a finger or button is held.</summary>
         public bool IsPressed
@@ -90,14 +106,14 @@ namespace ScrapTitan.Battle
                 if (battleOver) return null;
                 if (weapon.IsManualAiming)
                 {
-                    weapon.UpdateManualAim(WorldPoint(AimScreenPoint(screen)));
+                    weapon.UpdateManualAim(AimPoint(AimScreenPoint(screen)));
                     return null;
                 }
                 if (!dragOriginAllowed) return null;
                 float travelled = Vector2.Distance(dragStart, screen);
                 float threshold = Screen.height * tuning.world3d.dragThresholdScreenFraction;
                 if (travelled >= threshold)
-                    weapon.BeginManualAim(WorldPoint(AimScreenPoint(screen)));
+                    weapon.BeginManualAim(AimPoint(AimScreenPoint(screen)));
                 return null;
             }
 
@@ -107,7 +123,7 @@ namespace ScrapTitan.Battle
 
             if (weapon.IsManualAiming)
             {
-                weapon.UpdateManualAim(WorldPoint(AimScreenPoint(screen)));
+                weapon.UpdateManualAim(AimPoint(AimScreenPoint(screen)));
                 weapon.ReleaseManualAim();
                 return null;
             }

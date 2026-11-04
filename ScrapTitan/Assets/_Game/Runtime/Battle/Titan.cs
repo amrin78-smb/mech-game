@@ -24,6 +24,19 @@ namespace ScrapTitan.Battle
 
         private readonly Vector3 torsoRest;
         private readonly Vector3 barrelRest;
+
+        /// <summary>
+        /// Each imported part carries a rotation of its own, which is how a file authored
+        /// Z-up ends up Y-up in the scene. Animating by assigning localRotation wipes it and
+        /// the Titan lies down: the first frames rendered showed exactly that, a flat torso
+        /// with its legs stretched out behind it. Every turn below is composed onto the rest
+        /// pose instead.
+        /// </summary>
+        private readonly Quaternion torsoRestRotation;
+        private readonly Quaternion housingRestRotation;
+        private readonly Quaternion[] thighRest;
+        private readonly Quaternion[] shinRest;
+        private readonly Quaternion[] footRest;
         private float elapsed;
         private float recoil;
         private Vector3 aimPoint;
@@ -56,6 +69,17 @@ namespace ScrapTitan.Battle
 
             torsoRest = torso.localPosition;
             barrelRest = cannonBarrel.localPosition;
+            torsoRestRotation = torso.localRotation;
+            housingRestRotation = cannonHousing.localRotation;
+            thighRest = new Quaternion[legs.Length];
+            shinRest = new Quaternion[legs.Length];
+            footRest = new Quaternion[legs.Length];
+            for (int i = 0; i < legs.Length; i++)
+            {
+                thighRest[i] = legs[i].thigh.localRotation;
+                shinRest[i] = legs[i].shin.localRotation;
+                footRest[i] = legs[i].foot.localRotation;
+            }
             HullMax = hullMax;
             Hull = hullMax;
             aimPoint = root.position + Vector3.right * 10f;
@@ -74,6 +98,12 @@ namespace ScrapTitan.Battle
         /// </summary>
         public float BarrelLength { get; set; } = 5f;
 
+        /// <summary>
+        /// The barrel's own axis in its parent's space, so recoil slides it back along
+        /// itself. Set when the Titan is assembled, from the direction the barrel points.
+        /// </summary>
+        public Vector3 BarrelAxis { get; set; } = Vector3.forward;
+
         public void AimAt(Vector3 worldPoint) => aimPoint = worldPoint;
 
         /// <summary>A shot kicks the barrel back; it slides home over the next few frames.</summary>
@@ -87,7 +117,9 @@ namespace ScrapTitan.Battle
             float bob = Mathf.Sin(elapsed / mecha.bobPeriod * Mathf.PI * 2f)
                         * (mecha.bobAmplitude / world.pixelsPerMetre);
             torso.localPosition = torsoRest + new Vector3(0f, bob, 0f);
-            torso.localRotation = Quaternion.Euler(
+            // Sway is about the axis the Titan faces along, so it rocks side to side on
+            // screen rather than nodding.
+            torso.localRotation = torsoRestRotation * Quaternion.Euler(
                 0f, 0f,
                 Mathf.Sin(elapsed / mecha.swayPeriod * Mathf.PI * 2f) * mecha.swayAmplitude);
 
@@ -108,10 +140,14 @@ namespace ScrapTitan.Battle
             {
                 LegChain leg = legs[i];
                 float t = Mathf.Sin(cycle + (leg.phase > 0f ? 0f : Mathf.PI));
-                leg.thigh.localRotation = Quaternion.Euler(0f, 0f, t * swing);
+                // A model's width is on its local X, so that is the axis a hip, a knee and an
+                // ankle all turn about. Rotating about Z would splay the legs sideways.
+                leg.thigh.localRotation = thighRest[i] * Quaternion.Euler(t * swing, 0f, 0f);
                 // The knee only ever bends one way, which is what keeps it from inverting.
-                leg.shin.localRotation = Quaternion.Euler(0f, 0f, -Mathf.Max(t, 0f) * swing * 1.4f);
-                leg.foot.localRotation = Quaternion.Euler(0f, 0f, Mathf.Max(t, 0f) * swing * 0.5f);
+                leg.shin.localRotation =
+                    shinRest[i] * Quaternion.Euler(-Mathf.Max(t, 0f) * swing * 1.4f, 0f, 0f);
+                leg.foot.localRotation =
+                    footRest[i] * Quaternion.Euler(Mathf.Max(t, 0f) * swing * 0.5f, 0f, 0f);
             }
         }
 
@@ -127,14 +163,16 @@ namespace ScrapTitan.Battle
             // the barrel readable rather than pointing into the screen.
             float pitch = Mathf.Atan2(to.y, Mathf.Max(to.x, 0.01f)) * Mathf.Rad2Deg;
             pitch = Mathf.Clamp(pitch, -15f, 30f);
-            cannonHousing.localRotation = Quaternion.Euler(0f, 0f, pitch);
+            // The trunnion turns about the model's width axis, its local X. A positive
+            // rotation there pitches the barrel down, so aiming up is negative.
+            cannonHousing.localRotation = housingRestRotation * Quaternion.Euler(-pitch, 0f, 0f);
         }
 
         private void Recoil(float dt)
         {
             if (recoil <= 0f) return;
             recoil = Mathf.Max(0f, recoil - world.recoil.cannon * 9f * dt);
-            cannonBarrel.localPosition = barrelRest - Vector3.forward * recoil;
+            cannonBarrel.localPosition = barrelRest - BarrelAxis * recoil;
         }
 
         /// <summary>Takes hull damage and returns what was actually taken.</summary>

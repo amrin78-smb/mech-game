@@ -33,6 +33,10 @@ namespace ScrapTitan.Data
         public int costCores;
         public float damageBonus;
         public float fireRateBonus;
+
+        [Tooltip("A step's weapon-specific bonus, e.g. more pellets or a wider burn. No "
+                 + "weapon uses one yet, but the schema allows it, so it is carried.")]
+        public float specialBonus;
     }
 
     /// <summary>One weapon, straight from weapons.json.</summary>
