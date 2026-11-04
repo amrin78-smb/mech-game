@@ -317,6 +317,34 @@ def main(argv):
                        f"{span:.2f} m, brief says {expected} m, {off:+.1%}"
                        f"  (top of model {top:.2f} m above the hip; whole model {span + top:.2f} m)")
 
+    # Some briefs dimension the whole assembled asset rather than one part, so the figure
+    # belongs to no single object's bounding box. Measured here across every mesh in the
+    # assembled file, in world space, which is how the brief states it.
+    if spec.get("assembled_size"):
+        want = spec["assembled_size"]
+        # A brief's phrase may cover only some of the parts ("the pod, 2.6 m long including
+        # barrels", which does not include the pedestal the pod stands on), so the parts the
+        # phrase covers are named rather than assumed to be the whole file.
+        parts = want.get("parts") or sorted(spec["objects"])
+        included = [meshes[name] for name in parts if name in meshes]
+        label = "assembled" if not want.get("parts") else " + ".join(parts)
+        for axis, index in (("x", 0), ("y", 1), ("z", 2)):
+            expected = want.get(axis)
+            if expected is None:
+                continue
+            values = []
+            for obj in included:
+                matrix = obj.matrix_world
+                values.extend((matrix @ v.co)[index] for v in obj.data.vertices)
+            if not values:
+                continue
+            span = max(values) - min(values)
+            off = (span - expected) / expected
+            report.add(f"assembled size {axis}",
+                       abs(off) <= standards["default_tolerance"],
+                       f"{span:.2f} m across {label}, brief says "
+                       f"{expected} m, {off:+.1%}  (from {min(values):+.2f} to {max(values):+.2f})")
+
     result = {
         "asset": args.asset_id,
         "brief": spec.get("brief"),

@@ -8,7 +8,8 @@
     "The briefs require a joint to be overlapped with a ball, collar or housing, so geometry may legitimately run past a pivot. overlap_allowance_m is how far past the brief's extent that may go before it is reported.",
     "sockets: where the game places each child part's origin, as the brief states it. Checked against the actual object positions in the assembled source file, which is what proves the pivot spacing.",
     "waivers: failures the owner has accepted by name. Listed as waived in the report; every other failure still rejects.",
-    "A waiver records a failure the owner accepted, with the reason and the date. The report prints it as WAIVED and it stops gating an import; every other failure still rejects. A waiver is never added without the owner saying so."
+    "A waiver records a failure the owner accepted, with the reason and the date. The report prints it as WAIVED and it stops gating an import; every other failure still rejects. A waiver is never added without the owner saying so.",
+    "assembled_size: a dimension a brief gives across several parts rather than for one, measured in world space in the assembled source file. parts names the objects the brief's phrase covers; without it, every object in the brief. Needed where a brief dimensions a part 'including' something the brief itself makes a separate object."
   ],
   "default_tolerance": 0.05,
   "loose_tolerance": 0.05,
@@ -322,6 +323,248 @@
             "reason": "The brief dimensions the armoured block, then separately asks for parts bolted to it that a bounding box also takes in. Measurement cannot tell them apart. Judged in Phase 1, on whether it reads at phone size and sits properly in the Titan's 2.0 m collar. Consistent with the drip-stained pipes."
           }
         ]
+      }
+    },
+    "titan_cannon_railgun": {
+      "brief": "04_titan_cannon_railgun.md",
+      "phase": "3",
+      "max_materials": 1,
+      "material_names": [
+        "Railgun_Mat"
+      ],
+      "max_texture_px": 1024,
+      "objects": {
+        "Railgun_Housing": {
+          "max_tris": 800,
+          "size": [
+            2.2,
+            2.4,
+            2.0
+          ],
+          "loose_axes": [
+            "x",
+            "y",
+            "z"
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "centre"
+          }
+        },
+        "Railgun_Barrel": {
+          "max_tris": 700,
+          "size": [
+            null,
+            8.0,
+            null
+          ],
+          "min_thickness_m": 0.35,
+          "origin_at": {
+            "x": "centre",
+            "y": "max",
+            "z": "centre"
+          }
+        }
+      },
+      "sockets": {
+        "barrel": {
+          "part": "Railgun_Barrel",
+          "at": [
+            0.0,
+            -0.6,
+            0.0
+          ]
+        }
+      }
+    },
+    "titan_cannon_scattergun": {
+      "brief": "05_titan_cannon_scattergun.md",
+      "phase": "3",
+      "max_materials": 1,
+      "material_names": [
+        "Scattergun_Mat"
+      ],
+      "max_texture_px": 1024,
+      "objects": {
+        "Scattergun_Housing": {
+          "max_tris": 900,
+          "size": [
+            2.2,
+            2.4,
+            2.0
+          ],
+          "loose_axes": [
+            "x",
+            "y",
+            "z"
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "centre"
+          }
+        },
+        "Scattergun_Barrel": {
+          "max_tris": 700,
+          "size": [
+            null,
+            3.8,
+            null
+          ],
+          "min_thickness_m": 0.35,
+          "origin_at": {
+            "x": "centre",
+            "y": "max",
+            "z": "centre"
+          }
+        }
+      },
+      "sockets": {
+        "barrel": {
+          "part": "Scattergun_Barrel",
+          "at": [
+            0.0,
+            -0.6,
+            0.0
+          ]
+        }
+      }
+    },
+    "titan_turret_gatling": {
+      "brief": "06_titan_turret_gatling.md",
+      "phase": "2-3",
+      "max_materials": 1,
+      "material_names": [
+        "Gatling_Mat"
+      ],
+      "max_texture_px": 512,
+      "objects": {
+        "Gatling_Base": {
+          "max_tris": 250,
+          "size": [
+            1.5,
+            1.5,
+            0.8
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "min"
+          }
+        },
+        "Gatling_Gun": {
+          "max_tris": 450,
+          "size": [
+            1.0,
+            null,
+            1.0
+          ],
+          "loose_axes": [
+            "x",
+            "y",
+            "z"
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "min"
+          },
+          "size_note": {
+            "y": "The brief's 2.6 m is 'the pod, about 1.0 m wide, 2.6 m long including barrels pointing along -Y', and the barrels are a separate object in the same brief, so the figure covers the pod and the barrels together and belongs to neither one's own bounding box. It is not the whole turret either: the pedestal stands 0.75 m behind the pod. Checked in assembled_size over those two parts."
+          }
+        },
+        "Gatling_Barrels": {
+          "max_tris": 250,
+          "size": [
+            0.6,
+            1.4,
+            0.6
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "max",
+            "z": "centre"
+          }
+        }
+      },
+      "sockets": {
+        "gun": {
+          "part": "Gatling_Gun",
+          "at": [
+            0.0,
+            0.0,
+            0.8
+          ]
+        },
+        "barrels": {
+          "part": "Gatling_Barrels",
+          "at": [
+            0.0,
+            -1.0,
+            1.3
+          ]
+        }
+      },
+      "socket_note": "The brief gives the barrels' place as Y = -1.0, Z = 0.5 from the gun origin, and the gun pivot as Z = 0.8 above the pad, so in the assembled turret the barrels sit at Z = 1.3.",
+      "assembled_size": {
+        "parts": [
+          "Gatling_Gun",
+          "Gatling_Barrels"
+        ],
+        "y": 2.6
+      }
+    },
+    "titan_turret_flak": {
+      "brief": "07_titan_turret_flak.md",
+      "phase": "3",
+      "max_materials": 1,
+      "material_names": [
+        "Flak_Mat"
+      ],
+      "max_texture_px": 512,
+      "objects": {
+        "Flak_Base": {
+          "max_tris": 250,
+          "size": [
+            1.5,
+            1.5,
+            0.7
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "min"
+          }
+        },
+        "Flak_Gun": {
+          "max_tris": 600,
+          "size": [
+            1.4,
+            2.4,
+            1.2
+          ],
+          "loose_axes": [
+            "x",
+            "y",
+            "z"
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "min"
+          }
+        }
+      },
+      "sockets": {
+        "gun": {
+          "part": "Flak_Gun",
+          "at": [
+            0.0,
+            0.0,
+            0.7
+          ]
+        }
       }
     }
   }

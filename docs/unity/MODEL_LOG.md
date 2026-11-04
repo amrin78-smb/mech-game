@@ -63,3 +63,91 @@ A correction worth keeping: the first run of the checker reported the Titan as 1
 tall. It was not. The briefs' 14 m standing height is the torso roof, while a bounding box
 also takes in the stacks, and 16.7 m is the briefs' own arithmetic. The check now measures
 hip pivot to sole.
+
+## 2026-11-04: batch 2 — every Titan weapon
+
+Delivered as `Kimi_Agent_Scrap Titan 二批.zip`. Seven model folders, but three of them —
+`titan_chassis`, `titan_cannon_autocannon` and `titan_cannon_acid` — are byte-identical to
+batch 1 (SHA-256 compared on the .blend), so they were carried along, not revised. The two
+vertices sharing a position in `Autocannon_Barrel` are therefore still there.
+
+Four are new: `titan_cannon_railgun`, `titan_cannon_scattergun`, `titan_turret_gatling` and
+`titan_turret_flak` (briefs 04 to 07). With these, every weapon the game has a model brief
+for is delivered: four main cannons and both turrets.
+
+**145 checks passed, 11 failed, 0 waived so far.** Awaiting the owner's decision on the 11.
+
+Two of the four are Phase 3 models (railgun, scattergun) and the flak turret is Phase 3 as
+well; only the Gatling Pod is needed for Phase 2.
+
+### What the checker confirmed
+
+| | |
+|---|---|
+| Pivots | Every socket exact to the centimetre. Railgun and scattergun barrels at (0, −0.60, 0); the Gatling gun at Z = 0.80 and its barrel cluster at (0, −1.00, 1.30); the flak gun at Z = 0.70 |
+| Barrel lengths | Railgun 8.00 m, scattergun 3.80 m, both exactly as briefed |
+| Assembled Gatling | Pod plus barrels 2.60 m along −Y, exactly the brief's figure |
+| Triangles | All inside budget: railgun 468/800 and 592/700, scattergun 324/900 and 536/700, Gatling 228/250, 360/450 and 236/250, flak 228/250 and 568/600 |
+| Materials | One each, named as briefed: `Railgun_Mat`, `Scattergun_Mat`, `Gatling_Mat`, `Flak_Mat` |
+| Textures | Exactly the briefed sizes: 1024 for the two cannons, 512 for the two turrets |
+| Meshes | Transforms applied, closed, normals outward, UVs present, no zero-area faces, no loose or doubled vertices anywhere in the four |
+| Silhouettes | Clearly distinct, which the cannon briefs require: barrels of 8.00, 5.00, 3.80 and 3.60 m, the scattergun's a 3.02 m wide fan |
+| Palette | Within half a percentage point of batch 1 on every colour, so the house look is consistent |
+
+### Triangle budget
+
+The assembled Titan comes to about 7,700 triangles: torso 1,824, legs and feet 2,320 for
+the pair, a main cannon about 1,060, and three Gatling pods 2,472. The plan's budget allows
+about 9,000, so the weapons fit with room to spare.
+
+### What failed
+
+Eleven checks, in three kinds.
+
+**Real, and worth watching when it animates (2):**
+
+- **`Flak_Gun`'s aim pivot sits 0.66 m behind the centre of the gun** (bounding box −1.90 to
+  +0.58 along Y), where the brief asks for the centre of its underside. Kimi put the trunnion
+  near the breech with the barrels projecting forward, which is arguably truer to the thing
+  than the brief's own wording, but it is a deviation and it is the largest in the batch. At
+  the briefed 50 degrees of elevation the muzzle rises about 1.45 m and swings back about
+  0.7 m. **Watch whether the flak turret looks like it pivots about a point inside itself.**
+- **`Gatling_Gun`'s aim pivot sits 0.41 m behind the pod's centre**, against an allowance of
+  0.35 m. The pod is 1.22 m long and the pivot is 0.20 m from its rear face. **Watch the join
+  between the pod and its pedestal as the turret elevates through its 40 degrees, for a gap.**
+
+**A bounding box taking in a feature the brief asks for but does not exclude from the
+dimension — the same thing that was waived across batch 1 (3):**
+
+- **`Railgun_Housing` measures 3.37 m across against 2.2 m.** Symmetric, −1.68 to +1.68,
+  which is the "heavy capacitor banks on the housing" the brief requires. **Watch whether it
+  reads at phone size and sits properly in the Titan's 2.0 m collar.** It is the second
+  widest housing, after the acid spitter's 3.62 m.
+- **`Scattergun_Housing` measures 2.71 m tall against 2.0 m**, and its origin therefore sits
+  0.35 m above the bounding box's midpoint. Both are one cause: the armoured block is exactly
+  2.00 m (−1.00 to +1.00) and the extra 0.71 m above it is the "shell hopper on top" the
+  brief asks for. The trunnion is dead centre of the block itself.
+- **`Gatling_Gun` measures 1.52 m wide against 1.0 m.** Asymmetric, −0.63 to +0.89, which is
+  the "ammo box on the side" the brief requires.
+
+**Trivially over the 5% tolerance (6):** `Scattergun_Housing` 2.40 m wide against 2.2 m
+(20 cm); `Gatling_Gun` 1.06 m tall against 1.0 m (6 cm); `Gatling_Barrels` 0.64 m across
+against 0.6 m, on two axes (4 cm each, and "0.6 m across" for a six-barrel cluster is
+approximate by its nature); `Flak_Gun` 1.48 m wide against 1.4 m (8 cm, which is 5.4% where
+5% passes).
+
+### Two corrections to the checker, not to the models
+
+Both are cases where the first run reported a failure and the model turned out to be right.
+
+- **The Gatling pod measured 1.22 m long where the brief says 2.6 m.** The brief dimensions
+  "the pod ... 2.6 m long including barrels", and the same brief makes the barrels a separate
+  object, so the figure belongs to the pod and the barrels together. Assembled, they span
+  exactly 2.60 m. The checker gained an `assembled_size` check for dimensions a brief states
+  across several parts.
+- **That check then measured 3.15 m**, because it took in the pedestal as well, which stands
+  0.75 m behind the pod and is not part of the brief's phrase. `assembled_size` now names the
+  parts the phrase covers.
+
+This is the third and fourth time a first run accused a correct model, after batch 1's
+standing height and its emissive teal. A failure is read before it is believed.

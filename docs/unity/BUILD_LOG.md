@@ -24,7 +24,7 @@ can move something into the second column.
 | Data | 49 assets generated from `src/data`: 17 enemies, 6 weapons, 2 pilots, 2 escorts, 20 levels, tuning, database |
 | Tests | 23/23 EditMode passing |
 | Published | GitHub pre-release `demo-0.0.1`, APK only, tag on an empty-tree commit. Downloaded back and the SHA-256 matches |
-| Tested on a phone | **Not yet. Nothing here is known to work on the S25 Ultra or the Redmi A3.** |
+| Tested on a phone | **Passed on both, 2026-11-04.** Owner launched it three times on the Samsung Galaxy S25 Ultra and three times on the Redmi A3, closing it fully between launches. The launch counter reached 3 on both, so the PowerVR relaunch crash does not happen with the Vulkan deny filter in place. |
 
 Notes:
 
