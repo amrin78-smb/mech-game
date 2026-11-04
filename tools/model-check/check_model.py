@@ -13,6 +13,7 @@ brief goes back to the artist. Only the owner can accept a failure, as a named w
 standards.json.
 """
 import argparse
+import hashlib
 import json
 import math
 import pathlib
@@ -242,6 +243,26 @@ def main(argv):
     waivers = waiver_block.get("checks", [])
     # Older entries were a bare list of names; both forms are accepted.
     waivers = [w if isinstance(w, dict) else {"check": w} for w in waivers]
+
+    # A waiver is the owner accepting one measurement of one file, not an asset id excused
+    # for good. It is honoured only for the file it was granted against, so a revision, or
+    # a placeholder standing in under the same name, has to pass on its own merits.
+    source_sha = hashlib.sha256(pathlib.Path(args.input).read_bytes()).hexdigest()
+    waived_for = waiver_block.get("for_file_sha256")
+    waiver_mismatch = None
+    if waivers and waived_for and waived_for != source_sha:
+        waiver_mismatch = (
+            f"{len(waivers)} waiver(s) on record do not apply to this file: they were granted "
+            f"for sha256 {waived_for[:12]}..., this is {source_sha[:12]}.... Every check is "
+            f"gating again."
+        )
+        waivers = []
+    elif waivers and not waived_for:
+        waiver_mismatch = (
+            f"{len(waivers)} waiver(s) on record carry no for_file_sha256, so they are being "
+            f"applied to whatever file is checked. Record the hash they were granted for."
+        )
+
     report = Report(args.asset_id, waivers)
 
     objects = list(bpy.data.objects)
@@ -357,10 +378,14 @@ def main(argv):
         "checks": report.checks,
         "failed": len(report.failures),
         "waived": len(report.waived_failures),
+        "source_sha256": source_sha,
+        "waiver_note": waiver_mismatch,
         "passed": sum(1 for c in report.checks if c["passed"]),
     }
 
     print(f"\n==== {args.asset_id}  ({spec.get('brief')}) ====")
+    if waiver_mismatch:
+        print(f"  NOTE   {waiver_mismatch}")
     for c in report.checks:
         mark = "PASS" if c["passed"] else ("WAIVED" if c["waived"] else "FAIL")
         print(f"  {mark:6} {c['check']}: {c['detail']}")

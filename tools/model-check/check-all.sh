@@ -11,7 +11,9 @@ cd "$(dirname "$0")/../.."
 ROOT="${1:?usage: check-all.sh <dir-of-model-folders> [asset-id ...]}"
 shift || true
 BLENDER="${BLENDER:-$HOME/.local/bin/blender}"
-OUT=Logs/model-check
+# Reports go in their own directory per source, so checking the placeholders cannot
+# overwrite a delivery's report and have the summary mix the two.
+OUT="${OUT:-Logs/model-check}"
 mkdir -p "$OUT"
 
 if [ "$#" -gt 0 ]; then IDS=("$@"); else mapfile -t IDS < <(cd "$ROOT" && ls -d */ | tr -d /); fi
@@ -24,7 +26,7 @@ for id in "${IDS[@]}"; do
   "$BLENDER" --background --factory-startup --disable-autoexec \
     --python tools/model-check/check_model.py -- \
     --input "$blend" --asset-id "$id" --report "$OUT/$id.json" \
-    2>&1 | grep -E "^  (PASS|FAIL|WAIVED)|^ +waived |^====|^  [0-9]+ passed"
+    2>&1 | grep -E "^  (PASS|FAIL|WAIVED|NOTE)|^ +waived |^====|^  [0-9]+ passed"
   status=${PIPESTATUS[0]}
   [ "$status" -gt "$WORST" ] && WORST=$status
 done

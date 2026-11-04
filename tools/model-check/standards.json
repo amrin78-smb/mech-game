@@ -9,7 +9,8 @@
     "sockets: where the game places each child part's origin, as the brief states it. Checked against the actual object positions in the assembled source file, which is what proves the pivot spacing.",
     "waivers: failures the owner has accepted by name. Listed as waived in the report; every other failure still rejects.",
     "A waiver records a failure the owner accepted, with the reason and the date. The report prints it as WAIVED and it stops gating an import; every other failure still rejects. A waiver is never added without the owner saying so.",
-    "assembled_size: a dimension a brief gives across several parts rather than for one, measured in world space in the assembled source file. parts names the objects the brief's phrase covers; without it, every object in the brief. Needed where a brief dimensions a part 'including' something the brief itself makes a separate object."
+    "assembled_size: a dimension a brief gives across several parts rather than for one, measured in world space in the assembled source file. parts names the objects the brief's phrase covers; without it, every object in the brief. Needed where a brief dimensions a part 'including' something the brief itself makes a separate object.",
+    "A waiver is honoured only for the file named in for_file_sha256, the delivery the owner actually accepted. A revision, or a placeholder standing in under the same asset id, is checked with every limit gating again."
   ],
   "default_tolerance": 0.05,
   "loose_tolerance": 0.05,
@@ -137,6 +138,7 @@
       "waivers": {
         "approved_by": "owner",
         "date": "2026-11-04",
+        "for_file_sha256": "57942e58f802fdacb28363c663b3025f5dd7427dd5258097cdeb83c57c7b7cce",
         "decision": "Accepted as delivered; every one of these is judged in Phase 1 from frames of the running game, not from a measurement or from Kimi's renders.",
         "checks": [
           {
@@ -236,6 +238,7 @@
       "waivers": {
         "approved_by": "owner",
         "date": "2026-11-04",
+        "for_file_sha256": "ce5c61c37169abea69a8ed0b1f76b5949aceefe2957ea83e558bfb8a362a615c",
         "decision": "Accepted as delivered; every one of these is judged in Phase 1 from frames of the running game, not from a measurement or from Kimi's renders.",
         "checks": [
           {
@@ -312,6 +315,7 @@
       "waivers": {
         "approved_by": "owner",
         "date": "2026-11-04",
+        "for_file_sha256": "304fe39b50c0fd86dfd4adf7c864e770df048af75ee4349eea72ae43934a00a1",
         "decision": "Accepted as delivered; every one of these is judged in Phase 1 from frames of the running game, not from a measurement or from Kimi's renders.",
         "checks": [
           {
@@ -564,6 +568,139 @@
             0.0,
             0.7
           ]
+        }
+      }
+    },
+    "enemy_rustcrawler": {
+      "brief": "10_enemy_rustcrawler.md",
+      "phase": "1-2",
+      "max_materials": 1,
+      "material_names": [
+        "Rustcrawler_Mat"
+      ],
+      "max_texture_px": 1024,
+      "objects": {
+        "Rustcrawler_Body": {
+          "max_tris": 700,
+          "size": [
+            1.8,
+            3.2,
+            1.4
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "min"
+          }
+        },
+        "Rustcrawler_Leg": {
+          "max_tris": 80,
+          "size": [
+            null,
+            null,
+            null
+          ],
+          "size_note": {
+            "x": "The brief gives the leg as a 1.3 m reach from the hip out and down to the tip, which is a length along its own bend and not a bounding box, so no extent is checked. The origin check is what proves the hip pivot."
+          },
+          "origin_at": {
+            "x": "min",
+            "y": "centre",
+            "z": "max"
+          }
+        }
+      },
+      "socket_note": "The brief gives six hip sockets, at X = +/-0.8, Y = -0.9, 0, +0.9, Z = 0.2, and the delivery holds one leg to be instanced at all six. Which socket it is parked at is not fixed by the brief, so no socket position is checked; the leg's own origin is."
+    },
+    "pickup_scrap": {
+      "brief": "27_pickup_scrap.md",
+      "phase": "2",
+      "max_materials": 1,
+      "material_names": [
+        "Scrap_Mat"
+      ],
+      "max_texture_px": 256,
+      "objects": {
+        "Scrap_A": {
+          "max_tris": 120,
+          "size": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "loose_axes": [
+            "x",
+            "y",
+            "z"
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "centre"
+          }
+        },
+        "Scrap_B": {
+          "max_tris": 120,
+          "size": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "loose_axes": [
+            "x",
+            "y",
+            "z"
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "centre"
+          }
+        },
+        "Scrap_C": {
+          "max_tris": 120,
+          "size": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "loose_axes": [
+            "x",
+            "y",
+            "z"
+          ],
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "centre"
+          }
+        }
+      }
+    },
+    "env_rust_flats_ground": {
+      "brief": "28_env_rust_flats_ground.md",
+      "phase": "2",
+      "max_materials": 1,
+      "material_names": [
+        "Ground_Mat"
+      ],
+      "max_texture_px": 1024,
+      "objects": {
+        "Ground_Tile": {
+          "max_tris": 1200,
+          "size": [
+            20.0,
+            12.0,
+            3.0
+          ],
+          "size_note": {
+            "z": "The brief runs the tile from Z = 0, the walking surface, down to Z = -3.0 at the front lip, so the extent is 3.0 m and the origin sits at the top of it."
+          },
+          "origin_at": {
+            "x": "centre",
+            "y": "centre",
+            "z": "max"
+          }
         }
       }
     }
