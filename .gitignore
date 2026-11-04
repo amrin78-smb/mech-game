@@ -49,3 +49,7 @@ ScrapTitan/test-results.xml
 *.keystore
 *.jks
 keystore.env
+
+# Model deliveries land here for checking. They are large binaries and are not the
+# source of truth; what gets committed is the prepared asset inside ScrapTitan/Assets.
+unity_assets/INCOMING/

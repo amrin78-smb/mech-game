@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "notes": [
+    "Limits transcribed from docs/unity/KIMI_MODEL_PROMPTS. Blender axes: Z up, model front faces -Y, left faces +X. Metres.",
+    "default_tolerance is the briefs' own rule: 'Stay within 5% of the dimensions in this brief unless a tolerance is stated.'",
+    "size: expected extent per axis, null to skip. Some briefs give a dimension as 'about'; those axes are listed in loose_axes, which only annotates the report. The tolerance is the briefs' own 5% everywhere: inventing a wider one would be loosening a limit to make a model pass, which only the owner may do, as a named waiver.",
+    "origin_at: where the object's origin must sit inside its own bounding box, per axis. min = at the low end, max = at the high end, centre = midway, null = unconstrained. This is the pivot check.",
+    "The briefs require a joint to be overlapped with a ball, collar or housing, so geometry may legitimately run past a pivot. overlap_allowance_m is how far past the brief's extent that may go before it is reported.",
+    "sockets: where the game places each child part's origin, as the brief states it. Checked against the actual object positions in the assembled source file, which is what proves the pivot spacing.",
+    "waivers: failures the owner has accepted by name. Listed as waived in the report; every other failure still rejects."
+  ],
+  "default_tolerance": 0.05,
+  "loose_tolerance": 0.05,
+  "overlap_allowance_m": 0.35,
+  "assets": {
+    "titan_chassis": {
+      "brief": "01_titan_chassis.md",
+      "phase": "1-2",
+      "max_materials": 1,
+      "material_names": ["Titan_Mat"],
+      "max_texture_px": 2048,
+      "hip_to_sole_m": 7.7,
+      "height_note": "The brief's 14 m standing height is the top of the torso box: 6.5 m of torso above the hip, plus 3.4 + 3.4 + 0.9 m of leg below it. A bounding box also takes in the exhaust stacks, which the brief puts at 9.0 m above the hip, so the assembled model measures 16.7 m overall. Both figures follow from the brief's own numbers, so what is worth checking is the leg span: hip pivot to sole.",
+      "objects": {
+        "Titan_Torso": {
+          "max_tris": 3500,
+          "size": [5.5, 7.0, 9.0],
+          "size_note": {
+            "z": "The brief gives 6.5 m for the torso box and says the exhaust stacks rise to 9.0 m above the origin. A bounding box includes the stacks, so 9.0 is the figure checked."
+          },
+          "origin_at": {"x": "centre", "y": "centre", "z": "min"}
+        },
+        "Titan_Leg_Upper": {
+          "max_tris": 900,
+          "size": [1.6, 1.6, 3.4],
+          "loose_axes": ["x", "y"],
+          "origin_at": {"x": "centre", "y": "centre", "z": "max"}
+        },
+        "Titan_Leg_Lower": {
+          "max_tris": 900,
+          "size": [null, null, 3.4],
+          "origin_at": {"x": "centre", "y": "centre", "z": "max"}
+        },
+        "Titan_Foot": {
+          "max_tris": 500,
+          "size": [2.2, 3.6, 0.9],
+          "origin_at": {"x": "centre", "y": "centre", "z": "max"}
+        }
+      },
+      "sockets": {
+        "hip_right": {"part": "Titan_Leg_Upper", "at": [2.2, 0.0, 0.0]},
+        "knee": {"part": "Titan_Leg_Lower", "at": [2.2, 0.0, -3.4]},
+        "ankle": {"part": "Titan_Foot", "at": [2.2, 0.0, -6.8]}
+      },
+      "mount_points": {
+        "main_cannon": [0.0, -3.2, 4.2],
+        "turret_1": [0.0, -1.2, 6.5],
+        "turret_2": [0.0, 1.4, 6.5],
+        "turret_3": [0.0, 3.2, 5.2]
+      }
+    },
+    "titan_cannon_autocannon": {
+      "brief": "02_titan_cannon_autocannon.md",
+      "phase": "1-2",
+      "max_materials": 1,
+      "material_names": ["Autocannon_Mat"],
+      "max_texture_px": 1024,
+      "objects": {
+        "Autocannon_Housing": {
+          "max_tris": 900,
+          "size": [2.2, 2.4, 2.0],
+          "loose_axes": ["x", "y", "z"],
+          "size_note": {"x": "The brief says 'about 2.2 m across', 'about 2.4 m long', 'about 2.0 m tall'."},
+          "origin_at": {"x": "centre", "y": "centre", "z": "centre"}
+        },
+        "Autocannon_Barrel": {
+          "max_tris": 600,
+          "size": [null, 5.0, null],
+          "min_thickness_m": 0.35,
+          "origin_at": {"x": "centre", "y": "max", "z": "centre"}
+        }
+      },
+      "sockets": {
+        "barrel": {"part": "Autocannon_Barrel", "at": [0.0, -0.6, 0.0]}
+      }
+    },
+    "titan_cannon_acid": {
+      "brief": "03_titan_cannon_acid.md",
+      "phase": "3",
+      "max_materials": 1,
+      "material_names": ["Acid_Mat"],
+      "max_texture_px": 1024,
+      "objects": {
+        "Acid_Housing": {
+          "max_tris": 900,
+          "size": [2.2, 2.4, 2.0],
+          "loose_axes": ["x", "y", "z"],
+          "origin_at": {"x": "centre", "y": "centre", "z": "centre"}
+        },
+        "Acid_Barrel": {
+          "max_tris": 500,
+          "size": [null, 3.6, null],
+          "min_thickness_m": 0.35,
+          "origin_at": {"x": "centre", "y": "max", "z": "centre"}
+        }
+      },
+      "sockets": {
+        "barrel": {"part": "Acid_Barrel", "at": [0.0, -0.6, 0.0]}
+      }
+    }
+  }
+}
